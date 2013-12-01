@@ -20,10 +20,17 @@ void EventHandler::checkEvents()
 				app.windowWasClosed();
 				break;
 			case sf::Event::Resized:
-				sf::Vector2u temp = app.getRenderer()->getRenderWindow()->getSize();
-				std::cout << "+EventHandler: Window was resized to ";
-				app.getToolbox()->print_vector(temp);
+                app.getRenderer()->OnWindowResize();
+				break;
+			case sf::Event::KeyReleased:
+				break;
+			case sf::Event::KeyPressed:
 				break;
 		}
 	}
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    {
+        // Do something with left
+    }
 }

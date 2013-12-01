@@ -8,8 +8,10 @@ class Application
 private:
     RendererPtr renderer;
     ToolboxPtr toolbox;
+	EventHandlerPtr eventhandler;
 
 	bool windowIsOpen;
+	bool showFPS;
 public:
     Application();
 

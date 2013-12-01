@@ -1,0 +1,9 @@
+{
+    "game_version" : "1.00",
+
+    "resolution" : { "x" : 800, "y" : 600 },
+    "framerate" : 60,
+    "title" : "Proceduralia",
+    "show_fps" : "yes"
+}
+

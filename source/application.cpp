@@ -2,6 +2,7 @@
 #include "renderer.hpp"
 #include "json/json.h"
 #include "toolbox.hpp"
+#include "eventhandler.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -12,6 +13,7 @@ Application::Application()
 {
     renderer = RendererPtr(new Renderer());
     toolbox = ToolboxPtr(new Toolbox());
+	eventhandler = EventHandlerPtr(new EventHandler());
 }
 
 int Application::readConfig()
@@ -43,6 +45,11 @@ int Application::readConfig()
     std::cout << "+Application: Set framerate to " << root["framerate"].asInt() << std::endl;
     renderer->setFramerate(root["framerate"].asInt());
 
+	if (root["show_fps"].asString() == "yes")
+		showFPS = true;
+	else
+		showFPS = false;
+
     configdata.close();
 
     std::cout << "+Application: Finished reading config" << std::endl;
@@ -52,29 +59,44 @@ int Application::readConfig()
 
 int Application::run()
 {
+    int fps = 0;
+    int nextFPS = 3;
+    sf::Clock fps_clock;
+    sf::Clock main_clock;
 
     renderer->openWindow();
-	windowIsOpen = true;
+    windowIsOpen = true;
 
-	while (renderer->getRenderWindow()->isOpen())
-	{
-	
-	}
+    while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
+    {
+        fps = 1 / fps_clock.getElapsedTime().asSeconds();
+		fps_clock.restart();
+        if (main_clock.getElapsedTime().asSeconds() > nextFPS)
+        {
+            nextFPS += 1;
+            renderer->updateTitleFPS(fps);
+            //std::cout << fps << std::endl);
+        }
+
+        renderer->getRenderWindow()->clear();
+        eventhandler->checkEvents();
+        renderer->work();
+    }
 
     return exit();
 }
 
 int Application::exit()
 {
-	if (windowIsOpen)
-		renderer->closeWindow();
+    if (windowIsOpen)
+        renderer->closeWindow();
     std::cout << "+Application exiting normally" << std::endl;
     return 0;
 }
 
 void Application::windowWasClosed()
 {
-	windowIsOpen = false;
+    windowIsOpen = false;
 }
 
 RendererPtr Application::getRenderer()
