@@ -1,0 +1,15 @@
+# The dream
+
+A procedural world that has intelligent beings living inside it. The player can perform tasks in this randomly generated world and his actions have a meaning. All NPCs are individuals with personalities and their own stories. The player can be part of a virtual reality generated unique for each playthrough. No multiplayer.
+
+# How
+
+Pre-generate a world using a world generation algorithm. First perform whatever steps are necessary for the basic topology, then perform other steps to make it more realistic. This needs further study, but in general climates, vulcanism, oceans, lakes, rivers, mountains and vegetation should be varying and realistic.
+
+The second step should be a Dwarf Fortress style history simulation where civilizations within the world live and breathe. Growth and trade should happen, wars and politics should happen. Under this system every citizen should have some part in the simulation. Politics should only happen because some individual is driving it.
+
+# During runtime
+
+As the world is generated store it in files, each signifying some area. As the player walks around load some number of areas in memory and perform simulation for only those few chunks. This may be entities living within a 3km radius of the player, for example.
+
+As the day changes the entire world is once again simulated for one day. News travel, people travel, world economics simulate.
