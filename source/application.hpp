@@ -7,13 +7,17 @@ class Application
 {
 private:
     RendererPtr renderer;
+    ToolboxPtr toolbox;
 public:
     Application();
 
     int readConfig();
 
     int run();
+    int exit();
+
     RendererPtr getRenderer();
+    ToolboxPtr getToolbox();
 };
 
 extern Application game;
