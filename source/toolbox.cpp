@@ -411,8 +411,8 @@ long Toolbox::getCurrentTime()
 {
     return std::chrono::duration_cast<std::chrono::seconds> (std::chrono::system_clock::now().time_since_epoch()).count();
 }
-
-//template<class T>
+/*
+template<class T>
 void Toolbox::print_vector(sf::Vector2f vec)
 {
     std::cout << vec.x << "x" << vec.y << std::endl;
@@ -422,7 +422,7 @@ void Toolbox::print_vector(sf::Vector2u vec)
 {
     std::cout << vec.x << "x" << vec.y << std::endl;
 }
-
+*/
 
 std::string Toolbox::sfml_key_to_string(sf::Event e)
 {
