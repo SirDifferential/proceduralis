@@ -7,6 +7,7 @@ class Tile
 {
 private:
     SpritePtr sprite;
+    sf::Vector2f render_coordinates;
 public:
     Tile();
 
