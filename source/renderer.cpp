@@ -24,3 +24,8 @@ void Renderer::setTitle(std::string t)
     title = t;
 }
 
+void Renderer::setFramerate(int r)
+{
+    framerate = r;
+}
+

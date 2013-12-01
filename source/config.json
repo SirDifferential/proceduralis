@@ -2,7 +2,7 @@
     "game_version" : "1.00",
 
     "resolution" : { "x" : 800, "y" : 600 },
-    "bpp" : 32,
+    "framerate" : 32,
     "title" : "Proceduralia"
 }
 

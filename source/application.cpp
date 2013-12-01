@@ -40,6 +40,9 @@ int Application::readConfig()
     toolbox->print_vector(temp);
     renderer->setResolution(temp);
 
+    std::cout << "+Application: Set framerate to " << root["framerate"].asInt() << std::endl;
+    renderer->setFramerate(root["framerate"].asInt());
+
     configdata.close();
 
     std::cout << "+Application: Finished reading config" << std::endl;
