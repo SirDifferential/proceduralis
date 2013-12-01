@@ -52,11 +52,15 @@ int Application::readConfig()
 
 int Application::run()
 {
+
+    renderer->openWindow();
+
     return exit();
 }
 
 int Application::exit()
 {
+    renderer->closeWindow();
     std::cout << "+Application exiting normally" << std::endl;
     return 0;
 }

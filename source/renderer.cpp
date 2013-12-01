@@ -4,6 +4,18 @@ Renderer::Renderer()
 {
 }
 
+void Renderer::openWindow()
+{
+    renderWindow = RenderWindowPtr(new sf::RenderWindow());
+    renderWindow->create(sf::VideoMode(resolution.x, resolution.y), title);
+    renderWindow->setFramerateLimit(framerate);
+}
+
+void Renderer::closeWindow()
+{
+    renderWindow->close();
+}
+
 void Renderer::draw(SpritePtr s)
 {
     renderWindow->draw(*s);

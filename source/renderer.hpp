@@ -17,6 +17,9 @@ public:
 
     RenderWindowPtr getRenderWindow();
 
+    void openWindow();
+    void closeWindow();
+
     void setResolution(sf::Vector2f res);
     void setTitle(std::string t);
     void setFramerate(int r);
