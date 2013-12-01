@@ -64,7 +64,9 @@ public:
     void deleteFloatArray3D(float*** arr, int sizeX, int sizeY);
 
 
-    void print_vector(sf::Vector2f s);
+	template <class T>
+	void print_vector(T vec);
+	std::string sfml_key_to_string(sf::Event e);
 };
 
 #endif

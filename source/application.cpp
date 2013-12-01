@@ -6,7 +6,7 @@
 #include <chrono>
 #include <iostream>
 
-Application game;
+Application app;
 
 Application::Application()
 {
@@ -54,15 +54,27 @@ int Application::run()
 {
 
     renderer->openWindow();
+	windowIsOpen = true;
+
+	while (renderer->getRenderWindow()->isOpen())
+	{
+	
+	}
 
     return exit();
 }
 
 int Application::exit()
 {
-    renderer->closeWindow();
+	if (windowIsOpen)
+		renderer->closeWindow();
     std::cout << "+Application exiting normally" << std::endl;
     return 0;
+}
+
+void Application::windowWasClosed()
+{
+	windowIsOpen = false;
 }
 
 RendererPtr Application::getRenderer()

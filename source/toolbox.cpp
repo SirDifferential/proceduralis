@@ -412,8 +412,46 @@ long Toolbox::getCurrentTime()
     return std::chrono::duration_cast<std::chrono::seconds> (std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-void Toolbox::print_vector(sf::Vector2f s)
+template<class T>
+void Toolbox::print_vector(T vec)
 {
-    std::cout << s.x << "x" << s.y << std::endl;
+    std::cout << vec.x << "x" << vec.y << std::endl;
 }
 
+std::string Toolbox::sfml_key_to_string(sf::Event e)
+{
+    if (e.type == sf::Event::KeyPressed)
+    {
+        switch (e.key.code)
+        {
+            case sf::Keyboard::A: return "A";
+            case sf::Keyboard::B: return "B";
+            case sf::Keyboard::C: return "C";
+            case sf::Keyboard::D: return "D";
+            case sf::Keyboard::E: return "E";
+            case sf::Keyboard::F: return "F";
+            case sf::Keyboard::G: return "G";
+            case sf::Keyboard::H: return "H";
+            case sf::Keyboard::I: return "I";
+            case sf::Keyboard::J: return "J";
+            case sf::Keyboard::K: return "K";
+            case sf::Keyboard::L: return "L";
+            case sf::Keyboard::M: return "M";
+            case sf::Keyboard::N: return "N";
+            case sf::Keyboard::O: return "O";
+            case sf::Keyboard::P: return "P";
+            case sf::Keyboard::Q: return "Q";
+            case sf::Keyboard::R: return "R";
+            case sf::Keyboard::S: return "S";
+            case sf::Keyboard::T: return "T";
+            case sf::Keyboard::U: return "U";
+            case sf::Keyboard::V: return "V";
+            case sf::Keyboard::W: return "W";
+            case sf::Keyboard::X: return "X";
+            case sf::Keyboard::Y: return "Y";
+            case sf::Keyboard::Z: return "Z";
+            default: return "DEL";
+        }
+    }
+    return "DEL";
+}

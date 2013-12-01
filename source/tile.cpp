@@ -9,7 +9,7 @@ Tile::Tile()
 void Tile::draw()
 {
     sprite->setPosition(render_coordinates);
-    game.getRenderer()->draw(sprite);
+    app.getRenderer()->draw(sprite);
     
 }
 

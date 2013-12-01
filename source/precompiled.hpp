@@ -4,6 +4,9 @@
 
 #include <memory>
 #include <vector>
+#include <map>
+#include <iostream>
+#include <algorithm>
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>

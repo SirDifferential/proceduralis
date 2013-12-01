@@ -8,6 +8,8 @@ class Application
 private:
     RendererPtr renderer;
     ToolboxPtr toolbox;
+
+	bool windowIsOpen;
 public:
     Application();
 
@@ -16,11 +18,13 @@ public:
     int run();
     int exit();
 
+	void windowWasClosed();
+
     RendererPtr getRenderer();
     ToolboxPtr getToolbox();
 };
 
-extern Application game;
+extern Application app;
 
 #endif
 
