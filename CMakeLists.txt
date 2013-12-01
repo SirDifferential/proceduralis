@@ -12,8 +12,8 @@ add_definitions(-std=c++0x -g -fpermissive -o0 2>&1)
 FILE(GLOB cpp_files "source/*.cpp")
 FILE(GLOB hpp_files "source/*.hpp")
 
-add_executable(septillion ${cpp_files} ${hpp_files})
-target_link_libraries(septillion ${SFML_LIBRARIES})
+add_executable(proceduralis ${cpp_files} ${hpp_files})
+target_link_libraries(proceduralis ${SFML_LIBRARIES})
 
 install(TARGETS proceduralis DESTINATION proceduralis)
 install(DIRECTORY data DESTINATION proceduralis)
