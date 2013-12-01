@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_CXX_COMPILER g++)
 set(CMAKE_INSTALL_PREFIX /opt)
-project(septillion)
+project(proceduralis)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(SFML 2 COMPONENTS graphics audio window system)
@@ -15,7 +15,7 @@ FILE(GLOB hpp_files "source/*.hpp")
 add_executable(septillion ${cpp_files} ${hpp_files})
 target_link_libraries(septillion ${SFML_LIBRARIES})
 
-install(TARGETS septillion DESTINATION septillion)
-install(DIRECTORY data DESTINATION septillion)
-install(FILES config.txt DESTINATION septillion)
+install(TARGETS proceduralis DESTINATION proceduralis)
+install(DIRECTORY data DESTINATION proceduralis)
+install(FILES config.txt DESTINATION proceduralis)
 
