@@ -10,6 +10,8 @@ private:
 public:
     Application();
 
+    int readConfig();
+
     int run();
     RendererPtr getRenderer();
 };

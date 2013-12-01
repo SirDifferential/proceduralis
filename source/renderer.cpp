@@ -14,3 +14,13 @@ RenderWindowPtr Renderer::getRenderWindow()
     return renderWindow;
 }
 
+void Renderer::setResolution(sf::Vector2f res)
+{
+    resolution = res;
+}
+
+void Renderer::setTitle(std::string t)
+{
+    title = t;
+}
+
