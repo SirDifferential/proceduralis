@@ -55,6 +55,17 @@ char* loadSource(const char* filename)
     return memblock;
 }
 
+void printPlatformInfo(cl::Platform p)
+{
+    std::string platformVendor;
+    std::string platformName;
+    std::string platformVersion;
+    p.getInfo((cl_platform_info)CL_PLATFORM_VENDOR, &platformVendor);
+    p.getInfo((cl_platform_info)CL_PLATFORM_NAME, &platformName);
+    p.getInfo((cl_platform_info)CL_PLATFORM_VERSION, &platformVersion);
+    std::cout << "\tVendor: " << platformVendor << "\n\tName: " << platformName << "\n\tVersion: " << platformVersion << std::endl;
+}
+
 void CL_Program::test()
 {
     const std::string hw("Hello World\n");
@@ -66,8 +77,12 @@ void CL_Program::test()
     checkError(platformList.size() != 0 ? CL_SUCCESS : -1, "cl::Platform::get");
     std::cout <<  "Platform number is " << platformList.size() << std::endl;
     std::string platformVendor;
+    for (auto iter : platformList)
+    {
+        printPlatformInfo(iter);
+    }
     platformList[0].getInfo((cl_platform_info)CL_PLATFORM_VENDOR, &platformVendor);
-    std::cout << "Platform is by: " << platformVendor << std::endl;
+    std::cout << "Selected platform is by: " << platformVendor << std::endl;
     cl_context_properties contextprops[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)(platformList[0])(), 0};
     cl::Context context(CL_DEVICE_TYPE_GPU, contextprops, NULL, NULL, &error);
     checkError(error, "Context::Context()");
@@ -111,7 +126,7 @@ void CL_Program::test()
     checkError(error, "CommandQueue::enqueueReadBuffer()");
     std::cout << outH << std::endl;
 
-    while(1);
+    
     return;
 
 }
