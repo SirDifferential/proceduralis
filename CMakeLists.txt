@@ -5,7 +5,7 @@ project(proceduralis)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(SFML 2 COMPONENTS graphics audio window system)
-include_directories(${SFML_INCLUDE_DIR})
+include_directories(${SFML_INCLUDE_DIR} ${OPENCL_INCLUDE_DIR})
 
 find_package(OPENCL)
 
