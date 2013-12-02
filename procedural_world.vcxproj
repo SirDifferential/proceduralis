@@ -49,6 +49,7 @@
     <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -73,14 +74,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\SFML-2.1_64\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\SFML-2.1_64\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\libs\glew-1.10.0\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include;C:\SFML-2.1_64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\libs\glew-1.10.0\lib\Release\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\lib\x64;C:\SFML-2.1_64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include;C:\SFML-2.1_64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\SFML-2.1_64\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -109,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>sfml-system-d.lib;sfml-main-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-window-d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;OpenCL.lib;sfml-system-d.lib;sfml-main-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-window-d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,13 +149,17 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glew32.lib;OpenCL.lib;sfml-system.lib;sfml-main.lib;sfml-graphics.lib;sfml-audio.lib;sfml-network.lib;sfml-window.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="source\application.hpp" />
+    <ClInclude Include="source\cl.hpp" />
     <ClInclude Include="source\eventhandler.hpp" />
+    <ClInclude Include="source\applicationFlags.hpp" />
     <ClInclude Include="source\json\json-forwards.h" />
     <ClInclude Include="source\json\json.h" />
+    <ClInclude Include="source\opencl_program.hpp" />
     <ClInclude Include="source\precompiled.hpp" />
     <ClInclude Include="source\renderer.hpp" />
     <ClInclude Include="source\tile.hpp" />
@@ -162,9 +169,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\application.cpp" />
+    <ClCompile Include="source\applicationFlags.cpp" />
     <ClCompile Include="source\eventhandler.cpp" />
     <ClCompile Include="source\jsoncpp.cpp" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\opencl_program.cpp" />
     <ClCompile Include="source\renderer.cpp" />
     <ClCompile Include="source\tile.cpp" />
     <ClCompile Include="source\toolbox.cpp" />

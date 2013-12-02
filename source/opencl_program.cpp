@@ -126,7 +126,7 @@ void CL_Program::loadProgram()
     }
 
     // arrays stored in CPU memory
-    int num = 10;
+    num = 10;
     float* a = new float[num];
     float* b = new float[num];
     float* c = new float[num];
@@ -174,10 +174,23 @@ void CL_Program::loadProgram()
 
 void CL_Program::runKernel()
 {
+    std::cout << "+OpenCL: Kernel running" << std::endl;
 
-    
-    return;
+    error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    print_errors("commandQueue.enqueueNDRangeKernel", error);
 
+    commandQueue.finish();
+
+    float* c_done = new float[num];
+    error = commandQueue.enqueueReadBuffer(cl_c, CL_TRUE, 0, sizeof(float) * num, &c_done, NULL, &event);
+    print_errors("commandQueue.enqueueReadBuffer", error);
+
+    for (int i = 0; i < num; i++)
+    {
+        std::cout << "c_done[" << i << "] = " << c_done[i] << std::endl;
+    }
+
+    delete c_done;
 }
 
 void CL_Program::printPlatformInfo(cl::Platform p)

@@ -23,6 +23,7 @@ private:
     cl::Buffer cl_a;
     cl::Buffer cl_b;
     cl::Buffer cl_c;
+    int num;
 
 public:
     CL_Program(std::string s);

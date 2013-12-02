@@ -6,8 +6,10 @@ int main(int argc, char** argv)
     //app.readConfig();
     //return app.run();
 
-    //CL_Program p;
-    //p.runKernel();
+    CL_Program c1("lesson1.cl");
+    c1.loadProgram();
+
+    c1.runKernel();
 
     return 0;
 }
