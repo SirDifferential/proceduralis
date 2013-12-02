@@ -17,13 +17,21 @@ private:
     cl::Kernel kernel;
     cl_int error;
     cl::Event event;
-public:
-    CL_Program();
 
-    char* loadProgram(std::string file_path);
+    std::string sourcepath;
+
+    cl::Buffer cl_a;
+    cl::Buffer cl_b;
+    cl::Buffer cl_c;
+
+public:
+    CL_Program(std::string s);
+
+    char* readSource(std::string file_path);
+    void loadProgram();
     void runKernel();
 
-    int checkError(cl_int error, const char* n);
+    void print_errors(std::string function, cl_int error);
     void printPlatformInfo(cl::Platform p);
 };
 

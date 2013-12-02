@@ -140,6 +140,9 @@
 #ifndef CL_HPP_
 #define CL_HPP_
 
+#define __CL_ENABLE_EXCEPTIONS
+
+
 #ifdef _WIN32
 #include <windows.h>
 #include <malloc.h>

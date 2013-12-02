@@ -9,6 +9,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "cl.hpp"
 
 class Toolbox
 {
@@ -70,9 +71,9 @@ public:
     {
         std::cout << vec.x << "x" << vec.y << std::endl;
     }
-	//void print_vector(sf::Vector2u vec);
-	//void print_vector(sf::Vector2f vec);
 	std::string sfml_key_to_string(sf::Event e);
+
+    const char* opencl_error_string(cl_int errorcode);
 };
 
 #endif
