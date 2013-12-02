@@ -3,6 +3,7 @@
 #include "json/json.h"
 #include "toolbox.hpp"
 #include "eventhandler.hpp"
+#include "applicationFlags.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -14,6 +15,7 @@ Application::Application()
     renderer = RendererPtr(new Renderer());
     toolbox = ToolboxPtr(new Toolbox());
 	eventhandler = EventHandlerPtr(new EventHandler());
+    applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
 }
 
 int Application::readConfig()
@@ -49,6 +51,11 @@ int Application::readConfig()
 		showFPS = true;
 	else
 		showFPS = false;
+
+    if (root["gpu_device_debug"].asString() == "yes")
+        applicationFlags->opencl_devices_debug = true;
+    else
+        applicationFlags->opencl_devices_debug = false;
 
     configdata.close();
 
@@ -107,5 +114,10 @@ RendererPtr Application::getRenderer()
 ToolboxPtr Application::getToolbox()
 {
     return toolbox;
+}
+
+ApplicationFlagsPtr Application::getApplicationFlags()
+{
+    return applicationFlags;
 }
 

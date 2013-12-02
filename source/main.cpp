@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     //return app.run();
 
     CL_Program p;
-    p.test();
+    p.runKernel();
 
     return 0;
 }
