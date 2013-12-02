@@ -117,12 +117,27 @@ void CL_Program::loadProgram()
 
     try
     {
-        kernel = cl::Kernel(program, "part1", &error);
-        print_errors("kernel", error);
+        error = program.build(devices);
     }
     catch (cl::Error err)
     {
         std::cout << "-OpenCL Exception: " << err.what() << ", " << err.err() << std::endl;
+        print_errors("program.build()", error);
+    }
+
+    std::cout << "Build status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
+    std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;
+    std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+    
+    try
+    {
+        kernel = cl::Kernel(program, "part1", &error);
+        print_errors("kernel()", error);
+    }
+    catch (cl::Error err)
+    {
+        std::cout << "-OpenCL Exception: " << err.what() << ", " << err.err() << std::endl;
+        print_errors("kernel()", error);
     }
 
     // arrays stored in CPU memory
@@ -159,9 +174,9 @@ void CL_Program::loadProgram()
 
     error = kernel.setArg(0, cl_a);
     print_errors("kernel.setArg a", error);
-    error = kernel.setArg(0, cl_a);
+    error = kernel.setArg(1, cl_a);
     print_errors("kernel.setArg b", error);
-    error = kernel.setArg(0, cl_a);
+    error = kernel.setArg(2, cl_a);
     print_errors("kernel.setArg c", error);
 
 
@@ -181,7 +196,8 @@ void CL_Program::runKernel()
 
     commandQueue.finish();
 
-    float* c_done = new float[num];
+    //float* c_done = new float[num];
+    float c_done[10];
     error = commandQueue.enqueueReadBuffer(cl_c, CL_TRUE, 0, sizeof(float) * num, &c_done, NULL, &event);
     print_errors("commandQueue.enqueueReadBuffer", error);
 
@@ -189,8 +205,6 @@ void CL_Program::runKernel()
     {
         std::cout << "c_done[" << i << "] = " << c_done[i] << std::endl;
     }
-
-    delete c_done;
 }
 
 void CL_Program::printPlatformInfo(cl::Platform p)
