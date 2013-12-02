@@ -11,8 +11,6 @@
 #include <iterator>
 #include <utility>
 
-#define __NO_STD_VECTOR // Use cl::vector instead of STL version
-
 CL_Program::CL_Program(std::string filepath)
 {
     sourcepath = filepath;
@@ -142,9 +140,9 @@ void CL_Program::loadProgram()
 
     // arrays stored in CPU memory
     num = 10;
-    float* a = new float[num];
-    float* b = new float[num];
-    float* c = new float[num];
+    a = new float[num];
+    b = new float[num];
+    c = new float[num];
     for (int i = 0; i < num; i++)
     {
         a[i] = 1.0f * i;
@@ -167,23 +165,17 @@ void CL_Program::loadProgram()
     std::cout << "+OpenCL: Sending data to the GPU" << std::endl,
     error = commandQueue.enqueueWriteBuffer(cl_a, CL_TRUE, 0, array_size, a, NULL, &event);
     print_errors("commandQueue.enqueueWriteBuffer a", error);
-    error = commandQueue.enqueueWriteBuffer(cl_a, CL_TRUE, 0, array_size, b, NULL, &event);
+    error = commandQueue.enqueueWriteBuffer(cl_b, CL_TRUE, 0, array_size, b, NULL, &event);
     print_errors("commandQueue.enqueueWriteBuffer b", error);
-    error = commandQueue.enqueueWriteBuffer(cl_a, CL_TRUE, 0, array_size, c, NULL, &event);
+    error = commandQueue.enqueueWriteBuffer(cl_c, CL_TRUE, 0, array_size, c, NULL, &event);
     print_errors("commandQueue.enqueueWriteBuffer c", error);
 
     error = kernel.setArg(0, cl_a);
     print_errors("kernel.setArg a", error);
-    error = kernel.setArg(1, cl_a);
+    error = kernel.setArg(1, cl_b);
     print_errors("kernel.setArg b", error);
-    error = kernel.setArg(2, cl_a);
+    error = kernel.setArg(2, cl_c);
     print_errors("kernel.setArg c", error);
-
-
-    delete a;
-    delete b;
-    delete c;
-
 }
 
 
@@ -196,15 +188,19 @@ void CL_Program::runKernel()
 
     commandQueue.finish();
 
-    //float* c_done = new float[num];
-    float c_done[10];
-    error = commandQueue.enqueueReadBuffer(cl_c, CL_TRUE, 0, sizeof(float) * num, &c_done, NULL, &event);
+    float* c_done = new float[num];
+    error = commandQueue.enqueueReadBuffer(cl_c, CL_TRUE, 0, sizeof(float) * num, c_done, NULL, &event);
     print_errors("commandQueue.enqueueReadBuffer", error);
 
     for (int i = 0; i < num; i++)
     {
         std::cout << "c_done[" << i << "] = " << c_done[i] << std::endl;
     }
+
+    delete[] a;
+    delete[] b;
+    delete[] c;
+    delete[] c_done;
 }
 
 void CL_Program::printPlatformInfo(cl::Platform p)

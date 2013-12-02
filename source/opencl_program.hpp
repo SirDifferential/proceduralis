@@ -23,6 +23,10 @@ private:
     cl::Buffer cl_a;
     cl::Buffer cl_b;
     cl::Buffer cl_c;
+
+    float* a;
+    float* b;
+    float* c;
     int num;
 
 public:
