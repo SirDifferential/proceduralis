@@ -100,7 +100,7 @@ void CL_Program::loadProgram()
     commandQueue = cl::CommandQueue(context, devices[device_used], 0, &error);
     print_errors("cl::CommandQueue", error);
 
-    readSource(sourcepath);
+    programSourceRaw = readSource(sourcepath);
 
     std::cout << "+OpenCL: Kernel size: " << programSourceRaw.size() << std::endl;
     std::cout << "+OpenCL: Kernel: " << programSourceRaw << std::endl;
