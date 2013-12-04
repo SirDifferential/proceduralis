@@ -10,6 +10,7 @@ private:
     ToolboxPtr toolbox;
 	EventHandlerPtr eventhandler;
     ApplicationFlagsPtr applicationFlags;
+    WorldPtr world;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -27,6 +28,7 @@ public:
     RendererPtr getRenderer();
     ToolboxPtr getToolbox();
     ApplicationFlagsPtr getApplicationFlags();
+    WorldPtr getWorld();
 };
 
 extern Application app;

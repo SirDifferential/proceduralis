@@ -3,13 +3,11 @@
 
 int main(int argc, char** argv)
 {
-    //app.readConfig();
-    //return app.run();
-
-    CL_Program c1("lesson1.cl");
+    CL_Program c1("simple_world.cl");
     c1.loadProgram();
 
     c1.runKernel();
 
-    return 0;
+    app.readConfig();
+    return app.run();
 }

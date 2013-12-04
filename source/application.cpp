@@ -4,6 +4,7 @@
 #include "toolbox.hpp"
 #include "eventhandler.hpp"
 #include "applicationFlags.hpp"
+#include "world.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -16,6 +17,7 @@ Application::Application()
     toolbox = ToolboxPtr(new Toolbox());
 	eventhandler = EventHandlerPtr(new EventHandler());
     applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
+    world = WorldPtr(new World());
 }
 
 int Application::readConfig()
@@ -87,6 +89,7 @@ int Application::run()
 
         renderer->getRenderWindow()->clear();
         eventhandler->checkEvents();
+        world->work();
         renderer->work();
     }
 
@@ -121,3 +124,7 @@ ApplicationFlagsPtr Application::getApplicationFlags()
     return applicationFlags;
 }
 
+WorldPtr Application::getWorld()
+{
+    return world;
+}

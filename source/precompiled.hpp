@@ -18,6 +18,8 @@ class EventHandler;
 class ApplicationFlags;
 
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
+typedef std::shared_ptr<sf::Image> ImagePtr;
+typedef std::shared_ptr<sf::Texture> TexturePtr;
 typedef std::shared_ptr<sf::RenderWindow> RenderWindowPtr;
 typedef std::shared_ptr<sf::View> ViewPtr;
 typedef std::shared_ptr<Renderer> RendererPtr;
@@ -25,3 +27,4 @@ typedef std::shared_ptr<Toolbox> ToolboxPtr;
 typedef std::shared_ptr<World> WorldPtr;
 typedef std::shared_ptr<EventHandler> EventHandlerPtr;
 typedef std::shared_ptr<ApplicationFlags> ApplicationFlagsPtr;
+

@@ -74,6 +74,8 @@ public:
 	std::string sfml_key_to_string(sf::Event e);
 
     const char* opencl_error_string(cl_int errorcode);
+
+    sf::Color int_to_sfmlcolor(int i);
 };
 
 #endif

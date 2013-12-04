@@ -532,3 +532,12 @@ const char* Toolbox::opencl_error_string(cl_int error_code)
     return (index >= 0 && index < errorCount) ? errorString[index] : "";
 
 }
+
+/**
+* Produces a sf::color with all components set to i
+*/
+sf::Color Toolbox::int_to_sfmlcolor(int i)
+{
+    return sf::Color(i,i,i,255);
+}
+

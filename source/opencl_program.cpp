@@ -2,6 +2,7 @@
 #include "application.hpp"
 #include "applicationFlags.hpp"
 #include "toolbox.hpp"
+#include "world.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -129,7 +130,7 @@ void CL_Program::loadProgram()
     
     try
     {
-        kernel = cl::Kernel(program, "part1", &error);
+        kernel = cl::Kernel(program, "simple_world", &error);
         print_errors("kernel()", error);
     }
     catch (cl::Error err)
@@ -139,43 +140,35 @@ void CL_Program::loadProgram()
     }
 
     // arrays stored in CPU memory
-    num = 10;
-    a = new float[num];
-    b = new float[num];
-    c = new float[num];
-    for (int i = 0; i < num; i++)
+    num = 1024;
+    a = new float[num*num];
+    b = new float[num*num];
+    for (int i = 0; i < num*num; i++)
     {
-        a[i] = 1.0f * i;
-        b[i] = 1.0f * i;
-        c[i]= 0.0f;
+        a[i] = app.getToolbox()->giveRandomInt(1, 100);
+        b[i] = 0.0f;
     }
 
     std::cout << "+OpenCL: Creating OpenCL arrays" << std::endl;
-    size_t array_size = sizeof(float) * num;
+    size_t array_size = sizeof(float) * num*num;
 
-    // Two input arrays
+    // One input array
     cl_a = cl::Buffer(context, CL_MEM_READ_ONLY, array_size, NULL, &error);
     print_errors("cl::Buffer a", error);
-    cl_b = cl::Buffer(context, CL_MEM_READ_ONLY, array_size, NULL, &error);
-    print_errors("cl::Buffer b", error);
     // One output array
-    cl_c = cl::Buffer(context, CL_MEM_WRITE_ONLY, array_size, NULL, &error);
-    print_errors("cl::Buffer c", error);
+    cl_b = cl::Buffer(context, CL_MEM_WRITE_ONLY, array_size, NULL, &error);
+    print_errors("cl::Buffer b", error);
 
     std::cout << "+OpenCL: Sending data to the GPU" << std::endl,
     error = commandQueue.enqueueWriteBuffer(cl_a, CL_TRUE, 0, array_size, a, NULL, &event);
     print_errors("commandQueue.enqueueWriteBuffer a", error);
     error = commandQueue.enqueueWriteBuffer(cl_b, CL_TRUE, 0, array_size, b, NULL, &event);
     print_errors("commandQueue.enqueueWriteBuffer b", error);
-    error = commandQueue.enqueueWriteBuffer(cl_c, CL_TRUE, 0, array_size, c, NULL, &event);
-    print_errors("commandQueue.enqueueWriteBuffer c", error);
 
     error = kernel.setArg(0, cl_a);
     print_errors("kernel.setArg a", error);
     error = kernel.setArg(1, cl_b);
     print_errors("kernel.setArg b", error);
-    error = kernel.setArg(2, cl_c);
-    print_errors("kernel.setArg c", error);
 }
 
 
@@ -183,24 +176,27 @@ void CL_Program::runKernel()
 {
     std::cout << "+OpenCL: Kernel running" << std::endl;
 
-    error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+    error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(num*num), cl::NullRange, NULL, &event);
     print_errors("commandQueue.enqueueNDRangeKernel", error);
 
     commandQueue.finish();
 
-    float* c_done = new float[num];
-    error = commandQueue.enqueueReadBuffer(cl_c, CL_TRUE, 0, sizeof(float) * num, c_done, NULL, &event);
+    float* b_done = new float[num*num];
+    error = commandQueue.enqueueReadBuffer(cl_b, CL_TRUE, 0, sizeof(float) * num *num, b_done, NULL, &event);
     print_errors("commandQueue.enqueueReadBuffer", error);
 
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < 10; i++)
     {
-        std::cout << "c_done[" << i << "] = " << c_done[i] << std::endl;
+        std::cout << "b_done[" << i << "] = " << b_done[i] << std::endl;
     }
+
+    std::shared_ptr<std::vector<float>> world_heightmap(new std::vector<float>());
+    for (int i = 0; i < num*num; i++)
+        world_heightmap->push_back(b_done[i]);
+    app.getWorld()->setWorld(world_heightmap, num, num);
 
     delete[] a;
     delete[] b;
-    delete[] c;
-    delete[] c_done;
 }
 
 void CL_Program::printPlatformInfo(cl::Platform p)
