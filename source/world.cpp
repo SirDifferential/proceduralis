@@ -7,21 +7,30 @@ World::World()
 {
 }
 
-void World::setWorld(std::shared_ptr<std::vector<float>> in, unsigned int width, unsigned int height)
+void World::setWorld(float* buffer, unsigned int width, unsigned int height)
 {
-    heightmap_raw = in;
-
     heightmap_image = ImagePtr(new sf::Image());
     heightmap_image->create(width, height, sf::Color(0,0,0, 255));
-    
-    
 
-    for (int x = 0; x < width; x++)
+    sf::Color c;
+
+    int x = -1;
+    int y = 0;
+
+    // Copy buffer in SFML image
+    for (int i = 3; i < width*height*4; i += 4)
     {
-        for (int y = 0; y < height; y++)
+        x += 1;
+        if (x == width)
         {
-            heightmap_image->setPixel(x, y, app.getToolbox()->int_to_sfmlcolor((int)in->at(x*y)));
+            y += 1;
+            x = 0;
         }
+        c.r = buffer[i-3]*255;
+        c.g = buffer[i-2]*255;
+        c.b = buffer[i-1]*255;
+        c.a = buffer[i]*255;
+        heightmap_image->setPixel(x, y, c);
     }
 
     heightmap_texture = TexturePtr(new sf::Texture());

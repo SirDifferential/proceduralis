@@ -29,6 +29,16 @@ private:
     float* c;
     int num;
 
+    float* image_buffer_in;
+    float* image_buffer_out;
+
+    cl::size_t<3> origin;
+    cl::size_t<3> region;
+    size_t row_pitch;
+
+    cl::Image2D* image_a;
+    cl::Image2D* image_b;
+
 public:
     CL_Program(std::string s);
 

@@ -139,6 +139,46 @@ void CL_Program::loadProgram()
         print_errors("kernel()", error);
     }
 
+    cl::ImageFormat format;
+
+    format.image_channel_data_type = CL_FLOAT;
+    format.image_channel_order = CL_RGBA;
+    
+
+    int image_size = 1024*1024*4;
+    image_buffer_in = new float[image_size];
+    if (image_buffer_in == NULL)
+        std::cout << "no go" << std::endl;
+    for (int i = 3; i < 1024*1024*4; i += 4)
+    {
+        image_buffer_in[i-3] = 0.2f;
+        image_buffer_in[i-2] = 0.2f;
+        image_buffer_in[i-1] = 0.6f;
+        image_buffer_in[i] = 1.0f;
+    }
+    image_buffer_out = new float[image_size];//(float*)calloc((image_size), sizeof(float));
+    row_pitch = 1024 * 4 * sizeof(float);
+    origin.push_back(0);
+    origin.push_back(0);
+    origin.push_back(0);
+
+    region.push_back(1024);
+    region.push_back(1024);
+    region.push_back(1);
+
+    try
+    {
+        image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
+        image_b = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format, 1024, 1024, 0);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error at creating image buffers: " << e.what() << ", " << e.err() << std::endl;
+    }
+    commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
+    commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
+
+    /*
     // arrays stored in CPU memory
     num = 1024;
     a = new float[num*num];
@@ -164,11 +204,18 @@ void CL_Program::loadProgram()
     print_errors("commandQueue.enqueueWriteBuffer a", error);
     error = commandQueue.enqueueWriteBuffer(cl_b, CL_TRUE, 0, array_size, b, NULL, &event);
     print_errors("commandQueue.enqueueWriteBuffer b", error);
+    */
 
-    error = kernel.setArg(0, cl_a);
-    print_errors("kernel.setArg a", error);
-    error = kernel.setArg(1, cl_b);
-    print_errors("kernel.setArg b", error);
+    try
+    {
+        error = kernel.setArg(0, *image_a);
+        error = kernel.setArg(1, *image_b);
+    }
+    catch (cl::Error err)
+    {
+        std::cout << "-OpenCL: Error setting kernel arguments: " << err.what() << ", " << err.err() << std::endl;
+        print_errors("kernel.setArg image_a", error);
+    }
 }
 
 
@@ -176,27 +223,28 @@ void CL_Program::runKernel()
 {
     std::cout << "+OpenCL: Kernel running" << std::endl;
 
-    error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(num*num), cl::NullRange, NULL, &event);
+    error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
     print_errors("commandQueue.enqueueNDRangeKernel", error);
 
     commandQueue.finish();
 
-    float* b_done = new float[num*num];
-    error = commandQueue.enqueueReadBuffer(cl_b, CL_TRUE, 0, sizeof(float) * num *num, b_done, NULL, &event);
-    print_errors("commandQueue.enqueueReadBuffer", error);
+    float* map_done = new float[1024*1024*4];
+    error = commandQueue.enqueueReadImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, map_done);
+    //error = commandQueue.enqueueReadBuffer(*image_b, CL_TRUE, 0, sizeof(float) * num *num, b_done, NULL, &event);
+    print_errors("commandQueue.enqueueReadImage", error);
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 8*8*4; i++)
     {
-        std::cout << "b_done[" << i << "] = " << b_done[i] << std::endl;
+        std::cout << "map_done[" << i << "] = " << map_done[i] << std::endl;
     }
 
-    std::shared_ptr<std::vector<float>> world_heightmap(new std::vector<float>());
-    for (int i = 0; i < num*num; i++)
-        world_heightmap->push_back(b_done[i]);
-    app.getWorld()->setWorld(world_heightmap, num, num);
+    app.getWorld()->setWorld(map_done, 1024, 1024);
 
     delete[] a;
     delete[] b;
+    delete[] image_buffer_in;
+    delete[] image_buffer_out;
+    delete[] map_done;
 }
 
 void CL_Program::printPlatformInfo(cl::Platform p)
