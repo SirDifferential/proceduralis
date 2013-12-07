@@ -149,11 +149,36 @@ void CL_Program::loadProgram()
     image_buffer_in = new float[image_size];
     if (image_buffer_in == NULL)
         std::cout << "no go" << std::endl;
+    int x = -1;
+    int y = 0;
+    float value = 0.0f;
     for (int i = 3; i < 1024*1024*4; i += 4)
     {
-        image_buffer_in[i-3] = 0.2f;
-        image_buffer_in[i-2] = 0.2f;
-        image_buffer_in[i-1] = 0.6f;
+        x += 1;
+        if (x == 1024)
+        {
+            y += 1;
+            x = 0;
+        }
+
+        /*
+        // Gradient
+        image_buffer_in[i-3] = (x / 1024.0f) + (y / 1024.0f);
+        image_buffer_in[i-2] = (x / 1024.0f) + (y / 1024.0f);
+        image_buffer_in[i-1] = (x / 1024.0f) + (y / 1024.0f);
+        image_buffer_in[i] = 1.0f;
+        */
+
+        // Checker
+        
+        
+        if (x % 2 == 0)
+            value = 1.0f;
+        else
+            value = 0.0f;
+        image_buffer_in[i-3] = value;
+        image_buffer_in[i-2] = value;
+        image_buffer_in[i-1] = value;
         image_buffer_in[i] = 1.0f;
     }
     image_buffer_out = new float[image_size];//(float*)calloc((image_size), sizeof(float));
@@ -233,10 +258,12 @@ void CL_Program::runKernel()
     //error = commandQueue.enqueueReadBuffer(*image_b, CL_TRUE, 0, sizeof(float) * num *num, b_done, NULL, &event);
     print_errors("commandQueue.enqueueReadImage", error);
 
+    /*
     for (int i = 0; i < 8*8*4; i++)
     {
         std::cout << "map_done[" << i << "] = " << map_done[i] << std::endl;
     }
+    */
 
     app.getWorld()->setWorld(map_done, 1024, 1024);
 
