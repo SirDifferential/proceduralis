@@ -16,9 +16,9 @@
 CL_Program::CL_Program(std::string filepath)
 {
     sourcepath = filepath;
-    frequency = new float(2.0f);
-    persistence = new float(0.5f);
-    octaves = new int(8);
+    frequency = new float(0.4f);
+    persistence = new float(1.3f);
+    octaves = new int(10);
 }
 
 char* CL_Program::readSource(std::string filename)
@@ -193,7 +193,7 @@ void CL_Program::loadProgram()
         image_buffer_in[i] = 1.0f;
         
     }
-    image_buffer_out = new float[image_size];//(float*)calloc((image_size), sizeof(float));
+    image_buffer_out = new float[image_size];
     row_pitch = 1024 * 4 * sizeof(float);
     origin.push_back(0);
     origin.push_back(0);
