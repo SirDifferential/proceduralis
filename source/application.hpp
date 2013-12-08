@@ -11,6 +11,7 @@ private:
 	EventHandlerPtr eventhandler;
     ApplicationFlagsPtr applicationFlags;
     WorldPtr world;
+    CL_ProgramPtr opencl;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -29,6 +30,7 @@ public:
     ToolboxPtr getToolbox();
     ApplicationFlagsPtr getApplicationFlags();
     WorldPtr getWorld();
+    CL_ProgramPtr getOpenCL();
 };
 
 extern Application app;

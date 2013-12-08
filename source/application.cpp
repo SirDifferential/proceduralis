@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "opencl_program.hpp"
 #include "renderer.hpp"
 #include "json/json.h"
 #include "toolbox.hpp"
@@ -18,6 +19,7 @@ Application::Application()
 	eventhandler = EventHandlerPtr(new EventHandler());
     applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
     world = WorldPtr(new World());
+    opencl = CL_ProgramPtr(new CL_Program("perlin.cl"));
 }
 
 int Application::readConfig()
@@ -76,6 +78,9 @@ int Application::run()
     renderer->openWindow();
     windowIsOpen = true;
 
+    opencl->loadProgram();
+    opencl->runKernel();
+
     while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
     {
         fps = 1 / fps_clock.getElapsedTime().asSeconds();
@@ -128,3 +133,9 @@ WorldPtr Application::getWorld()
 {
     return world;
 }
+
+CL_ProgramPtr Application::getOpenCL()
+{
+    return opencl;
+}
+

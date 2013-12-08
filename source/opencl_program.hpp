@@ -1,7 +1,6 @@
 #ifndef __OPENCL_PROGRAM_HPP_
 #define __OPENCL_PROGRAM_HPP_
 
-#include <GL/glew.h>
 #include "cl.hpp"
 
 class CL_Program
@@ -39,6 +38,14 @@ private:
     cl::Image2D* image_a;
     cl::Image2D* image_b;
 
+    cl::Buffer cl_frequency;
+    cl::Buffer cl_persistence;
+    cl::Buffer cl_octaves;
+    float* frequency;
+    float* persistence;
+    int* octaves;
+    
+
 public:
     CL_Program(std::string s);
 
@@ -48,6 +55,16 @@ public:
 
     void print_errors(std::string function, cl_int error);
     void printPlatformInfo(cl::Platform p);
+    void cleanup();
+
+    void event1();
+    void event2();
+    void event3();
+    void event4();
+    void event5();
+    void event6();
+    void event7();
+    void event8();
 };
 
 #endif

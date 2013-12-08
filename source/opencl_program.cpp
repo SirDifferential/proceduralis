@@ -15,6 +15,9 @@
 CL_Program::CL_Program(std::string filepath)
 {
     sourcepath = filepath;
+    frequency = new float(2.0f);
+    persistence = new float(0.5f);
+    octaves = new int(8);
 }
 
 char* CL_Program::readSource(std::string filename)
@@ -130,7 +133,7 @@ void CL_Program::loadProgram()
     
     try
     {
-        kernel = cl::Kernel(program, "simple_world", &error);
+        kernel = cl::Kernel(program, "perlinnoise", &error);
         print_errors("kernel()", error);
     }
     catch (cl::Error err)
@@ -169,9 +172,8 @@ void CL_Program::loadProgram()
         image_buffer_in[i] = 1.0f;
         */
 
+        /*
         // Checker
-        
-        
         if (x % 2 == 0)
             value = 1.0f;
         else
@@ -180,6 +182,15 @@ void CL_Program::loadProgram()
         image_buffer_in[i-2] = value;
         image_buffer_in[i-1] = value;
         image_buffer_in[i] = 1.0f;
+        */
+
+        // Random values
+        value = app.getToolbox()->giveRandomInt(1, 255) / 255.0f;
+        image_buffer_in[i-3] = value;
+        image_buffer_in[i-2] = value;
+        image_buffer_in[i-1] = value;
+        image_buffer_in[i] = 1.0f;
+        
     }
     image_buffer_out = new float[image_size];//(float*)calloc((image_size), sizeof(float));
     row_pitch = 1024 * 4 * sizeof(float);
@@ -195,58 +206,48 @@ void CL_Program::loadProgram()
     {
         image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
         image_b = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format, 1024, 1024, 0);
+        cl_frequency = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
+        cl_persistence = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
+        cl_octaves = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &error);
     }
     catch (cl::Error e)
     {
-        std::cout << "!OpenCL: Error at creating image buffers: " << e.what() << ", " << e.err() << std::endl;
+        std::cout << "!OpenCL: Error at creating buffers: " << e.what() << ", " << e.err() << std::endl;
     }
-    commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
-    commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
 
-    /*
-    // arrays stored in CPU memory
-    num = 1024;
-    a = new float[num*num];
-    b = new float[num*num];
-    for (int i = 0; i < num*num; i++)
+    try
     {
-        a[i] = app.getToolbox()->giveRandomInt(1, 100);
-        b[i] = 0.0f;
+        error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
+        error = commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
+        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
     }
-
-    std::cout << "+OpenCL: Creating OpenCL arrays" << std::endl;
-    size_t array_size = sizeof(float) * num*num;
-
-    // One input array
-    cl_a = cl::Buffer(context, CL_MEM_READ_ONLY, array_size, NULL, &error);
-    print_errors("cl::Buffer a", error);
-    // One output array
-    cl_b = cl::Buffer(context, CL_MEM_WRITE_ONLY, array_size, NULL, &error);
-    print_errors("cl::Buffer b", error);
-
-    std::cout << "+OpenCL: Sending data to the GPU" << std::endl,
-    error = commandQueue.enqueueWriteBuffer(cl_a, CL_TRUE, 0, array_size, a, NULL, &event);
-    print_errors("commandQueue.enqueueWriteBuffer a", error);
-    error = commandQueue.enqueueWriteBuffer(cl_b, CL_TRUE, 0, array_size, b, NULL, &event);
-    print_errors("commandQueue.enqueueWriteBuffer b", error);
-    */
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error pushing data in the device buffers: " << e.what() << ", " << e.err() << std::endl;
+        print_errors("commandQueue.enqueueWriteBuffer", error);
+    }
 
     try
     {
         error = kernel.setArg(0, *image_a);
         error = kernel.setArg(1, *image_b);
+        error = kernel.setArg(2, cl_frequency);
+        error = kernel.setArg(3, cl_persistence);
+        error = kernel.setArg(4, cl_octaves);
     }
     catch (cl::Error err)
     {
         std::cout << "-OpenCL: Error setting kernel arguments: " << err.what() << ", " << err.err() << std::endl;
-        print_errors("kernel.setArg image_a", error);
+        print_errors("kernel.setArg", error);
     }
 }
 
 
 void CL_Program::runKernel()
 {
-    std::cout << "+OpenCL: Kernel running" << std::endl;
+    //std::cout << "+OpenCL: Kernel running" << std::endl;
 
     error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
     print_errors("commandQueue.enqueueNDRangeKernel", error);
@@ -267,10 +268,6 @@ void CL_Program::runKernel()
 
     app.getWorld()->setWorld(map_done, 1024, 1024);
 
-    delete[] a;
-    delete[] b;
-    delete[] image_buffer_in;
-    delete[] image_buffer_out;
     delete[] map_done;
 }
 
@@ -294,4 +291,107 @@ void CL_Program::printPlatformInfo(cl::Platform p)
     std::ofstream out("gpu_debug.txt", std::ios::app );
     out << "\tVendor: " << platformVendor << "\n\tName: " << platformName << "\n\tVersion: " << platformVersion << "\n\tPlatormProfile: " << platformProfile << "\n\ticdsuffix: " << icd_suffix << "\n\tplatform extensions: " << platform_ext;
     out.close();
+}
+
+void CL_Program::cleanup()
+{
+    delete[] a;
+    delete[] b;
+    delete[] image_buffer_in;
+    delete[] image_buffer_out;
+    delete frequency;
+    delete persistence;
+    delete octaves;
+}
+
+void CL_Program::event1()
+{
+    *persistence += 0.1f;
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error writing buffer at event 1: " << e.what() << ", " << e.err() << std::endl;
+    }
+    runKernel();
+}
+
+void CL_Program::event2()
+{
+    *persistence -= 0.1f;
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error writing buffer at event 2: " << e.what() << ", " << e.err() << std::endl;
+    }
+    runKernel();
+}
+
+void CL_Program::event3()
+{
+    *frequency += 0.1f;
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error writing buffer at event 3: " << e.what() << ", " << e.err() << std::endl;
+    }
+    runKernel();
+}
+
+void CL_Program::event4()
+{
+    *frequency -= 0.1f;
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error writing buffer at event 4: " << e.what() << ", " << e.err() << std::endl;
+    }
+    runKernel();
+}
+
+void CL_Program::event5()
+{
+    *octaves += 1;
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error writing buffer at event 5: " << e.what() << ", " << e.err() << std::endl;
+    }
+    runKernel();
+}
+
+void CL_Program::event6()
+{
+    *octaves -= 1;
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error writing buffer at event 6: " << e.what() << ", " << e.err() << std::endl;
+    }
+    runKernel();
+}
+
+void CL_Program::event7()
+{
+}
+
+void CL_Program::event8()
+{
 }
