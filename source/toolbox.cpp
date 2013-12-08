@@ -231,6 +231,14 @@ std::string Toolbox::combineStringAndString(std::string s1, std::string s2)
     return out.str();
 }
 
+std::string Toolbox::combineStringAndFloat(std::string s, float f)
+{
+    std::stringstream out;
+    out << s;
+    out << f;
+    return out.str();
+}
+
 /**
 * Removes a number of characters from a string, from the end
 */

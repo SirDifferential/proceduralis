@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 #include "application.hpp"
 #include "toolbox.hpp"
+#include "gui.hpp"
 
 Renderer::Renderer()
 {
@@ -23,6 +24,7 @@ void Renderer::closeWindow()
 void Renderer::work()
 {
 	renderWindow->setView(*main_view);
+    app.getGUI()->draw();
 	renderWindow->display();
 }
 

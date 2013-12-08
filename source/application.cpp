@@ -6,6 +6,8 @@
 #include "eventhandler.hpp"
 #include "applicationFlags.hpp"
 #include "world.hpp"
+#include "gui.hpp"
+#include "textrenderer.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -20,6 +22,8 @@ Application::Application()
     applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
     world = WorldPtr(new World());
     opencl = CL_ProgramPtr(new CL_Program("perlin.cl"));
+    gui = GUIPtr(new GUI());
+    textrenderer = TextRendererPtr(new TextRenderer());
 }
 
 int Application::readConfig()
@@ -137,5 +141,15 @@ WorldPtr Application::getWorld()
 CL_ProgramPtr Application::getOpenCL()
 {
     return opencl;
+}
+
+GUIPtr Application::getGUI()
+{
+    return gui;
+}
+
+TextRendererPtr Application::getTextRenderer()
+{
+    return textrenderer;
 }
 

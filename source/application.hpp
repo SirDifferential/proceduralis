@@ -12,6 +12,8 @@ private:
     ApplicationFlagsPtr applicationFlags;
     WorldPtr world;
     CL_ProgramPtr opencl;
+    GUIPtr gui;
+    TextRendererPtr textrenderer;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -31,6 +33,8 @@ public:
     ApplicationFlagsPtr getApplicationFlags();
     WorldPtr getWorld();
     CL_ProgramPtr getOpenCL();
+    GUIPtr getGUI();
+    TextRendererPtr getTextRenderer();
 };
 
 extern Application app;

@@ -3,6 +3,7 @@
 #include "applicationFlags.hpp"
 #include "toolbox.hpp"
 #include "world.hpp"
+#include "gui.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -242,6 +243,10 @@ void CL_Program::loadProgram()
         std::cout << "-OpenCL: Error setting kernel arguments: " << err.what() << ", " << err.err() << std::endl;
         print_errors("kernel.setArg", error);
     }
+
+    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
+    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("Frequency: ", *frequency);
+    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("Octaves: ", *octaves);
 }
 
 
@@ -316,6 +321,8 @@ void CL_Program::event1()
         std::cout << "!OpenCL: Error writing buffer at event 1: " << e.what() << ", " << e.err() << std::endl;
     }
     runKernel();
+
+    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
 }
 
 void CL_Program::event2()
@@ -330,6 +337,8 @@ void CL_Program::event2()
         std::cout << "!OpenCL: Error writing buffer at event 2: " << e.what() << ", " << e.err() << std::endl;
     }
     runKernel();
+
+    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
 }
 
 void CL_Program::event3()
@@ -344,6 +353,8 @@ void CL_Program::event3()
         std::cout << "!OpenCL: Error writing buffer at event 3: " << e.what() << ", " << e.err() << std::endl;
     }
     runKernel();
+
+    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
 }
 
 void CL_Program::event4()
@@ -358,6 +369,8 @@ void CL_Program::event4()
         std::cout << "!OpenCL: Error writing buffer at event 4: " << e.what() << ", " << e.err() << std::endl;
     }
     runKernel();
+
+    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
 }
 
 void CL_Program::event5()
@@ -372,6 +385,8 @@ void CL_Program::event5()
         std::cout << "!OpenCL: Error writing buffer at event 5: " << e.what() << ", " << e.err() << std::endl;
     }
     runKernel();
+
+    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
 }
 
 void CL_Program::event6()
@@ -386,6 +401,8 @@ void CL_Program::event6()
         std::cout << "!OpenCL: Error writing buffer at event 6: " << e.what() << ", " << e.err() << std::endl;
     }
     runKernel();
+
+    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
 }
 
 void CL_Program::event7()

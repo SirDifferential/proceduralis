@@ -7,6 +7,7 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
+#include <string>
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
@@ -17,6 +18,8 @@ class Toolbox;
 class EventHandler;
 class ApplicationFlags;
 class CL_Program;
+class GUI;
+class TextRenderer;
 
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
 typedef std::shared_ptr<sf::Image> ImagePtr;
@@ -29,3 +32,5 @@ typedef std::shared_ptr<World> WorldPtr;
 typedef std::shared_ptr<EventHandler> EventHandlerPtr;
 typedef std::shared_ptr<ApplicationFlags> ApplicationFlagsPtr;
 typedef std::shared_ptr<CL_Program> CL_ProgramPtr;
+typedef std::shared_ptr<GUI> GUIPtr;
+typedef std::shared_ptr<TextRenderer> TextRendererPtr;
