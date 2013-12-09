@@ -102,7 +102,7 @@ void CL_Program::loadProgram()
         std::cout << "+OpenCL: If this causes errors, switch to CPU by changing \"use_GPU\" to \"no\" in config.json" << std::endl;
         try
         {
-            context = cl::Context(CL_DEVICE_TYPE_GPU, properties, error);
+            context = cl::Context(CL_DEVICE_TYPE_GPU, properties);
         }
         catch (cl::Error e)
         {
@@ -113,7 +113,7 @@ void CL_Program::loadProgram()
             std::cout << "----------------------------------------" << std::endl;
             try
             {
-                context = cl::Context(CL_DEVICE_TYPE_CPU, properties, error);
+                context = cl::Context(CL_DEVICE_TYPE_CPU, properties);
                 std::cout << "+OpenCL: I was able to create a backup context using the CPU as OpenCL device" << std::endl;
                 std::cout << "+OpenCL: Consider tweaking your GPU drivers later so that the program runs faster." << std::endl;
                 app.getApplicationFlags()->use_GPU = false;
@@ -136,7 +136,7 @@ void CL_Program::loadProgram()
         std::cout << "+OpenCL: This can be done by changing \"use_GPU\" to \"yes\" in config.json" << std::endl;
         try
         {
-            context = cl::Context(CL_DEVICE_TYPE_CPU, properties, error);
+            context = cl::Context(CL_DEVICE_TYPE_CPU, properties);
         }
         catch (cl::Error e)
         {
@@ -147,7 +147,7 @@ void CL_Program::loadProgram()
             std::cout << "----------------------------------------" << std::endl;
             try
             {
-                context = cl::Context(CL_DEVICE_TYPE_GPU, properties, error);
+                context = cl::Context(CL_DEVICE_TYPE_GPU, properties);
             }
             catch (cl::Error e2)
             {
