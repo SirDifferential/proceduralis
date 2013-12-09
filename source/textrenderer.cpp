@@ -1,4 +1,4 @@
-#include "textRenderer.hpp"
+#include "textrenderer.hpp"
 #include "application.hpp"
 #include "renderer.hpp"
 #include <iostream>

@@ -19,6 +19,8 @@ private:
     float display_offset_x;
     float display_offset_y;
     float aspect_ratio;
+
+    SpritePtr splashSprite;
 public:
     Renderer();
 
@@ -29,6 +31,8 @@ public:
 
     void openWindow();
     void closeWindow();
+
+    void showSplash();
 
     void updateTitleFPS(int fps);
 	void OnWindowResize();

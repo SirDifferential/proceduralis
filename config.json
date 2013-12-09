@@ -6,6 +6,9 @@
     "title" : "Proceduralia",
     "show_fps" : "yes",
     
-    "gpu_device_debug" : "yes"
+    "gpu_device_debug" : "yes",
+    "use_GPU" : "yes",
+
+    "print_cl_programs" : "no"
 }
 

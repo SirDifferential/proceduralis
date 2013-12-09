@@ -15,6 +15,7 @@ private:
     GUIPtr gui;
     TextRendererPtr textrenderer;
     WorldGeneratorPtr worldgenerator;
+    DataStoragePtr datastorage;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -37,6 +38,7 @@ public:
     GUIPtr getGUI();
     TextRendererPtr getTextRenderer();
     WorldGeneratorPtr getWorldGenerator();
+    DataStoragePtr getDataStorage();
 };
 
 extern Application app;
