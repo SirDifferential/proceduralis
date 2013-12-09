@@ -7,6 +7,8 @@ public:
     ApplicationFlags();
 
     bool opencl_devices_debug;
+    bool use_GPU;
+    bool print_cl_programs;
 };
 
 #endif

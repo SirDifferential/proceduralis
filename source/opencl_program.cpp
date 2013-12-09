@@ -96,17 +96,84 @@ void CL_Program::loadProgram()
     device_used = 0;
 
     cl_context_properties properties[] = { CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0 };
-    context = cl::Context(CL_DEVICE_TYPE_GPU, properties);
+    if (app.getApplicationFlags()->use_GPU)
+    {
+        std::cout << "+OpenCL: Attempting to use GPU as OpenCL device" << std::endl;
+        std::cout << "+OpenCL: If this causes errors, switch to CPU by changing \"use_GPU\" to \"no\" in config.json" << std::endl;
+        try
+        {
+            context = cl::Context(CL_DEVICE_TYPE_GPU, properties, error);
+        }
+        catch (cl::Error e)
+        {
+            std::cout << "----------------------------------------" << std::endl;
+            std::cout << e.what() << ", " << e.err() << std::endl;
+            std::cout << "-OpenCL: Could not use GPU as OpenCL device. Most of the time this is due to GPU drivers not having the required functionality." << std::endl;
+            std::cout << "-OpenCL: I'm switching to CPU OpenCL. This is slower, but should work" << std::endl;
+            std::cout << "----------------------------------------" << std::endl;
+            try
+            {
+                context = cl::Context(CL_DEVICE_TYPE_CPU, properties, error);
+                std::cout << "+OpenCL: I was able to create a backup context using the CPU as OpenCL device" << std::endl;
+                std::cout << "+OpenCL: Consider tweaking your GPU drivers later so that the program runs faster." << std::endl;
+                app.getApplicationFlags()->use_GPU = false;
+            }
+            catch (cl::Error e2)
+            {
+                std::cout << "----------------------------------------" << std::endl;
+                std::cout << e.what() << ", " << e.err() << std::endl;
+                std::cout << "-OpenCL: I was not able to use CPU as a backup OpenCL device. Something real bad is going on.\nAborting.\nContact the software author!" << std::endl;
+                std::cout << "----------------------------------------" << std::endl;    
+            app.exit();
+                return;
+            }
+        }
+    }
+    else
+    {
+        std::cout << "+OpenCL: Attempting to use CPU as OpenCL device" << std::endl;
+        std::cout << "+OpenCL: If you have modern GPU drivers, please switch to GPU for better performance" << std::endl;
+        std::cout << "+OpenCL: This can be done by changing \"use_GPU\" to \"yes\" in config.json" << std::endl;
+        try
+        {
+            context = cl::Context(CL_DEVICE_TYPE_CPU, properties, error);
+        }
+        catch (cl::Error e)
+        {
+            std::cout << "----------------------------------------" << std::endl;
+            std::cout << e.what() << ", " << e.err() << std::endl;
+            std::cout << "-OpenCL: Error at creating context with CPU as OpenCL device" << std::endl;
+            std::cout << "-OpenCL: This should not happen, but it did. Trying GPU as a backup device" << std::endl;
+            std::cout << "----------------------------------------" << std::endl;
+            try
+            {
+                context = cl::Context(CL_DEVICE_TYPE_GPU, properties, error);
+            }
+            catch (cl::Error e2)
+            {
+                std::cout << "----------------------------------------" << std::endl;
+                std::cout << e2.what() << ", " << e.err() << std::endl;
+                std::cout << "-OpenCL: Using GPU as a backup device failed. This is probably due to problems with the GPU drivers" << std::endl;
+                std::cout << "-OpenCL: There were no OpenCL capable devices. The program cannot continue :(" << std::endl;
+                std::cout << "----------------------------------------" << std::endl;
+                app.exit();
+                return;
+            }
+        }
+    }
     devices = context.getInfo<CL_CONTEXT_DEVICES>();
-    std::cout << "+OpenCL: Devices available: " << devices.size();
+    std::cout << "+OpenCL: Devices available: " << devices.size() << std::endl;
 
     commandQueue = cl::CommandQueue(context, devices[device_used], 0, &error);
     print_errors("cl::CommandQueue", error);
 
     programSourceRaw = readSource(sourcepath);
 
-    std::cout << "+OpenCL: Kernel size: " << programSourceRaw.size() << std::endl;
-    std::cout << "+OpenCL: Kernel: " << programSourceRaw << std::endl;
+    if (app.getApplicationFlags()->print_cl_programs)
+    {
+        std::cout << "+OpenCL: Kernel size: " << programSourceRaw.size() << std::endl;
+        std::cout << "+OpenCL: Kernel: " << programSourceRaw << std::endl;
+    }
 
     try
     {

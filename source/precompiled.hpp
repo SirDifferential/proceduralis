@@ -11,6 +11,7 @@
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 class World;
 class Renderer;
@@ -20,10 +21,13 @@ class ApplicationFlags;
 class CL_Program;
 class GUI;
 class TextRenderer;
+class DataStorage;
 
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
 typedef std::shared_ptr<sf::Image> ImagePtr;
 typedef std::shared_ptr<sf::Texture> TexturePtr;
+typedef std::shared_ptr<sf::Sound> SoundPtr;
+typedef std::shared_ptr<sf::SoundBuffer> SoundBufferPtr;
 typedef std::shared_ptr<sf::RenderWindow> RenderWindowPtr;
 typedef std::shared_ptr<sf::View> ViewPtr;
 typedef std::shared_ptr<Renderer> RendererPtr;
@@ -34,3 +38,5 @@ typedef std::shared_ptr<ApplicationFlags> ApplicationFlagsPtr;
 typedef std::shared_ptr<CL_Program> CL_ProgramPtr;
 typedef std::shared_ptr<GUI> GUIPtr;
 typedef std::shared_ptr<TextRenderer> TextRendererPtr;
+typedef std::shared_ptr<DataStorage> DataStoragePtr;
+

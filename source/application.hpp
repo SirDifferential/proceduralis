@@ -14,6 +14,7 @@ private:
     CL_ProgramPtr opencl;
     GUIPtr gui;
     TextRendererPtr textrenderer;
+    DataStoragePtr datastorage;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -35,6 +36,7 @@ public:
     CL_ProgramPtr getOpenCL();
     GUIPtr getGUI();
     TextRendererPtr getTextRenderer();
+    DataStoragePtr getDataStorage();
 };
 
 extern Application app;

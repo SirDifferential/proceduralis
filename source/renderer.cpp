@@ -2,6 +2,7 @@
 #include "application.hpp"
 #include "toolbox.hpp"
 #include "gui.hpp"
+#include "datastorage.hpp"
 
 Renderer::Renderer()
 {
@@ -14,11 +15,19 @@ void Renderer::openWindow()
     renderWindow->setFramerateLimit(framerate);
 	main_view = ViewPtr(new sf::View(sf::FloatRect(0, 0, renderWindow->getSize().x/2,renderWindow->getSize().y/2)));
 	OnWindowResize();
+
+    splashSprite = app.getDataStorage()->loadAndGiveSprite("splashImage", "data/2D/splash.png");
 }
 
 void Renderer::closeWindow()
 {
     renderWindow->close();
+}
+
+void Renderer::showSplash()
+{
+    renderWindow->draw(*splashSprite);
+    renderWindow->display();
 }
 
 void Renderer::work()

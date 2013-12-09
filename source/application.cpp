@@ -8,6 +8,7 @@
 #include "world.hpp"
 #include "gui.hpp"
 #include "textrenderer.hpp"
+#include "datastorage.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -24,6 +25,7 @@ Application::Application()
     opencl = CL_ProgramPtr(new CL_Program("perlin.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
+    datastorage = DataStoragePtr(new DataStorage());
 }
 
 int Application::readConfig()
@@ -65,6 +67,16 @@ int Application::readConfig()
     else
         applicationFlags->opencl_devices_debug = false;
 
+    if (root["use_GPU"].asString() == "yes")
+        applicationFlags->use_GPU = true;
+    else
+        applicationFlags->use_GPU = false;
+
+    if (root["print_cl_programs"].asString() == "yes")
+        applicationFlags->print_cl_programs = true;
+    else
+        applicationFlags->print_cl_programs = false;
+
     configdata.close();
 
     std::cout << "+Application: Finished reading config" << std::endl;
@@ -81,6 +93,7 @@ int Application::run()
 
     renderer->openWindow();
     windowIsOpen = true;
+    renderer->showSplash();
 
     opencl->loadProgram();
     opencl->runKernel();
@@ -152,4 +165,10 @@ TextRendererPtr Application::getTextRenderer()
 {
     return textrenderer;
 }
+
+DataStoragePtr Application::getDataStorage()
+{
+    return datastorage;
+}
+
 
