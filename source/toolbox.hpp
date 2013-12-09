@@ -22,6 +22,7 @@ public:
     
     int giveRandomInt();
     int giveRandomInt(int min, int max);
+    float giveRandomFloat();
     
     bool fileExists(std::string path);
     

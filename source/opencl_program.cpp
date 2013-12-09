@@ -134,7 +134,7 @@ void CL_Program::loadProgram()
     
     try
     {
-        kernel = cl::Kernel(program, "perlinnoise", &error);
+        kernel = cl::Kernel(program, "simplexnoise", &error);
         print_errors("kernel()", error);
     }
     catch (cl::Error err)

@@ -29,6 +29,15 @@ int Toolbox::giveRandomInt()
     return rand();
 }
 
+/**
+* Returns a random float in range 0...1
+*/
+float Toolbox::giveRandomFloat()
+{
+    timesRandomized++;
+    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+}
+
 // Returns a random integer in range (min, max)
 int Toolbox::giveRandomInt(int min, int max)
 {

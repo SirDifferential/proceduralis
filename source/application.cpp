@@ -8,6 +8,7 @@
 #include "world.hpp"
 #include "gui.hpp"
 #include "textrenderer.hpp"
+#include "worldGenerator.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -21,9 +22,10 @@ Application::Application()
 	eventhandler = EventHandlerPtr(new EventHandler());
     applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
     world = WorldPtr(new World());
-    opencl = CL_ProgramPtr(new CL_Program("perlin.cl"));
+    opencl = CL_ProgramPtr(new CL_Program("simplex.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
+    worldgenerator = WorldGeneratorPtr(new WorldGenerator());
 }
 
 int Application::readConfig()
@@ -84,6 +86,7 @@ int Application::run()
 
     opencl->loadProgram();
     opencl->runKernel();
+    //worldgenerator->generate();
 
     while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
     {
@@ -151,5 +154,10 @@ GUIPtr Application::getGUI()
 TextRendererPtr Application::getTextRenderer()
 {
     return textrenderer;
+}
+
+WorldGeneratorPtr Application::getWorldGenerator()
+{
+    return worldgenerator;
 }
 

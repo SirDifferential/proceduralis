@@ -12,6 +12,7 @@ private:
 public:
     World();
     void setWorld(float* buffer, unsigned int width, unsigned int height);
+    void setWorld(float** buffer, unsigned int width, unsigned int height);
 
     void draw();
     void work();

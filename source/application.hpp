@@ -14,6 +14,7 @@ private:
     CL_ProgramPtr opencl;
     GUIPtr gui;
     TextRendererPtr textrenderer;
+    WorldGeneratorPtr worldgenerator;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -35,6 +36,7 @@ public:
     CL_ProgramPtr getOpenCL();
     GUIPtr getGUI();
     TextRendererPtr getTextRenderer();
+    WorldGeneratorPtr getWorldGenerator();
 };
 
 extern Application app;

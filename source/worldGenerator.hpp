@@ -8,6 +8,7 @@ public:
     WorldGenerator();
 
     void generate();
+    float** diamondSquare();
 };
 
 #endif

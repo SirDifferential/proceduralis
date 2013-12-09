@@ -42,6 +42,37 @@ void World::setWorld(float* buffer, unsigned int width, unsigned int height)
     
 }
 
+void World::setWorld(float** buffer, unsigned int width, unsigned int height)
+{
+    heightmap.reset();
+    heightmap_texture.reset();
+    heightmap_image.reset();
+
+    heightmap_image = ImagePtr(new sf::Image());
+    heightmap_image->create(width, height);
+    sf::Color c;
+
+    for (int x = 0; x < width; x++)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            c.r = buffer[x][y] * 255;
+            c.g = c.r;
+            c.b = c.r;
+            c.a = 255;
+            heightmap_image->setPixel(x, y, c);
+        }
+    }
+
+    
+    heightmap_texture = TexturePtr(new sf::Texture());
+    heightmap_texture->create(width, height);
+    heightmap_texture->update(*heightmap_image);
+    
+    heightmap = SpritePtr(new sf::Sprite());
+    heightmap->setTexture(*heightmap_texture);
+}
+
 void World::draw()
 {
     app.getRenderer()->getRenderWindow()->draw(*heightmap);
