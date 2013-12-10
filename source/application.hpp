@@ -16,6 +16,7 @@ private:
     TextRendererPtr textrenderer;
     WorldGeneratorPtr worldgenerator;
     DataStoragePtr datastorage;
+    SpriteUtilsPtr spriteutils;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -39,6 +40,7 @@ public:
     TextRendererPtr getTextRenderer();
     WorldGeneratorPtr getWorldGenerator();
     DataStoragePtr getDataStorage();
+    SpriteUtilsPtr getSpriteUtils();
 };
 
 extern Application app;

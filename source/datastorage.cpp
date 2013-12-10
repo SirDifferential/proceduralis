@@ -77,6 +77,25 @@ int DataStorage::storeSprite(std::string name, std::shared_ptr<sf::Sprite> s)
 }
 
 /**
+* Stores an existing iamge in the imageContainer
+*/
+int DataStorage::storeImage(std::string name, std::shared_ptr<sf::Image> i)
+{
+    imageContainer[name] = i;
+    return 0;
+}
+
+/**
+* Stores an existing texture in the textureContainer
+*/
+int DataStorage::storeTexture(std::string name, std::shared_ptr<sf::Texture> t)
+{
+    textureContainer[name] = t;
+    return 0;
+}
+
+
+/**
 * Loads a new texture from the filepath, and stores it in texture map by name
 * Returns a SpritePtr containing the entire texture
 */
@@ -183,4 +202,42 @@ SoundPtr DataStorage::getSound(std::string name)
     }
     return iter->second;
 }
+
+/**
+* Returns a shared_ptr<sf::Image> to a loaded image
+* or nullptr if not found
+*/
+ImagePtr DataStorage::getImage(std::string name)
+{
+    auto iter = imageContainer.find(name);
+    if (iter == imageContainer.end())
+    {
+        std::cout << "-DataStorage: Can't find image in map: " << name << std::endl;
+        return nullptr;
+    }
+    return iter->second;
+}
+
+
+void DataStorage::deleteImage(std::string name)
+{
+    auto iter = imageContainer.find(name);
+    if (iter != imageContainer.end())
+        imageContainer.erase(iter);
+}
+
+void DataStorage::deleteTexture(std::string name)
+{
+    auto iter = textureContainer.find(name);
+    if (iter != textureContainer.end())
+        textureContainer.erase(iter);
+}
+
+void DataStorage::deleteSprite(std::string name)
+{
+    auto iter = spriteContainer.find(name);
+    if (iter != spriteContainer.end())
+        spriteContainer.erase(iter);
+}
+
 

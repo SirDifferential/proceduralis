@@ -4,6 +4,8 @@
 #include "toolbox.hpp"
 #include "world.hpp"
 #include "gui.hpp"
+#include "spriteutils.hpp"
+#include "datastorage.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -201,7 +203,7 @@ void CL_Program::loadProgram()
     
     try
     {
-        kernel = cl::Kernel(program, "simplexnoise", &error);
+        kernel = cl::Kernel(program, "perlinnoise", &error);
         print_errors("kernel()", error);
     }
     catch (cl::Error err)
@@ -239,7 +241,7 @@ void CL_Program::loadProgram()
         image_buffer_in[i-1] = (x / 1024.0f) + (y / 1024.0f);
         image_buffer_in[i] = 1.0f;
         */
-
+        
         /*
         // Checker
         if (x % 2 == 0)
@@ -316,11 +318,8 @@ void CL_Program::loadProgram()
     app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("Octaves: ", *octaves);
 }
 
-
-void CL_Program::runKernel()
+void CL_Program::runKernel(bool write_output, SpritePtr target)
 {
-    //std::cout << "+OpenCL: Kernel running" << std::endl;
-
     error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
     print_errors("commandQueue.enqueueNDRangeKernel", error);
 
@@ -331,14 +330,12 @@ void CL_Program::runKernel()
     //error = commandQueue.enqueueReadBuffer(*image_b, CL_TRUE, 0, sizeof(float) * num *num, b_done, NULL, &event);
     print_errors("commandQueue.enqueueReadImage", error);
 
-    /*
-    for (int i = 0; i < 8*8*4; i++)
+    if (write_output == false || target == nullptr)
     {
-        std::cout << "map_done[" << i << "] = " << map_done[i] << std::endl;
+        delete[] map_done;
+        return;
     }
-    */
-
-    app.getWorld()->setWorld(map_done, 1024, 1024);
+    app.getSpriteUtils()->setPixels(target, "heightmap", map_done, 1024, 1024);
 
     delete[] map_done;
 }
@@ -376,6 +373,11 @@ void CL_Program::cleanup()
     delete octaves;
 }
 
+void CL_Program::standard_kernel()
+{
+    runKernel(true, app.getDataStorage()->getSprite("heightmap"));
+}
+
 void CL_Program::event1()
 {
     *persistence += 0.1f;
@@ -387,7 +389,7 @@ void CL_Program::event1()
     {
         std::cout << "!OpenCL: Error writing buffer at event 1: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
+    standard_kernel();
 
     app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
 }
@@ -403,7 +405,7 @@ void CL_Program::event2()
     {
         std::cout << "!OpenCL: Error writing buffer at event 2: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
+    standard_kernel();
 
     app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
 }
@@ -419,7 +421,7 @@ void CL_Program::event3()
     {
         std::cout << "!OpenCL: Error writing buffer at event 3: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
+    standard_kernel();
 
     app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
 }
@@ -435,7 +437,7 @@ void CL_Program::event4()
     {
         std::cout << "!OpenCL: Error writing buffer at event 4: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
+    standard_kernel();
 
     app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
 }
@@ -451,7 +453,7 @@ void CL_Program::event5()
     {
         std::cout << "!OpenCL: Error writing buffer at event 5: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
+    standard_kernel();
 
     app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
 }
@@ -467,7 +469,7 @@ void CL_Program::event6()
     {
         std::cout << "!OpenCL: Error writing buffer at event 6: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
+    standard_kernel();
 
     app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
 }
@@ -479,3 +481,5 @@ void CL_Program::event7()
 void CL_Program::event8()
 {
 }
+
+

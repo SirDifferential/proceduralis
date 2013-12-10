@@ -23,6 +23,7 @@ class GUI;
 class TextRenderer;
 class WorldGenerator;
 class DataStorage;
+class SpriteUtils;
 
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
 typedef std::shared_ptr<sf::Image> ImagePtr;
@@ -41,3 +42,5 @@ typedef std::shared_ptr<GUI> GUIPtr;
 typedef std::shared_ptr<TextRenderer> TextRendererPtr;
 typedef std::shared_ptr<WorldGenerator> WorldGeneratorPtr;
 typedef std::shared_ptr<DataStorage> DataStoragePtr;
+typedef std::shared_ptr<SpriteUtils> SpriteUtilsPtr;
+

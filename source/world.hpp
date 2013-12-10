@@ -8,12 +8,11 @@ class World
 private:
     TexturePtr heightmap_texture;
     ImagePtr heightmap_image;
-    SpritePtr heightmap;
 public:
     World();
-    void setWorld(float* buffer, unsigned int width, unsigned int height);
-    void setWorld(float** buffer, unsigned int width, unsigned int height);
+    SpritePtr getWorld();
 
+    void init();
     void draw();
     void work();
 };

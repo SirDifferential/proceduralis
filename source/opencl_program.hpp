@@ -2,6 +2,7 @@
 #define __OPENCL_PROGRAM_HPP_
 
 #include "cl.hpp"
+#include "precompiled.hpp"
 
 class CL_Program
 {
@@ -51,7 +52,8 @@ public:
 
     char* readSource(std::string file_path);
     void loadProgram();
-    void runKernel();
+    void runKernel(bool write_output, SpritePtr target);
+    void standard_kernel();
 
     void print_errors(std::string function, cl_int error);
     void printPlatformInfo(cl::Platform p);

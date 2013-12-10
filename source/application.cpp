@@ -10,6 +10,7 @@
 #include "textrenderer.hpp"
 #include "worldGenerator.hpp"
 #include "datastorage.hpp"
+#include "spriteutils.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -23,11 +24,12 @@ Application::Application()
 	eventhandler = EventHandlerPtr(new EventHandler());
     applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
     world = WorldPtr(new World());
-    opencl = CL_ProgramPtr(new CL_Program("simplex.cl"));
+    opencl = CL_ProgramPtr(new CL_Program("perlin.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
     datastorage = DataStoragePtr(new DataStorage());
+    spriteutils = SpriteUtilsPtr(new SpriteUtils());
 }
 
 int Application::readConfig()
@@ -97,8 +99,10 @@ int Application::run()
     windowIsOpen = true;
     renderer->showSplash();
 
+    world->init();
+
     opencl->loadProgram();
-    opencl->runKernel();
+    opencl->runKernel(true, datastorage->getSprite("heightmap"));
     //worldgenerator->generate();
 
     while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
@@ -178,3 +182,9 @@ DataStoragePtr Application::getDataStorage()
 {
     return datastorage;
 }
+
+SpriteUtilsPtr Application::getSpriteUtils()
+{
+    return spriteutils;
+}
+
