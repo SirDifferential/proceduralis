@@ -46,7 +46,15 @@ private:
     float* persistence;
     int* octaves;
     
+    float* input_data_x;
+    float* input_data_y;
+    int* data_points;
+    float* colors;
 
+    cl::Buffer cl_data_points;
+    cl::Buffer cl_input_a;
+    cl::Buffer cl_input_b;
+    cl::Buffer cl_colors;
 public:
     CL_Program(std::string s);
 

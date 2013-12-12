@@ -203,7 +203,7 @@ void CL_Program::loadProgram()
     
     try
     {
-        kernel = cl::Kernel(program, "perlinnoise", &error);
+        kernel = cl::Kernel(program, "voronoi", &error);
         print_errors("kernel()", error);
     }
     catch (cl::Error err)
@@ -219,6 +219,7 @@ void CL_Program::loadProgram()
     
 
     int image_size = 1024*1024*4;
+    /*
     image_buffer_in = new float[image_size];
     if (image_buffer_in == NULL)
         std::cout << "no go" << std::endl;
@@ -234,15 +235,15 @@ void CL_Program::loadProgram()
             x = 0;
         }
 
-        /*
+        
         // Gradient
         image_buffer_in[i-3] = (x / 1024.0f) + (y / 1024.0f);
         image_buffer_in[i-2] = (x / 1024.0f) + (y / 1024.0f);
         image_buffer_in[i-1] = (x / 1024.0f) + (y / 1024.0f);
         image_buffer_in[i] = 1.0f;
-        */
         
-        /*
+        
+        
         // Checker
         if (x % 2 == 0)
             value = 1.0f;
@@ -252,7 +253,7 @@ void CL_Program::loadProgram()
         image_buffer_in[i-2] = value;
         image_buffer_in[i-1] = value;
         image_buffer_in[i] = 1.0f;
-        */
+        
 
         // Random values
         value = app.getToolbox()->giveRandomInt(1, 255) / 255.0f;
@@ -262,6 +263,7 @@ void CL_Program::loadProgram()
         image_buffer_in[i] = 1.0f;
         
     }
+    */
     image_buffer_out = new float[image_size];
     row_pitch = 1024 * 4 * sizeof(float);
     origin.push_back(0);
@@ -272,13 +274,31 @@ void CL_Program::loadProgram()
     region.push_back(1024);
     region.push_back(1);
 
-    try
+    data_points = new int();
+    *data_points = 20;
+    input_data_x = new float[*data_points];
+    input_data_y = new float[*data_points];
+    colors = new float[*data_points];
+    for (int i = 0; i < *data_points; i++)
     {
-        image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
+        input_data_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
+        input_data_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
+        colors[i] = app.getToolbox()->giveRandomInt(0, 255);
+    }
+
+    size_t array_size = sizeof(float) * *data_points;
+    
+    try
+    {    
+        //image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
         image_b = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format, 1024, 1024, 0);
-        cl_frequency = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
-        cl_persistence = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
-        cl_octaves = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &error);
+        //cl_frequency = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
+        //cl_persistence = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
+        //cl_octaves = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &error);
+        cl_input_a = cl::Buffer(context, CL_MEM_READ_WRITE, array_size, NULL, &error);
+        cl_input_b = cl::Buffer(context, CL_MEM_READ_WRITE, array_size, NULL, &error);
+        cl_colors = cl::Buffer(context, CL_MEM_READ_WRITE, array_size, NULL, &error);
+        cl_data_points = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &error);
     }
     catch (cl::Error e)
     {
@@ -287,11 +307,15 @@ void CL_Program::loadProgram()
 
     try
     {
-        error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
-        error = commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
-        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
-        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
-        error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
+        //error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
+         error = commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
+        //error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
+        //error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
+        //error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_input_a, CL_TRUE, 0, array_size, input_data_x, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_input_b, CL_TRUE, 0, array_size, input_data_y, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_colors, CL_TRUE, 0, array_size, colors, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_data_points, CL_TRUE, 0, sizeof(int), data_points, NULL, &event);
     }
     catch (cl::Error e)
     {
@@ -301,11 +325,12 @@ void CL_Program::loadProgram()
 
     try
     {
-        error = kernel.setArg(0, *image_a);
-        error = kernel.setArg(1, *image_b);
-        error = kernel.setArg(2, cl_frequency);
-        error = kernel.setArg(3, cl_persistence);
-        error = kernel.setArg(4, cl_octaves);
+        //error = kernel.setArg(0, *image_a);
+        error = kernel.setArg(0, cl_input_a);
+        error = kernel.setArg(1, cl_input_b);
+        error = kernel.setArg(2, cl_colors);
+        error = kernel.setArg(3, cl_data_points);
+        error = kernel.setArg(4, *image_b);
     }
     catch (cl::Error err)
     {

@@ -1,54 +1,41 @@
-float blurred_value(int2 coord, __read_only image2d_t input_data)
+float interpolate(float x0, float x1, float alpha)
 {
-    const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+    float interpolation = x0 * (1.0 - alpha) + alpha * x1;
+    return interpolation;
+}
 
+float perlinnoise(int2 coord, __read_only image2d_t input_data, int octave)
+{
     
-    int2 tl = (int2)(coord.x-1, coord.y+1);
-    //int2 ml = (int2)(coord.x-1, coord.y);
-    //int2 bl = (int2)(coord.x-1, coord.y-1);
-    //int2 tm = (int2)(coord.x, coord.y+1);
-    //int2 bm = (int2)(coord.x, coord.y-1);
-    //int2 tr = (int2)(coord.x+1, coord.y+1);
-    //int2 mr = (int2)(coord.x+1, coord.y);
-    //int2 br = (int2)(coord.x+1, coord.y-1);
+    const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
     
-    int blur_size = 3;
-    float sum = 0.0f;
+    float final_noise = 0.0f;
+
+    int x = coord.x;
+    int y = coord.y;
     
-    for (int a = -blur_size; a < blur_size; a++)
-    {
-        for (int b = -blur_size; b < blur_size; b++)
-        {
-            int2 coords = (int2)(coord.x + a, coord.y + b);
-            sum += read_imagef(input_data, sampler, coords).x;
-        }
-    }
-    
-    float out = sum / 49.0f;
-    
+    int greatest_multiple_x = (coord.x / 32) * 32;
+    int greatest_multiple_y = (coord.y / 32) * 32;
+    int2 coords = (int2)(greatest_multiple_x, greatest_multiple_y);
+    float out = read_imagef(input_data, sampler, coords).x;
     
     return out;
 }
 
-__kernel void simple_world(__read_only image2d_t random_values, __write_only image2d_t heightmap)
+__kernel void simple_world(__read_only image2d_t input_map, __write_only image2d_t output_map)
 {
-    const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+    const sampler_t sampler = CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
     int x = get_global_id(0);
 	int y = get_global_id(1);
 	
 	int2 coord = (int2) (x, y);
     
-    float b = blurred_value(coord, random_values);
+    float a = perlinnoise(coord, input_map, 1);
     float4 outvalue;
-    outvalue.x = b;
-    outvalue.y = b;
-    outvalue.z = b;
+    outvalue.x = a;
+    outvalue.y = a;
+    outvalue.z = a;
     outvalue.w = 1.0f;
     
-    float4 pixel = read_imagef(random_values, sampler, coord);
-    //pixel.x = 0.2;
-    //pixel.y = 0.5;
-    //pixel.z = 0.8;
-    //pixel.w = 1.0f;
-    write_imagef(heightmap, coord, outvalue);
+    write_imagef(output_map, coord, outvalue);
 }

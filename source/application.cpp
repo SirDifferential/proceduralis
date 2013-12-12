@@ -24,7 +24,7 @@ Application::Application()
 	eventhandler = EventHandlerPtr(new EventHandler());
     applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
     world = WorldPtr(new World());
-    opencl = CL_ProgramPtr(new CL_Program("perlin.cl"));
+    opencl = CL_ProgramPtr(new CL_Program("voronoi.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
@@ -101,9 +101,9 @@ int Application::run()
 
     world->init();
 
-    //opencl->loadProgram();
-    //opencl->runKernel(true, datastorage->getSprite("heightmap"));
-    world->setWorld(worldgenerator->voronoi());
+    opencl->loadProgram();
+    opencl->runKernel(true, datastorage->getSprite("heightmap"));
+    //world->setWorld(worldgenerator->voronoi());
 
     while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
     {
