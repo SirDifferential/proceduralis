@@ -15,6 +15,8 @@ public:
     void init();
     void draw();
     void work();
+
+    void setWorld(ImagePtr image);
 };
 
 #endif

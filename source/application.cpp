@@ -101,9 +101,9 @@ int Application::run()
 
     world->init();
 
-    opencl->loadProgram();
-    opencl->runKernel(true, datastorage->getSprite("heightmap"));
-    //worldgenerator->generate();
+    //opencl->loadProgram();
+    //opencl->runKernel(true, datastorage->getSprite("heightmap"));
+    world->setWorld(worldgenerator->voronoi());
 
     while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
     {
