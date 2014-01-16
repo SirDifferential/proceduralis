@@ -31,11 +31,30 @@ __kernel void voronoi(__global float* voronoi_points_x, __global float* voronoi_
         }
     }
     
-	float out = colors[voronoi_cell];
+	float voronoi_color = colors[voronoi_cell];
 	float4 outvalue;
-	outvalue.x = out;
-	outvalue.y = out;
-	outvalue.z = out;
+	outvalue.x = voronoi_color;
+    
+    // Now see to which superregion this point belongs
+    
+    dmin = myhypot(1023, 1023);
+    d = 0.0f;
+    int super_cell = 0;
+    
+    for (int i = 0; i < *supercount; i++)
+    {
+        d = myhypot(superregions_x[i]-x, superregions_y[i]-y);
+        if (d < dmin)
+        {
+            dmin = d;
+            super_cell = i;
+        }
+    }
+    
+    float supercol = supercolors[super_cell];
+    
+	outvalue.y = supercol;
+	outvalue.z = 0.0f;
 	outvalue.w = 1.0f;
 	write_imagef(heightmap, coord, outvalue);
 }

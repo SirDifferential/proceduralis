@@ -91,6 +91,7 @@ void CL_Voronoi::loadProgram()
         cl_superregions_x = cl::Buffer(context, CL_MEM_READ_WRITE, superregions_size, NULL, &error);
         cl_superregions_y = cl::Buffer(context, CL_MEM_READ_WRITE, superregions_size, NULL, &error);
         cl_superregions = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &error);
+        cl_superregion_colors = cl::Buffer(context, CL_MEM_READ_WRITE, superregions_size, NULL, &error);
     }
     catch (cl::Error e)
     {
