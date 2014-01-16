@@ -64,7 +64,7 @@ void CL_Voronoi::loadProgram()
     {
         voronoi_points_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         voronoi_points_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        colors[i] = app.getToolbox()->giveRandomInt(0, 255);
+        colors[i] = app.getToolbox()->giveRandomInt(0, 10) * 0.1f;
     }
 
     // Then choose a few random points and make these the cores of some larger regions
@@ -75,7 +75,7 @@ void CL_Voronoi::loadProgram()
     {
         superregions_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         superregions_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        superregion_colors[i] = app.getToolbox()->giveRandomInt(0, 255);
+        superregion_colors[i] = app.getToolbox()->giveRandomInt(1, 5) * 0.1f;
     }
 
     size_t voronoi_points_size = sizeof(float) * *data_points;

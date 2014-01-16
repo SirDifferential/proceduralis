@@ -34,14 +34,32 @@ void WorldGenerator::formSuperRegions()
         app.getDataStorage()->storeImage("heightmap", heightmap);
     }
 
-    sf::Color temp;
+    sf::Color temp1;
+    sf::Color temp2;
+    sf::Color temp3;
+    sf::Color temp4;
 
     for (int i = 0; i < cells->getSize().x; i++)
     {
         for (int j = 0; j < cells->getSize().y; j++)
         {
-            temp = cells->getPixel(i, j) * perlin->getPixel(i, j);
-            heightmap->setPixel(i, j, temp);
+            temp1 = perlin->getPixel(i, j);
+            temp2 = cells->getPixel(i, j);
+            if (temp2.g == 0)
+                temp2.g = 1;
+            temp3.r = (0.5*temp1.r) + (2*temp2.g);
+            temp3.g = temp1.r * (temp2.r*2);
+            temp3.b = temp3.r;
+            if (temp2.r == 0)
+                temp2.r = 1;
+            //temp3.g = temp1.r * temp2.r;
+            //temp3.b = temp1.r;
+            
+            temp4.r = (temp3.r + temp3.g + temp3.b) / 3;
+            temp4.g = temp4.r;
+            temp4.b = temp4.r;
+            temp4.a = 255;
+            heightmap->setPixel(i, j, temp4);
         }
     }
 
