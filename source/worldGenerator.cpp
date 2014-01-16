@@ -20,7 +20,7 @@ ImagePtr WorldGenerator::voronoi()
 {
     ImagePtr out = ImagePtr(new sf::Image());
     out->create(1024, 1024);
-    int number_of_cells = 20;
+    int number_of_cells = 200;
     std::vector<int> nx;
     std::vector<int> ny;
     std::vector<int> nr;

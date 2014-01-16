@@ -28,22 +28,31 @@ void EventHandler::checkEvents()
                 switch (e.key.code)
                 {
                     case sf::Keyboard::A:
-                        app.getOpenCL()->event1();
+                        app.getCurrentCLProgram()->event1();
                         break;
                     case sf::Keyboard::S:
-                        app.getOpenCL()->event2();
+                        app.getCurrentCLProgram()->event2();
                         break;
                     case sf::Keyboard::Q:
-                        app.getOpenCL()->event3();
+                        app.getCurrentCLProgram()->event3();
                         break;
                     case sf::Keyboard::W:
-                        app.getOpenCL()->event4();
+                        app.getCurrentCLProgram()->event4();
                         break;
                     case sf::Keyboard::Z:
-                        app.getOpenCL()->event5();
+                        app.getCurrentCLProgram()->event5();
                         break;
                     case sf::Keyboard::X:
-                        app.getOpenCL()->event6();
+                        app.getCurrentCLProgram()->event6();
+                        break;
+                    case sf::Keyboard::Num1:
+                        app.setProgram(0);
+                        break;
+                    case sf::Keyboard::Num2:
+                        app.setProgram(1);
+                        break;
+                    case sf::Keyboard::Num3:
+                        app.setProgram(2);
                         break;
                     case sf::Keyboard::Escape:
                         app.exit();

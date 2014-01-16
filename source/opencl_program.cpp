@@ -18,9 +18,6 @@
 CL_Program::CL_Program(std::string filepath)
 {
     sourcepath = filepath;
-    frequency = new float(0.4f);
-    persistence = new float(1.3f);
-    octaves = new int(10);
 }
 
 char* CL_Program::readSource(std::string filename)
@@ -200,169 +197,6 @@ void CL_Program::loadProgram()
     std::cout << "Build status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
     std::cout << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;
     std::cout << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
-    
-    try
-    {
-        kernel = cl::Kernel(program, "voronoi", &error);
-        print_errors("kernel()", error);
-    }
-    catch (cl::Error err)
-    {
-        std::cout << "-OpenCL Exception: " << err.what() << ", " << err.err() << std::endl;
-        print_errors("kernel()", error);
-    }
-
-    cl::ImageFormat format;
-
-    format.image_channel_data_type = CL_FLOAT;
-    format.image_channel_order = CL_RGBA;
-    
-
-    int image_size = 1024*1024*4;
-    /*
-    image_buffer_in = new float[image_size];
-    if (image_buffer_in == NULL)
-        std::cout << "no go" << std::endl;
-    int x = -1;
-    int y = 0;
-    float value = 0.0f;
-    for (int i = 3; i < 1024*1024*4; i += 4)
-    {
-        x += 1;
-        if (x == 1024)
-        {
-            y += 1;
-            x = 0;
-        }
-
-        
-        // Gradient
-        image_buffer_in[i-3] = (x / 1024.0f) + (y / 1024.0f);
-        image_buffer_in[i-2] = (x / 1024.0f) + (y / 1024.0f);
-        image_buffer_in[i-1] = (x / 1024.0f) + (y / 1024.0f);
-        image_buffer_in[i] = 1.0f;
-        
-        
-        
-        // Checker
-        if (x % 2 == 0)
-            value = 1.0f;
-        else
-            value = 0.0f;
-        image_buffer_in[i-3] = value;
-        image_buffer_in[i-2] = value;
-        image_buffer_in[i-1] = value;
-        image_buffer_in[i] = 1.0f;
-        
-
-        // Random values
-        value = app.getToolbox()->giveRandomInt(1, 255) / 255.0f;
-        image_buffer_in[i-3] = value;
-        image_buffer_in[i-2] = value;
-        image_buffer_in[i-1] = value;
-        image_buffer_in[i] = 1.0f;
-        
-    }
-    */
-    image_buffer_out = new float[image_size];
-    row_pitch = 1024 * 4 * sizeof(float);
-    origin.push_back(0);
-    origin.push_back(0);
-    origin.push_back(0);
-
-    region.push_back(1024);
-    region.push_back(1024);
-    region.push_back(1);
-
-    data_points = new int();
-    *data_points = 20;
-    input_data_x = new float[*data_points];
-    input_data_y = new float[*data_points];
-    colors = new float[*data_points];
-    for (int i = 0; i < *data_points; i++)
-    {
-        input_data_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        input_data_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        colors[i] = app.getToolbox()->giveRandomInt(0, 255);
-    }
-
-    size_t array_size = sizeof(float) * *data_points;
-    
-    try
-    {    
-        //image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
-        image_b = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format, 1024, 1024, 0);
-        //cl_frequency = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
-        //cl_persistence = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &error);
-        //cl_octaves = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &error);
-        cl_input_a = cl::Buffer(context, CL_MEM_READ_WRITE, array_size, NULL, &error);
-        cl_input_b = cl::Buffer(context, CL_MEM_READ_WRITE, array_size, NULL, &error);
-        cl_colors = cl::Buffer(context, CL_MEM_READ_WRITE, array_size, NULL, &error);
-        cl_data_points = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &error);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error at creating buffers: " << e.what() << ", " << e.err() << std::endl;
-    }
-
-    try
-    {
-        //error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
-         error = commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
-        //error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
-        //error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
-        //error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
-        error = commandQueue.enqueueWriteBuffer(cl_input_a, CL_TRUE, 0, array_size, input_data_x, NULL, &event);
-        error = commandQueue.enqueueWriteBuffer(cl_input_b, CL_TRUE, 0, array_size, input_data_y, NULL, &event);
-        error = commandQueue.enqueueWriteBuffer(cl_colors, CL_TRUE, 0, array_size, colors, NULL, &event);
-        error = commandQueue.enqueueWriteBuffer(cl_data_points, CL_TRUE, 0, sizeof(int), data_points, NULL, &event);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error pushing data in the device buffers: " << e.what() << ", " << e.err() << std::endl;
-        print_errors("commandQueue.enqueueWriteBuffer", error);
-    }
-
-    try
-    {
-        //error = kernel.setArg(0, *image_a);
-        error = kernel.setArg(0, cl_input_a);
-        error = kernel.setArg(1, cl_input_b);
-        error = kernel.setArg(2, cl_colors);
-        error = kernel.setArg(3, cl_data_points);
-        error = kernel.setArg(4, *image_b);
-    }
-    catch (cl::Error err)
-    {
-        std::cout << "-OpenCL: Error setting kernel arguments: " << err.what() << ", " << err.err() << std::endl;
-        print_errors("kernel.setArg", error);
-    }
-
-    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
-    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("Frequency: ", *frequency);
-    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("Octaves: ", *octaves);
-}
-
-void CL_Program::runKernel(bool write_output, SpritePtr target)
-{
-    error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
-    print_errors("commandQueue.enqueueNDRangeKernel", error);
-
-    commandQueue.finish();
-
-    float* map_done = new float[1024*1024*4];
-    error = commandQueue.enqueueReadImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, map_done);
-    //error = commandQueue.enqueueReadBuffer(*image_b, CL_TRUE, 0, sizeof(float) * num *num, b_done, NULL, &event);
-    print_errors("commandQueue.enqueueReadImage", error);
-
-    if (write_output == false || target == nullptr)
-    {
-        delete[] map_done;
-        return;
-    }
-    app.getSpriteUtils()->setPixels(target, "heightmap", map_done, 1024, 1024);
-
-    delete[] map_done;
 }
 
 void CL_Program::printPlatformInfo(cl::Platform p)
@@ -389,122 +223,21 @@ void CL_Program::printPlatformInfo(cl::Platform p)
 
 void CL_Program::cleanup()
 {
-    delete[] a;
-    delete[] b;
-    delete[] image_buffer_in;
-    delete[] image_buffer_out;
-    delete frequency;
-    delete persistence;
-    delete octaves;
 }
 
-void CL_Program::standard_kernel()
+void CL_Program::setOutputTarget(SpritePtr s)
 {
-    runKernel(true, app.getDataStorage()->getSprite("heightmap"));
+    outputTarget = s;
 }
 
-void CL_Program::event1()
-{
-    *persistence += 0.1f;
-    try
-    {
-        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error writing buffer at event 1: " << e.what() << ", " << e.err() << std::endl;
-    }
-    standard_kernel();
+void CL_Program::event1() { }
+void CL_Program::event2() { }
+void CL_Program::event3() { }
+void CL_Program::event4() { }
+void CL_Program::event5() { }
+void CL_Program::event6() { }
+void CL_Program::event7() { }
+void CL_Program::event8() { }
+void CL_Program::event9() { }
 
-    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
-}
-
-void CL_Program::event2()
-{
-    *persistence -= 0.1f;
-    try
-    {
-        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error writing buffer at event 2: " << e.what() << ", " << e.err() << std::endl;
-    }
-    standard_kernel();
-
-    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
-}
-
-void CL_Program::event3()
-{
-    *frequency += 0.1f;
-    try
-    {
-        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error writing buffer at event 3: " << e.what() << ", " << e.err() << std::endl;
-    }
-    standard_kernel();
-
-    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
-}
-
-void CL_Program::event4()
-{
-    *frequency -= 0.1f;
-    try
-    {
-        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error writing buffer at event 4: " << e.what() << ", " << e.err() << std::endl;
-    }
-    standard_kernel();
-
-    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
-}
-
-void CL_Program::event5()
-{
-    *octaves += 1;
-    try
-    {
-        error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error writing buffer at event 5: " << e.what() << ", " << e.err() << std::endl;
-    }
-    standard_kernel();
-
-    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
-}
-
-void CL_Program::event6()
-{
-    *octaves -= 1;
-    try
-    {
-        error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
-    }
-    catch (cl::Error e)
-    {
-        std::cout << "!OpenCL: Error writing buffer at event 6: " << e.what() << ", " << e.err() << std::endl;
-    }
-    standard_kernel();
-
-    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
-}
-
-void CL_Program::event7()
-{
-}
-
-void CL_Program::event8()
-{
-}
-
-
+std::string CL_Program::getSourceName() { return sourcepath; }

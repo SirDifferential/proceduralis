@@ -155,13 +155,19 @@
   <ItemGroup>
     <ClInclude Include="source\application.hpp" />
     <ClInclude Include="source\cl.hpp" />
+    <ClInclude Include="source\cl_perlin.hpp" />
+    <ClInclude Include="source\cl_voronoi.hpp" />
+    <ClInclude Include="source\datastorage.hpp" />
     <ClInclude Include="source\eventhandler.hpp" />
     <ClInclude Include="source\applicationFlags.hpp" />
+    <ClInclude Include="source\gui.hpp" />
     <ClInclude Include="source\json\json-forwards.h" />
     <ClInclude Include="source\json\json.h" />
     <ClInclude Include="source\opencl_program.hpp" />
     <ClInclude Include="source\precompiled.hpp" />
     <ClInclude Include="source\renderer.hpp" />
+    <ClInclude Include="source\spriteutils.hpp" />
+    <ClInclude Include="source\textrenderer.hpp" />
     <ClInclude Include="source\tile.hpp" />
     <ClInclude Include="source\toolbox.hpp" />
     <ClInclude Include="source\world.hpp" />
@@ -170,18 +176,29 @@
   <ItemGroup>
     <ClCompile Include="source\application.cpp" />
     <ClCompile Include="source\applicationFlags.cpp" />
+    <ClCompile Include="source\cl_perlin.cpp" />
+    <ClCompile Include="source\cl_voronoi.cpp" />
+    <ClCompile Include="source\datastorage.cpp" />
     <ClCompile Include="source\eventhandler.cpp" />
+    <ClCompile Include="source\gui.cpp" />
     <ClCompile Include="source\jsoncpp.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\opencl_program.cpp" />
     <ClCompile Include="source\renderer.cpp" />
+    <ClCompile Include="source\spriteutils.cpp" />
+    <ClCompile Include="source\textrenderer.cpp" />
     <ClCompile Include="source\tile.cpp" />
     <ClCompile Include="source\toolbox.cpp" />
     <ClCompile Include="source\world.cpp" />
     <ClCompile Include="source\worldGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="source\config.json" />
+    <None Include="blur.cl" />
+    <None Include="config.json" />
+    <None Include="diamondsquare.cl" />
+    <None Include="perlin.cl" />
+    <None Include="simplex.cl" />
+    <None Include="simple_world.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

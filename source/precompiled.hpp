@@ -24,6 +24,8 @@ class TextRenderer;
 class WorldGenerator;
 class DataStorage;
 class SpriteUtils;
+class CL_Voronoi;
+class CL_Perlin;
 
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
 typedef std::shared_ptr<sf::Image> ImagePtr;
@@ -43,4 +45,5 @@ typedef std::shared_ptr<TextRenderer> TextRendererPtr;
 typedef std::shared_ptr<WorldGenerator> WorldGeneratorPtr;
 typedef std::shared_ptr<DataStorage> DataStoragePtr;
 typedef std::shared_ptr<SpriteUtils> SpriteUtilsPtr;
-
+typedef std::shared_ptr<CL_Voronoi> CL_VoronoiPtr;
+typedef std::shared_ptr<CL_Perlin> CL_PerlinPtr;

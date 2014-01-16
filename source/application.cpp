@@ -11,9 +11,12 @@
 #include "worldGenerator.hpp"
 #include "datastorage.hpp"
 #include "spriteutils.hpp"
+#include "cl_voronoi.hpp"
+#include "cl_perlin.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
+#include <ctime>
 
 Application app;
 
@@ -24,7 +27,8 @@ Application::Application()
 	eventhandler = EventHandlerPtr(new EventHandler());
     applicationFlags = ApplicationFlagsPtr(new ApplicationFlags());
     world = WorldPtr(new World());
-    opencl = CL_ProgramPtr(new CL_Program("voronoi.cl"));
+    cl_voronoi = CL_VoronoiPtr(new CL_Voronoi("voronoi.cl"));
+    cl_perlin = CL_PerlinPtr(new CL_Perlin("perlin.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
@@ -101,9 +105,25 @@ int Application::run()
 
     world->init();
 
-    opencl->loadProgram();
-    opencl->runKernel(true, datastorage->getSprite("heightmap"));
+    int start_s=clock();
+
+    cl_voronoi->loadProgram();
+    cl_voronoi->setOutputTarget(datastorage->getSprite("heightmap"));
+    //cl_voronoi->runKernel();
+
+    cl_perlin->loadProgram();
+    cl_perlin->setOutputTarget(datastorage->getSprite("heightmap"));
+    //cl_perlin->runKernel();
+
+    programs.push_back(cl_voronoi);
+    programs.push_back(cl_perlin);
+
+    activeCLProgram = programs.at(0);
+    activeCLProgram->runKernel();
+
     //world->setWorld(worldgenerator->voronoi());
+    int stop_s=clock();
+    std::cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;
 
     while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
     {
@@ -138,6 +158,19 @@ void Application::windowWasClosed()
     windowIsOpen = false;
 }
 
+void Application::setProgram(int i)
+{
+    if (programs.size() < i)
+    {
+        std::cout << "-Application: No program " << i << " found. Loaded programs: " << programs.size() << std::endl;
+        return;
+    }
+
+    activeCLProgram = programs.at(i);
+    std::cout << "+Application: Active program set to: " << activeCLProgram->getSourceName() << std::endl;
+    activeCLProgram->runKernel();
+}
+
 RendererPtr Application::getRenderer()
 {
     return renderer;
@@ -158,9 +191,9 @@ WorldPtr Application::getWorld()
     return world;
 }
 
-CL_ProgramPtr Application::getOpenCL()
+CL_ProgramPtr Application::getCurrentCLProgram()
 {
-    return opencl;
+    return activeCLProgram;
 }
 
 GUIPtr Application::getGUI()

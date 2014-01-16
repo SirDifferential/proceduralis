@@ -11,12 +11,17 @@ private:
 	EventHandlerPtr eventhandler;
     ApplicationFlagsPtr applicationFlags;
     WorldPtr world;
-    CL_ProgramPtr opencl;
     GUIPtr gui;
     TextRendererPtr textrenderer;
     WorldGeneratorPtr worldgenerator;
     DataStoragePtr datastorage;
     SpriteUtilsPtr spriteutils;
+
+    CL_ProgramPtr activeCLProgram;
+    CL_VoronoiPtr cl_voronoi;
+    CL_PerlinPtr cl_perlin;
+
+    std::vector<std::shared_ptr<CL_Program>> programs;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -31,11 +36,13 @@ public:
 
 	void windowWasClosed();
 
+    void setProgram(int i);
+
     RendererPtr getRenderer();
     ToolboxPtr getToolbox();
     ApplicationFlagsPtr getApplicationFlags();
     WorldPtr getWorld();
-    CL_ProgramPtr getOpenCL();
+    CL_ProgramPtr getCurrentCLProgram();
     GUIPtr getGUI();
     TextRendererPtr getTextRenderer();
     WorldGeneratorPtr getWorldGenerator();

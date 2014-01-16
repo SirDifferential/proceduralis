@@ -6,7 +6,7 @@
 
 class CL_Program
 {
-private:
+protected:
     unsigned int device_used;
     std::vector<cl::Device> devices;
     cl::Context context;
@@ -20,61 +20,32 @@ private:
 
     std::string sourcepath;
 
-    cl::Buffer cl_a;
-    cl::Buffer cl_b;
-    cl::Buffer cl_c;
+    SpritePtr outputTarget;
 
-    float* a;
-    float* b;
-    float* c;
-    int num;
-
-    float* image_buffer_in;
-    float* image_buffer_out;
-
-    cl::size_t<3> origin;
-    cl::size_t<3> region;
-    size_t row_pitch;
-
-    cl::Image2D* image_a;
-    cl::Image2D* image_b;
-
-    cl::Buffer cl_frequency;
-    cl::Buffer cl_persistence;
-    cl::Buffer cl_octaves;
-    float* frequency;
-    float* persistence;
-    int* octaves;
-    
-    float* input_data_x;
-    float* input_data_y;
-    int* data_points;
-    float* colors;
-
-    cl::Buffer cl_data_points;
-    cl::Buffer cl_input_a;
-    cl::Buffer cl_input_b;
-    cl::Buffer cl_colors;
 public:
     CL_Program(std::string s);
 
     char* readSource(std::string file_path);
-    void loadProgram();
-    void runKernel(bool write_output, SpritePtr target);
-    void standard_kernel();
+    virtual void loadProgram() = 0;
+    virtual void runKernel() = 0;
+
+    void setOutputTarget(SpritePtr s);
 
     void print_errors(std::string function, cl_int error);
     void printPlatformInfo(cl::Platform p);
-    void cleanup();
+    virtual void cleanup();
 
-    void event1();
-    void event2();
-    void event3();
-    void event4();
-    void event5();
-    void event6();
-    void event7();
-    void event8();
+    virtual void event1();
+    virtual void event2();
+    virtual void event3();
+    virtual void event4();
+    virtual void event5();
+    virtual void event6();
+    virtual void event7();
+    virtual void event8();
+    virtual void event9();
+
+    std::string getSourceName();
 };
 
 #endif
