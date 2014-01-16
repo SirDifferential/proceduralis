@@ -28,6 +28,7 @@ void WorldGenerator::generate()
 void WorldGenerator::formSuperRegions()
 {
     app.getDataStorage()->getSprite("voronoi_cells");
+    
 }
 
 float** WorldGenerator::diamondSquare()

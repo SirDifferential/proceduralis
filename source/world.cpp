@@ -24,9 +24,9 @@ void World::draw()
     s2->setScale(0.2, 0.2);
     s3->setScale(0.2, 0.2);
 
-    s1->setPosition(0, 0);
-    s2->setPosition(250, 0);
-    s3->setPosition(500, 0);
+    s1->setPosition(10, 10);
+    s2->setPosition(220, 10);
+    s3->setPosition(430, 10);
 
     //app.getRenderer()->getRenderWindow()->draw(*app.getDataStorage()->getSprite("heightmap"));
     app.getRenderer()->getRenderWindow()->draw(*s1);

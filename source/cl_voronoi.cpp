@@ -6,6 +6,7 @@
 #include "gui.hpp"
 #include "spriteutils.hpp"
 #include "datastorage.hpp"
+#include <algorithm>
 
 CL_Voronoi::CL_Voronoi(std::string s) : CL_Program(s)
 {
@@ -49,11 +50,28 @@ void CL_Voronoi::loadProgram()
     input_data_y = new float[*data_points];
     colors = new float[*data_points];
 
+    bool unique_random = false;
+    bool match_found = false;
+
+    std::vector<float> random_values;
+
+    // Generate a container of random values, based on how many cells we want
+    random_values.push_back(0.0f);
+    for (int i = 1; i < *data_points; i++)
+    {
+        random_values.push_back((float)i / *data_points);
+    }
+
+    // Randomly distribute this container of unique values to the color palette
+    // This way no color is used twice
+
+    std::random_shuffle(random_values.begin(), random_values.end());
     for (int i = 0; i < *data_points; i++)
     {
         input_data_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         input_data_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        colors[i] = app.getToolbox()->giveRandomInt(0, 255);
+        colors[i] = random_values.at(i) * 255;
+        std::cout << colors[i] << std::endl;
     }
 
     size_t array_size = sizeof(float) * *data_points;
