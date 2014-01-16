@@ -28,6 +28,7 @@ void WorldGenerator::generate()
 */
 void WorldGenerator::formSuperRegions()
 {
+    /*
     auto cells = app.getDataStorage()->getImage("voronoi_cells");
 
     std::map<float, std::vector<sf::Vector2i>> regions;
@@ -39,6 +40,7 @@ void WorldGenerator::formSuperRegions()
     int superregion_size_x = 6;
     int start_super = 3;
     int region_counter = 0;
+    float lastregion = 0.0f;
 
     // Iterate through our generated voronoi noise
     // Add each pixel to the proper set based on the generated voronoi cell color
@@ -49,16 +51,24 @@ void WorldGenerator::formSuperRegions()
         {
             cell_color = cells->getPixel(i, j);
             region_code = cell_color.r;
-            if (regions.count(region_code) > 0)
+            if (lastregion != region_code)
+            {
+                lastregion = region_code;
+            }
+
+
+            if (!regions.count(region_code) > 0)
             {
                 // Region is not added yet
                 region_counter++;
-                if (start_super >= region_counter && region_counter < superregion_size_x)
+                if (region_counter >= start_super && region_counter < superregion_size_x)
                 {
                     superregions.push_back(region_code);
                 }
             }
+
             regions[region_code].push_back(sf::Vector2i(i, j));
+
         }
     }
 
@@ -72,14 +82,15 @@ void WorldGenerator::formSuperRegions()
     {
         for (auto coord : regions[r])
         {
-            temp2 = cells->getPixel(coord.x, coord.y);
-            temp2.r = 250;
+            temp2.r = 0;
             temp2.g = 250;
+            temp2.b = 0;
             cells->setPixel(coord.x, coord.y, temp2);
         }
     }
 
     app.getSpriteUtils()->setPixels(app.getDataStorage()->getSprite("heightmap"), "heightmap", cells);
+    */
 
 }
 

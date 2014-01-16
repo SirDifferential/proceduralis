@@ -9,7 +9,7 @@ GUI::GUI()
 
 void GUI::draw()
 {
-    app.getTextRenderer()->renderText(20, 20, octaveString, FONT_SIZE::MEDIUM_FONT, false, sf::Color::Black);
-    app.getTextRenderer()->renderText(20, 40, persistenceString, FONT_SIZE::MEDIUM_FONT, false, sf::Color::Black);
-    app.getTextRenderer()->renderText(20, 60, frequencyString, FONT_SIZE::MEDIUM_FONT, false, sf::Color::Black);
+    app.getTextRenderer()->renderText(20, 20, octaveString, FONT_SIZE::MEDIUM_FONT, false, sf::Color::Red);
+    app.getTextRenderer()->renderText(20, 40, persistenceString, FONT_SIZE::MEDIUM_FONT, false, sf::Color::Red);
+    app.getTextRenderer()->renderText(20, 60, frequencyString, FONT_SIZE::MEDIUM_FONT, false, sf::Color::Red);
 }

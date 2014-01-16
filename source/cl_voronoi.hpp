@@ -20,16 +20,24 @@ private:
     size_t row_pitch;
 
     // Constants used by the OpenCL program, in CPU memory
-    float* input_data_x;
-    float* input_data_y;
+    float* voronoi_points_x;
+    float* voronoi_points_y;
+    float* superregions_x;
+    float* superregions_y;
+    float* superregion_colors;
     int* data_points;
+    int* superregions;
     float* colors;
 
     // Constants in OpenCL memory
     cl::Buffer cl_data_points;
-    cl::Buffer cl_input_a;
-    cl::Buffer cl_input_b;
+    cl::Buffer cl_superregions;
+    cl::Buffer cl_voronoi_points_x;
+    cl::Buffer cl_voronoi_points_y;
+    cl::Buffer cl_superregions_x;
+    cl::Buffer cl_superregions_y;
     cl::Buffer cl_colors;
+    cl::Buffer cl_superregion_colors;
 
 public:
     CL_Voronoi(std::string s);
