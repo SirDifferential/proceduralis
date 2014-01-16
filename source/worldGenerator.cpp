@@ -21,77 +21,31 @@ void WorldGenerator::generate()
 {
 }
 
-/**
-* Assumes that a map of voronoi cells has been generated
-* Takes this map and produces sets of pixels based on cell color
-* Each voronoi cell is nicely categorized afterwards
-*/
 void WorldGenerator::formSuperRegions()
 {
-    /*
+    std::cout << "+WorldGenerator: Combining images" << std::endl;
     auto cells = app.getDataStorage()->getImage("voronoi_cells");
+    auto perlin = app.getDataStorage()->getImage("perlinnoise");
+    auto heightmap = app.getDataStorage()->getImage("heightmap");
+    if (heightmap == nullptr)
+    {
+        heightmap = ImagePtr(new sf::Image());
+        heightmap->create(cells->getSize().x, cells->getSize().y);
+        app.getDataStorage()->storeImage("heightmap", heightmap);
+    }
 
-    std::map<float, std::vector<sf::Vector2i>> regions;
-    std::vector<float> superregions;
-    sf::Color cell_color;
-    float region_code = 0.0f;
+    sf::Color temp;
 
-    int superregion_cores = 0;
-    int superregion_size_x = 6;
-    int start_super = 3;
-    int region_counter = 0;
-    float lastregion = 0.0f;
-
-    // Iterate through our generated voronoi noise
-    // Add each pixel to the proper set based on the generated voronoi cell color
-    // This is slow and stupid, but so is yours truly
     for (int i = 0; i < cells->getSize().x; i++)
     {
         for (int j = 0; j < cells->getSize().y; j++)
         {
-            cell_color = cells->getPixel(i, j);
-            region_code = cell_color.r;
-            if (lastregion != region_code)
-            {
-                lastregion = region_code;
-            }
-
-
-            if (!regions.count(region_code) > 0)
-            {
-                // Region is not added yet
-                region_counter++;
-                if (region_counter >= start_super && region_counter < superregion_size_x)
-                {
-                    superregions.push_back(region_code);
-                }
-            }
-
-            regions[region_code].push_back(sf::Vector2i(i, j));
-
+            temp = cells->getPixel(i, j) * perlin->getPixel(i, j);
+            heightmap->setPixel(i, j, temp);
         }
     }
 
-    std::cout << "+WorldGenerator: Regions found: " << regions.size() << std::endl;
-    std::cout << "+WorldGenerator: Superregions created: " << superregions.size() << std::endl;
-
-    // Add color to superregions
-
-    sf::Color temp2;
-    for (float r : superregions)
-    {
-        for (auto coord : regions[r])
-        {
-            temp2.r = 0;
-            temp2.g = 250;
-            temp2.b = 0;
-            cells->setPixel(coord.x, coord.y, temp2);
-        }
-    }
-
-    app.getSpriteUtils()->setPixels(app.getDataStorage()->getSprite("heightmap"), "heightmap", cells);
-    */
-
+    app.getSpriteUtils()->setPixels(app.getDataStorage()->getSprite("heightmap"), "heightmap", heightmap);
 }
 
 float** WorldGenerator::diamondSquare()

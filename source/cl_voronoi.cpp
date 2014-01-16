@@ -48,7 +48,7 @@ void CL_Voronoi::loadProgram()
     *data_points = 500;
 
     superregions = new int();
-    *superregions = 6;
+    *superregions = 18;
 
     voronoi_points_x = new float[*data_points];
     voronoi_points_y = new float[*data_points];
