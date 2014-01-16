@@ -9,8 +9,10 @@ World::World()
 
 void World::init()
 {
+    TexturePtr heightmap_tex = TexturePtr(new sf::Texture());
     SpritePtr heightmap = SpritePtr(new sf::Sprite());
     app.getDataStorage()->storeSprite("heightmap", heightmap);
+    app.getDataStorage()->storeTexture("heightmap", heightmap_tex);
 }
 
 void World::draw()

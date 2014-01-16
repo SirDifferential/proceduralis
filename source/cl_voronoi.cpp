@@ -71,7 +71,6 @@ void CL_Voronoi::loadProgram()
         input_data_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         input_data_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
         colors[i] = random_values.at(i) * 255;
-        std::cout << colors[i] << std::endl;
     }
 
     size_t array_size = sizeof(float) * *data_points;

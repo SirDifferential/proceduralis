@@ -86,3 +86,25 @@ void SpriteUtils::setPixels(SpritePtr target, std::string name, float** buffer, 
     app.getDataStorage()->storeSprite(name, target);
 }
 
+/**
+* Updates a Sprite
+* Assumes that sprite image, texture and the sprite itself already exist
+* Params:
+* target: the Sprite to be updated
+* name: The name by which the sprite is stored in the database
+* buffer: ImagePtr containing the new pixel data
+*/
+void SpriteUtils::setPixels(SpritePtr target, std::string name, ImagePtr buffer)
+{
+    target.reset();
+    app.getDataStorage()->deleteSprite(name);
+    app.getDataStorage()->deleteTexture(name);
+    auto sprite_texture = TexturePtr(new sf::Texture());
+    sprite_texture->create(buffer->getSize().x, buffer->getSize().y);
+    sprite_texture->update(*buffer);
+    target = SpritePtr(new sf::Sprite());
+    target->setTexture(*sprite_texture);
+    app.getDataStorage()->storeSprite(name, target);
+    app.getDataStorage()->storeTexture(name, sprite_texture);
+}
+

@@ -11,6 +11,7 @@ public:
 
     void setPixels(SpritePtr target, std::string name, float* buffer, unsigned int width, unsigned int height);
     void setPixels(SpritePtr target, std::string name, float** buffer, unsigned int width, unsigned int height);
+    void setPixels(SpritePtr target, std::string name, ImagePtr buffer);
 };
 
 #endif
