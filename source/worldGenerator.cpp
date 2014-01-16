@@ -2,13 +2,32 @@
 #include "application.hpp"
 #include "toolbox.hpp"
 #include "world.hpp"
+#include "datastorage.hpp"
 
 WorldGenerator::WorldGenerator()
 {
 }
 
+void WorldGenerator::init()
+{
+    SpritePtr voronoi_cells = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("voronoi_cells", voronoi_cells);
+    SpritePtr perlinnoise = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("perlinnoise", perlinnoise);
+}
+
 void WorldGenerator::generate()
 {
+}
+
+/**
+* Assumes that a map of voronoi cells has been generated
+* Takes this map and produces sets of pixels based on cell color
+* Each voronoi cell is nicely categorized afterwards
+*/
+void WorldGenerator::formSuperRegions()
+{
+    app.getDataStorage()->getSprite("voronoi_cells");
 }
 
 float** WorldGenerator::diamondSquare()

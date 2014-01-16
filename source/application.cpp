@@ -104,16 +104,15 @@ int Application::run()
     renderer->showSplash();
 
     world->init();
+    worldgenerator->init();
 
-    int start_s=clock();
+    int start_s = clock();
 
     cl_voronoi->loadProgram();
-    cl_voronoi->setOutputTarget(datastorage->getSprite("heightmap"));
-    //cl_voronoi->runKernel();
+    cl_voronoi->setOutputTarget(datastorage->getSprite("voronoi_cells"));
 
     cl_perlin->loadProgram();
-    cl_perlin->setOutputTarget(datastorage->getSprite("heightmap"));
-    //cl_perlin->runKernel();
+    cl_perlin->setOutputTarget(datastorage->getSprite("perlinnoise"));
 
     programs.push_back(cl_voronoi);
     programs.push_back(cl_perlin);
@@ -121,8 +120,11 @@ int Application::run()
     activeCLProgram = programs.at(0);
     activeCLProgram->runKernel();
 
-    //world->setWorld(worldgenerator->voronoi());
-    int stop_s=clock();
+    cl_perlin->runKernel();
+
+    worldgenerator->formSuperRegions();
+
+    int stop_s = clock();
     std::cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;
 
     while (renderer->getRenderWindow()->isOpen() && windowIsOpen)
@@ -160,7 +162,7 @@ void Application::windowWasClosed()
 
 void Application::setProgram(int i)
 {
-    if (programs.size() < i)
+    if (programs.size() < i + 1)
     {
         std::cout << "-Application: No program " << i << " found. Loaded programs: " << programs.size() << std::endl;
         return;

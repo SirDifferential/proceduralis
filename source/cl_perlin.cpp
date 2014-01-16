@@ -9,9 +9,12 @@
 
 CL_Perlin::CL_Perlin(std::string s) : CL_Program(s)
 {
-    frequency = new float(0.4f);
-    persistence = new float(1.3f);
-    octaves = new int(10);
+    frequency = new float();
+    *frequency = 0.3f;
+    persistence = new float();
+    *persistence = 1.3f;
+    octaves = new int();
+    *octaves = 10;
 }
 
 void CL_Perlin::loadProgram()
@@ -38,7 +41,7 @@ void CL_Perlin::loadProgram()
     
     image_buffer_in = new float[image_size];
     if (image_buffer_in == NULL)
-        std::cout << "no go" << std::endl;
+        std::cout << "-OpenCL: image_buffer_in is null" << std::endl;
     int x = -1;
     int y = 0;
     float value = 0.0f;
@@ -105,8 +108,8 @@ void CL_Perlin::loadProgram()
     {
         error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
         error = commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
-        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
-        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_persistence, CL_TRUE, 0, sizeof(float), persistence, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_frequency, CL_TRUE, 0, sizeof(float), frequency, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_octaves, CL_TRUE, 0, sizeof(int), octaves, NULL, &event);
     }
     catch (cl::Error e)
@@ -151,7 +154,7 @@ void CL_Perlin::runKernel()
         delete[] map_done;
         return;
     }
-    app.getSpriteUtils()->setPixels(outputTarget, "heightmap", map_done, 1024, 1024);
+    app.getSpriteUtils()->setPixels(outputTarget, "perlinnoise", map_done, 1024, 1024);
 
     delete[] map_done;
 }

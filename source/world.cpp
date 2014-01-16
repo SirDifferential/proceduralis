@@ -15,7 +15,23 @@ void World::init()
 
 void World::draw()
 {
-    app.getRenderer()->getRenderWindow()->draw(*app.getDataStorage()->getSprite("heightmap"));
+    // Temp code: Render all sprites next to each other
+    auto s1 = app.getDataStorage()->getSprite("voronoi_cells");
+    auto s2 = app.getDataStorage()->getSprite("perlinnoise");
+    auto s3 = app.getDataStorage()->getSprite("heightmap");
+
+    s1->setScale(0.2, 0.2);
+    s2->setScale(0.2, 0.2);
+    s3->setScale(0.2, 0.2);
+
+    s1->setPosition(0, 0);
+    s2->setPosition(250, 0);
+    s3->setPosition(500, 0);
+
+    //app.getRenderer()->getRenderWindow()->draw(*app.getDataStorage()->getSprite("heightmap"));
+    app.getRenderer()->getRenderWindow()->draw(*s1);
+    app.getRenderer()->getRenderWindow()->draw(*s2);
+    app.getRenderer()->getRenderWindow()->draw(*s3);
 }
 
 void World::work()

@@ -1,7 +1,7 @@
 {
     "game_version" : "1.00",
 
-    "resolution" : { "x" : 800, "y" : 600 },
+    "resolution" : { "x" : 1400, "y" : 900 },
     "framerate" : 60,
     "title" : "Proceduralia",
     "show_fps" : "yes",
@@ -9,6 +9,6 @@
     "gpu_device_debug" : "yes",
     "use_GPU" : "yes",
 
-    "print_cl_programs" : "no"
+    "print_cl_programs" : "yes"
 }
 

@@ -8,10 +8,13 @@ class WorldGenerator
 private:
 public:
     WorldGenerator();
+    void init();
 
     void generate();
     float** diamondSquare();
     ImagePtr voronoi();
+
+    void formSuperRegions();
 };
 
 #endif

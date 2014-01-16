@@ -116,7 +116,7 @@ void CL_Voronoi::runKernel()
         delete[] map_done;
         return;
     }
-    app.getSpriteUtils()->setPixels(outputTarget, "heightmap", map_done, 1024, 1024);
+    app.getSpriteUtils()->setPixels(outputTarget, "voronoi_cells", map_done, 1024, 1024);
 
     delete[] map_done;
 }
