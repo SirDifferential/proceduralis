@@ -1,4 +1,4 @@
-#include "CL_Perlin.hpp"
+#include "cl_perlin.hpp"
 #include "application.hpp"
 #include "applicationFlags.hpp"
 #include "toolbox.hpp"
