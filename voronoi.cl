@@ -5,8 +5,13 @@ float myhypot(float x, float y)
     return sqrt((x*x) + (y*y));
 }
 
+float mystrangehypot(float x, float y)
+{
+    return (sqrt((x*x) + (y*y)));
+}
+
 // Simple brute force voronoi diagram
-__kernel void voronoi(__global float* voronoi_points_x, __global float* voronoi_points_y, __global float* colors, __global int* data_points, __global float* superregions_x, __global float* superregions_y, __global float* supercolors, __global int* supercount, __write_only image2d_t heightmap)
+__kernel void voronoi(__global float* voronoi_points_x, __global float*  voronoi_points_y, __global float* colors, __global int* data_points, __global float* superregions_x, __global float* superregions_y, __global float* supercolors, __global int* supercount, __write_only image2d_t heightmap, __global float* middle_colors)
 {
     // Get the (x,y) coordinates of our desired point
     int x = get_global_id(0);
@@ -32,6 +37,7 @@ __kernel void voronoi(__global float* voronoi_points_x, __global float* voronoi_
     }
     
 	float voronoi_color = colors[voronoi_cell];
+    float uppercell = middle_colors[voronoi_cell];
 	float4 outvalue;
 	outvalue.x = voronoi_color;
     
@@ -43,7 +49,7 @@ __kernel void voronoi(__global float* voronoi_points_x, __global float* voronoi_
     
     for (int i = 0; i < *supercount; i++)
     {
-        d = myhypot(superregions_x[i]-x, superregions_y[i]-y);
+        d = mystrangehypot(superregions_x[i]-x, superregions_y[i]-y);
         if (d < dmin)
         {
             dmin = d;

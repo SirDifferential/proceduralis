@@ -20,8 +20,9 @@ private:
     CL_ProgramPtr activeCLProgram;
     CL_VoronoiPtr cl_voronoi;
     CL_PerlinPtr cl_perlin;
+    CL_BlurPtr cl_blur;
 
-    std::vector<std::shared_ptr<CL_Program>> programs;
+    std::map<std::string, std::shared_ptr<CL_Program>> programs;
 
 	bool windowIsOpen;
 	bool showFPS;
@@ -36,7 +37,8 @@ public:
 
 	void windowWasClosed();
 
-    void setProgram(int i);
+    void setProgram(std::string name);
+    CL_ProgramPtr getProgram(std::string name);
 
     RendererPtr getRenderer();
     ToolboxPtr getToolbox();

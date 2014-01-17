@@ -28,6 +28,7 @@ private:
     int* data_points;
     int* superregions;
     float* colors;
+    float* middle_colors;
 
     // Constants in OpenCL memory
     cl::Buffer cl_data_points;
@@ -37,6 +38,7 @@ private:
     cl::Buffer cl_superregions_x;
     cl::Buffer cl_superregions_y;
     cl::Buffer cl_colors;
+    cl::Buffer cl_middle_colors;
     cl::Buffer cl_superregion_colors;
 
 public:

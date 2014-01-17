@@ -26,6 +26,7 @@ class DataStorage;
 class SpriteUtils;
 class CL_Voronoi;
 class CL_Perlin;
+class CL_Blur;
 
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
 typedef std::shared_ptr<sf::Image> ImagePtr;
@@ -47,3 +48,4 @@ typedef std::shared_ptr<DataStorage> DataStoragePtr;
 typedef std::shared_ptr<SpriteUtils> SpriteUtilsPtr;
 typedef std::shared_ptr<CL_Voronoi> CL_VoronoiPtr;
 typedef std::shared_ptr<CL_Perlin> CL_PerlinPtr;
+typedef std::shared_ptr<CL_Blur> CL_BlurPtr;

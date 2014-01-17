@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="source\application.hpp" />
     <ClInclude Include="source\cl.hpp" />
+    <ClInclude Include="source\cl_blur.hpp" />
     <ClInclude Include="source\cl_perlin.hpp" />
     <ClInclude Include="source\cl_voronoi.hpp" />
     <ClInclude Include="source\datastorage.hpp" />
@@ -176,6 +177,7 @@
   <ItemGroup>
     <ClCompile Include="source\application.cpp" />
     <ClCompile Include="source\applicationFlags.cpp" />
+    <ClCompile Include="source\cl_blur.cpp" />
     <ClCompile Include="source\cl_perlin.cpp" />
     <ClCompile Include="source\cl_voronoi.cpp" />
     <ClCompile Include="source\datastorage.cpp" />
@@ -199,6 +201,7 @@
     <None Include="perlin.cl" />
     <None Include="simplex.cl" />
     <None Include="simple_world.cl" />
+    <None Include="voronoi.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

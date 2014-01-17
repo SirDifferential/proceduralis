@@ -13,6 +13,7 @@
 #include "spriteutils.hpp"
 #include "cl_voronoi.hpp"
 #include "cl_perlin.hpp"
+#include "cl_blur.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -29,6 +30,7 @@ Application::Application()
     world = WorldPtr(new World());
     cl_voronoi = CL_VoronoiPtr(new CL_Voronoi("voronoi.cl"));
     cl_perlin = CL_PerlinPtr(new CL_Perlin("perlin.cl"));
+    cl_blur = CL_BlurPtr(new CL_Blur("blur.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
@@ -114,10 +116,14 @@ int Application::run()
     cl_perlin->loadProgram();
     cl_perlin->setOutputTarget(datastorage->getSprite("perlinnoise"));
 
-    programs.push_back(cl_voronoi);
-    programs.push_back(cl_perlin);
+    cl_blur->loadProgram();
+    cl_blur->setOutputTarget(datastorage->getSprite("blurred"));
 
-    activeCLProgram = programs.at(0);
+    programs["voronoi"] = cl_voronoi;
+    programs["perlin"] = cl_perlin;
+    programs["blur"] = cl_blur;
+
+    activeCLProgram = programs["voronoi"];
     activeCLProgram->runKernel();
 
     cl_perlin->runKernel();
@@ -160,17 +166,28 @@ void Application::windowWasClosed()
     windowIsOpen = false;
 }
 
-void Application::setProgram(int i)
+void Application::setProgram(std::string name)
 {
-    if (programs.size() < i + 1)
+    if (programs.find(name) == programs.end())
     {
-        std::cout << "-Application: No program " << i << " found. Loaded programs: " << programs.size() << std::endl;
+        std::cout << "-Application: No program " << name << " found. Loaded programs: " << programs.size() << std::endl;
         return;
     }
 
-    activeCLProgram = programs.at(i);
+    activeCLProgram = programs[name];
     std::cout << "+Application: Active program set to: " << activeCLProgram->getSourceName() << std::endl;
     activeCLProgram->runKernel();
+}
+
+CL_ProgramPtr Application::getProgram(std::string name)
+{
+    auto p = programs.find(name);
+    if (p == programs.end())
+    {
+        std::cout << "-Application: No program " << name << " loaded" << std::endl;
+        return nullptr;
+    }
+    return p->second;
 }
 
 RendererPtr Application::getRenderer()

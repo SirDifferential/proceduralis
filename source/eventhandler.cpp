@@ -46,13 +46,13 @@ void EventHandler::checkEvents()
                         app.getCurrentCLProgram()->event6();
                         break;
                     case sf::Keyboard::Num1:
-                        app.setProgram(0);
+                        app.setProgram("voronoi");
                         break;
                     case sf::Keyboard::Num2:
-                        app.setProgram(1);
+                        app.setProgram("perlin");
                         break;
                     case sf::Keyboard::Num3:
-                        app.setProgram(2);
+                        app.setProgram("blur");
                         break;
                     case sf::Keyboard::Escape:
                         app.exit();

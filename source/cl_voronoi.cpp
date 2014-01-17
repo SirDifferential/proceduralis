@@ -6,7 +6,10 @@
 #include "gui.hpp"
 #include "spriteutils.hpp"
 #include "datastorage.hpp"
+#include "precompiled.hpp"
+#include "cl_blur.hpp"
 #include <algorithm>
+#include <functional>
 
 CL_Voronoi::CL_Voronoi(std::string s) : CL_Program(s)
 {
@@ -48,13 +51,14 @@ void CL_Voronoi::loadProgram()
     *data_points = 500;
 
     superregions = new int();
-    *superregions = 18;
+    *superregions = 150;
 
     voronoi_points_x = new float[*data_points];
     voronoi_points_y = new float[*data_points];
     superregions_x = new float[*superregions];
     superregions_y = new float[*superregions];
     colors = new float[*data_points];
+    middle_colors = new float[*data_points];
     superregion_colors = new float[*superregions];
 
     // Create random coordiantes to work as the datapoints in the voronoi diagram
@@ -64,8 +68,13 @@ void CL_Voronoi::loadProgram()
     {
         voronoi_points_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         voronoi_points_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        colors[i] = app.getToolbox()->giveRandomInt(0, 10) * 0.1f;
+        colors[i] = app.getToolbox()->giveRandomInt(0, 5) * 0.1f;
+        middle_colors[i] = app.getToolbox()->giveRandomInt(0, 5) * 0.1f;
     }
+
+    // Sort datapoints
+    //std::sort(voronoi_points_x, voronoi_points_x + *data_points, std::greater<int>());
+    //std::sort(voronoi_points_y, voronoi_points_y + *data_points, std::greater<int>());
 
     // Then choose a few random points and make these the cores of some larger regions
     // Assign some color for each superregion
@@ -75,8 +84,11 @@ void CL_Voronoi::loadProgram()
     {
         superregions_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         superregions_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        superregion_colors[i] = app.getToolbox()->giveRandomInt(1, 5) * 0.1f;
+        superregion_colors[i] = app.getToolbox()->giveRandomInt(1, 3)*0.1f;
     }
+
+    //std::sort(superregions_x, superregions_x + *superregions, std::greater<int>());
+    //std::sort(superregions_y, superregions_y + *superregions, std::greater<int>());
 
     size_t voronoi_points_size = sizeof(float) * *data_points;
     size_t superregions_size = sizeof(float) * *superregions;
@@ -87,6 +99,7 @@ void CL_Voronoi::loadProgram()
         cl_voronoi_points_x = cl::Buffer(context, CL_MEM_READ_WRITE, voronoi_points_size, NULL, &error);
         cl_voronoi_points_y = cl::Buffer(context, CL_MEM_READ_WRITE, voronoi_points_size, NULL, &error);
         cl_colors = cl::Buffer(context, CL_MEM_READ_WRITE, voronoi_points_size, NULL, &error);
+        cl_middle_colors = cl::Buffer(context, CL_MEM_READ_WRITE, voronoi_points_size, NULL, &error);
         cl_data_points = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &error);
         cl_superregions_x = cl::Buffer(context, CL_MEM_READ_WRITE, superregions_size, NULL, &error);
         cl_superregions_y = cl::Buffer(context, CL_MEM_READ_WRITE, superregions_size, NULL, &error);
@@ -104,6 +117,7 @@ void CL_Voronoi::loadProgram()
         error = commandQueue.enqueueWriteBuffer(cl_voronoi_points_x, CL_TRUE, 0, voronoi_points_size, voronoi_points_x, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_voronoi_points_y, CL_TRUE, 0, voronoi_points_size, voronoi_points_y, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_colors, CL_TRUE, 0, voronoi_points_size, colors, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_middle_colors, CL_TRUE, 0, voronoi_points_size, middle_colors, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_data_points, CL_TRUE, 0, sizeof(int), data_points, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_superregions_x, CL_TRUE, 0, superregions_size, superregions_x, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_superregions_y, CL_TRUE, 0, superregions_size, superregions_y, NULL, &event);
@@ -127,6 +141,7 @@ void CL_Voronoi::loadProgram()
         error = kernel.setArg(6, cl_superregion_colors);
         error = kernel.setArg(7, cl_superregions);
         error = kernel.setArg(8, *image_b);
+        error = kernel.setArg(9, cl_middle_colors);
     }
     catch (cl::Error err)
     {
@@ -153,6 +168,11 @@ void CL_Voronoi::runKernel()
     }
     app.getSpriteUtils()->setPixels(outputTarget, "voronoi_cells", map_done, 1024, 1024);
 
+    std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
+    temp->setInputBuffer(map_done);
+    temp->runKernel();
+    temp->setInputBuffer(NULL);
+
     delete[] map_done;
 }
 
@@ -171,6 +191,7 @@ void CL_Voronoi::cleanup()
 
     delete[] colors;
     delete[] superregion_colors;
+    delete[] middle_colors;
 
     delete data_points;
     delete superregions;

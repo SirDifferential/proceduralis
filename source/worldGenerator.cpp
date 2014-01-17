@@ -15,6 +15,8 @@ void WorldGenerator::init()
     app.getDataStorage()->storeSprite("voronoi_cells", voronoi_cells);
     SpritePtr perlinnoise = SpritePtr(new sf::Sprite());
     app.getDataStorage()->storeSprite("perlinnoise", perlinnoise);
+    SpritePtr blurred = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("blurred", blurred);
 }
 
 void WorldGenerator::generate()
@@ -27,6 +29,7 @@ void WorldGenerator::formSuperRegions()
     auto cells = app.getDataStorage()->getImage("voronoi_cells");
     auto perlin = app.getDataStorage()->getImage("perlinnoise");
     auto heightmap = app.getDataStorage()->getImage("heightmap");
+    auto blurred = app.getDataStorage()->getImage("blurred");
     if (heightmap == nullptr)
     {
         heightmap = ImagePtr(new sf::Image());
@@ -34,32 +37,33 @@ void WorldGenerator::formSuperRegions()
         app.getDataStorage()->storeImage("heightmap", heightmap);
     }
 
-    sf::Color temp1;
-    sf::Color temp2;
-    sf::Color temp3;
-    sf::Color temp4;
+    sf::Color perlincol;
+    sf::Color cellcol;
+    sf::Color blurredcol;
+    sf::Color outputcol;
+    sf::Color averagedcol;
 
     for (int i = 0; i < cells->getSize().x; i++)
     {
         for (int j = 0; j < cells->getSize().y; j++)
         {
-            temp1 = perlin->getPixel(i, j);
-            temp2 = cells->getPixel(i, j);
-            if (temp2.g == 0)
-                temp2.g = 1;
-            temp3.r = (0.5*temp1.r) + (2*temp2.g);
-            temp3.g = temp1.r * (temp2.r*2);
-            temp3.b = temp3.r;
-            if (temp2.r == 0)
-                temp2.r = 1;
-            //temp3.g = temp1.r * temp2.r;
-            //temp3.b = temp1.r;
-            
-            temp4.r = (temp3.r + temp3.g + temp3.b) / 3;
-            temp4.g = temp4.r;
-            temp4.b = temp4.r;
-            temp4.a = 255;
-            heightmap->setPixel(i, j, temp4);
+            perlincol = perlin->getPixel(i, j);
+            cellcol = cells->getPixel(i, j);
+            blurredcol = blurred->getPixel(i, j);
+            if (blurredcol.g < 40 && blurredcol.g > 30)
+                outputcol.r = 10;
+            else if (blurredcol.g < 30)
+                outputcol.r = 0;
+            else
+                outputcol.r = perlincol.r;
+
+            outputcol.g = outputcol.r;
+            outputcol.b = outputcol.r;
+            averagedcol.r = (outputcol.r + outputcol.g + outputcol.b) / 3;
+            averagedcol.g = averagedcol.r;
+            averagedcol.b = averagedcol.r;
+            averagedcol.a = 255;
+            heightmap->setPixel(i, j, averagedcol);
         }
     }
 
