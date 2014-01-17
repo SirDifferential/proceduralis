@@ -171,6 +171,19 @@ void CL_Perlin::cleanup()
     delete octaves;
 }
 
+void CL_Perlin::postevent()
+{
+    runKernel();
+
+    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
+    app.forceredraw();
+    app.getWorldGenerator()->formSuperRegions();
+
+    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
+    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
+    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
+}
+
 void CL_Perlin::event1()
 {
     *persistence += 0.1f;
@@ -182,11 +195,7 @@ void CL_Perlin::event1()
     {
         std::cout << "!OpenCL: Error writing buffer at event 1: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
-
-    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
-
-    app.getWorldGenerator()->formSuperRegions();
+    postevent();
 }
 
 void CL_Perlin::event2()
@@ -200,10 +209,7 @@ void CL_Perlin::event2()
     {
         std::cout << "!OpenCL: Error writing buffer at event 2: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
-
-    app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
-    app.getWorldGenerator()->formSuperRegions();
+    postevent();
 }
 
 void CL_Perlin::event3()
@@ -217,10 +223,7 @@ void CL_Perlin::event3()
     {
         std::cout << "!OpenCL: Error writing buffer at event 3: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
-
-    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
-    app.getWorldGenerator()->formSuperRegions();
+    postevent();
 }
 
 void CL_Perlin::event4()
@@ -234,10 +237,7 @@ void CL_Perlin::event4()
     {
         std::cout << "!OpenCL: Error writing buffer at event 4: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
-
-    app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
-    app.getWorldGenerator()->formSuperRegions();
+    postevent();
 }
 
 void CL_Perlin::event5()
@@ -251,10 +251,7 @@ void CL_Perlin::event5()
     {
         std::cout << "!OpenCL: Error writing buffer at event 5: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
-
-    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
-    app.getWorldGenerator()->formSuperRegions();
+    postevent();
 }
 
 void CL_Perlin::event6()
@@ -268,10 +265,7 @@ void CL_Perlin::event6()
     {
         std::cout << "!OpenCL: Error writing buffer at event 6: " << e.what() << ", " << e.err() << std::endl;
     }
-    runKernel();
-
-    app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
-    app.getWorldGenerator()->formSuperRegions();
+    postevent();
 }
 
 void CL_Perlin::event7()

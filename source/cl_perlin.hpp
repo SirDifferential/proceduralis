@@ -35,6 +35,8 @@ public:
     void runKernel();
     void cleanup();
 
+    void postevent();
+
     // Events for changing constants
     void event1();
     void event2();

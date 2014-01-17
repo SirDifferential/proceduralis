@@ -36,6 +36,7 @@ public:
     int exit();
 
 	void windowWasClosed();
+    void forceredraw();
 
     void setProgram(std::string name);
     CL_ProgramPtr getProgram(std::string name);

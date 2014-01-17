@@ -166,6 +166,16 @@ void Application::windowWasClosed()
     windowIsOpen = false;
 }
 
+/**
+* Quick ugly hack to see output faster
+* TODO: delete this later
+*/
+void Application::forceredraw()
+{
+    world->work();
+    renderer->work();
+}
+
 void Application::setProgram(std::string name)
 {
     if (programs.find(name) == programs.end())
