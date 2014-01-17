@@ -50,20 +50,26 @@ void WorldGenerator::formSuperRegions()
             perlincol = perlin->getPixel(i, j);
             cellcol = cells->getPixel(i, j);
             blurredcol = blurred->getPixel(i, j);
-            if (blurredcol.g < 40 && blurredcol.g > 30)
-                outputcol.r = 10;
-            else if (blurredcol.g < 30)
-                outputcol.r = 0;
-            else
-                outputcol.r = perlincol.r;
 
-            outputcol.g = outputcol.r;
-            outputcol.b = outputcol.r;
+            outputcol.r = blurredcol.g / 270.0 * perlincol.r;
+            if (outputcol.r < 100)
+            {
+                outputcol.r = 0;
+                outputcol.b = 50;
+                outputcol.g = 0;
+            }
+            else
+            {
+                outputcol.b = 50;
+                outputcol.g = 150;
+            }
+
+            
             averagedcol.r = (outputcol.r + outputcol.g + outputcol.b) / 3;
             averagedcol.g = averagedcol.r;
             averagedcol.b = averagedcol.r;
             averagedcol.a = 255;
-            heightmap->setPixel(i, j, averagedcol);
+            heightmap->setPixel(i, j, outputcol);
         }
     }
 

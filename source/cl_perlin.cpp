@@ -73,7 +73,7 @@ void CL_Perlin::loadProgram()
         */
 
         // Random values
-        value = app.getToolbox()->giveRandomInt(1, 255) / 255.0f;
+        value = app.getToolbox()->giveRandomInt(50, 255) / 255.0f;
         image_buffer_in[i-3] = value;
         image_buffer_in[i-2] = value;
         image_buffer_in[i-1] = value;

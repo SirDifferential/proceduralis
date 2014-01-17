@@ -51,7 +51,7 @@ void CL_Voronoi::loadProgram()
     *data_points = 500;
 
     superregions = new int();
-    *superregions = 150;
+    *superregions = 50;
 
     voronoi_points_x = new float[*data_points];
     voronoi_points_y = new float[*data_points];
@@ -69,7 +69,7 @@ void CL_Voronoi::loadProgram()
         voronoi_points_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         voronoi_points_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
         colors[i] = app.getToolbox()->giveRandomInt(0, 5) * 0.1f;
-        middle_colors[i] = app.getToolbox()->giveRandomInt(0, 5) * 0.1f;
+        middle_colors[i] = app.getToolbox()->giveRandomInt(1, 2) * 0.1f;
     }
 
     // Sort datapoints
