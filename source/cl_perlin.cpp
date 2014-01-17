@@ -6,6 +6,7 @@
 #include "gui.hpp"
 #include "spriteutils.hpp"
 #include "datastorage.hpp"
+#include "worldGenerator.hpp"
 
 CL_Perlin::CL_Perlin(std::string s) : CL_Program(s)
 {
@@ -184,6 +185,8 @@ void CL_Perlin::event1()
     runKernel();
 
     app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
+
+    app.getWorldGenerator()->formSuperRegions();
 }
 
 void CL_Perlin::event2()
@@ -200,6 +203,7 @@ void CL_Perlin::event2()
     runKernel();
 
     app.getGUI()->persistenceString = app.getToolbox()->combineStringAndFloat("Persistence: ", *persistence);
+    app.getWorldGenerator()->formSuperRegions();
 }
 
 void CL_Perlin::event3()
@@ -216,6 +220,7 @@ void CL_Perlin::event3()
     runKernel();
 
     app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
+    app.getWorldGenerator()->formSuperRegions();
 }
 
 void CL_Perlin::event4()
@@ -232,6 +237,7 @@ void CL_Perlin::event4()
     runKernel();
 
     app.getGUI()->frequencyString = app.getToolbox()->combineStringAndFloat("frequency: ", *frequency);
+    app.getWorldGenerator()->formSuperRegions();
 }
 
 void CL_Perlin::event5()
@@ -248,6 +254,7 @@ void CL_Perlin::event5()
     runKernel();
 
     app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
+    app.getWorldGenerator()->formSuperRegions();
 }
 
 void CL_Perlin::event6()
@@ -264,6 +271,7 @@ void CL_Perlin::event6()
     runKernel();
 
     app.getGUI()->octaveString = app.getToolbox()->combineStringAndInt("octaves: ", *octaves);
+    app.getWorldGenerator()->formSuperRegions();
 }
 
 void CL_Perlin::event7()
