@@ -64,13 +64,39 @@ void CL_Voronoi::loadProgram()
     // Create random coordiantes to work as the datapoints in the voronoi diagram
     // Also create colors according to the number of datapoints
 
+    int mountains = 100;
+    int flats = 300;
+    int hills = 100;
+    int mountains_added = 0;
+    int flats_added = 0;
+    int hills_added = 0;
+
     for (int i = 0; i < *data_points; i++)
     {
         voronoi_points_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         voronoi_points_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        colors[i] = app.getToolbox()->giveRandomInt(0, 5) * 0.1f;
-        middle_colors[i] = app.getToolbox()->giveRandomInt(1, 2) * 0.1f;
+        if (mountains_added < mountains)
+        {
+            mountains_added++;
+            colors[i] = 0.3f;
+        }
+        else if (flats_added < flats)
+        {
+            flats_added++;
+            colors[i] = 0.1f;
+        }
+        else if (hills_added < hills)
+        {
+            hills_added++;
+            colors[i] = 0.2f;
+        }
+        else
+        {
+            colors[i] = 0.0f;
+        }
+        middle_colors[i] = 0.0f;
     }
+    std::random_shuffle(colors, colors + *data_points);
 
     // Sort datapoints
     //std::sort(voronoi_points_x, voronoi_points_x + *data_points, std::greater<int>());

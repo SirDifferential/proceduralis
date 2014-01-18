@@ -31,9 +31,9 @@ void WorldGenerator::formSuperRegions()
     std::cout << "+WorldGenerator: Combining images" << std::endl;
     auto cells = app.getDataStorage()->getImage("voronoi_cells");
     //auto perlin = app.getDataStorage()->getImage("perlinnoise");
-    auto perlin = app.getDataStorage()->getImage("perlinblurred");
+    auto perlin = app.getDataStorage()->getImage("perlinnoise");
     auto heightmap = app.getDataStorage()->getImage("heightmap");
-    auto blurred = app.getDataStorage()->getImage("voronoiblurred");
+    auto voronoiblurred = app.getDataStorage()->getImage("voronoiblurred");
     if (heightmap == nullptr)
     {
         heightmap = ImagePtr(new sf::Image());
@@ -41,39 +41,69 @@ void WorldGenerator::formSuperRegions()
         app.getDataStorage()->storeImage("heightmap", heightmap);
     }
 
-    sf::Color perlincol;
-    sf::Color cellcol;
-    sf::Color blurredcol;
-    sf::Color outputcol;
-    sf::Color averagedcol;
-
+    sf::Color perlin_col;
+    sf::Color voronoi_col;
+    sf::Color blurred_voronoi_col;
+    
+    sf::Color output_col;
+    sf::Color averaged_col;
+    
     for (int i = 0; i < cells->getSize().x; i++)
     {
         for (int j = 0; j < cells->getSize().y; j++)
         {
-            perlincol = perlin->getPixel(i, j);
-            cellcol = cells->getPixel(i, j);
-            blurredcol = blurred->getPixel(i, j);
+            perlin_col = perlin->getPixel(i, j);
+            blurred_voronoi_col = voronoiblurred->getPixel(i, j);
+            voronoi_col = cells->getPixel(i, j);
 
-            outputcol.r = blurredcol.g / 270.0 * perlincol.r;
-            if (outputcol.r < 100)
+            // The blurred large voronoi cells mark oceans
+            output_col.r = blurred_voronoi_col.g / 270.0 * perlin_col.r;
+            
+            if (output_col.r < 100)
             {
-                outputcol.r = 0;
-                outputcol.b = 50;
-                outputcol.g = 0;
+                // Ocean
+                output_col.r = 0;
+                output_col.b = 50;
+                output_col.g = 0;
             }
             else
             {
-                outputcol.b = 50;
-                outputcol.g = 150;
+                // Land
+
+                //output_col.r = voronoi_col.r * (perlin_col.r / 100);
+
+                if (voronoi_col.r > 70)
+                {
+                    output_col.r = (perlin_col.r);
+                    output_col.g = (perlin_col.r);
+                    output_col.b = (perlin_col.r);
+                }
+                else if (voronoi_col.r > 45 && voronoi_col.r < 60)
+                {
+                    output_col.r = 100;
+                    output_col.g = 150;
+                    output_col.b = 100;
+                }
+                else
+                {
+                    output_col.r = 150;
+                    output_col.g = 255;
+                    output_col.b = 150;
+                }
+
+                //outputcol.r = perlincol.r * (cellcol.r+1);
+                //output_col.g = output_col.r;
+                //output_col.b = output_col.r;
+
+                //outputcol.b = 50;;
+                //outputcol.g = 150;
             }
 
-            
-            averagedcol.r = (outputcol.r + outputcol.g + outputcol.b) / 3;
-            averagedcol.g = averagedcol.r;
-            averagedcol.b = averagedcol.r;
-            averagedcol.a = 255;
-            heightmap->setPixel(i, j, outputcol);
+            averaged_col.r = (output_col.r + output_col.g + output_col.b) / 3;
+            averaged_col.g = averaged_col.r;
+            averaged_col.b = averaged_col.r;
+            averaged_col.a = 255;
+            heightmap->setPixel(i, j, output_col);
         }
     }
 
