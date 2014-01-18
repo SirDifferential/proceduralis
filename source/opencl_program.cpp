@@ -225,9 +225,10 @@ void CL_Program::cleanup()
 {
 }
 
-void CL_Program::setOutputTarget(SpritePtr s)
+void CL_Program::setOutputTarget(SpritePtr s, std::string n)
 {
     outputTarget = s;
+    outputName = n;
 }
 
 void CL_Program::event1() { }

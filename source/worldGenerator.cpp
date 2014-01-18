@@ -16,7 +16,10 @@ void WorldGenerator::init()
     SpritePtr perlinnoise = SpritePtr(new sf::Sprite());
     app.getDataStorage()->storeSprite("perlinnoise", perlinnoise);
     SpritePtr blurred = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("blurred", blurred);
+    app.getDataStorage()->storeSprite("voronoiblurred", blurred);
+    SpritePtr perlinblurred = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("perlinblurred", blurred);
+
 }
 
 void WorldGenerator::generate()
@@ -27,9 +30,10 @@ void WorldGenerator::formSuperRegions()
 {
     std::cout << "+WorldGenerator: Combining images" << std::endl;
     auto cells = app.getDataStorage()->getImage("voronoi_cells");
-    auto perlin = app.getDataStorage()->getImage("perlinnoise");
+    //auto perlin = app.getDataStorage()->getImage("perlinnoise");
+    auto perlin = app.getDataStorage()->getImage("perlinblurred");
     auto heightmap = app.getDataStorage()->getImage("heightmap");
-    auto blurred = app.getDataStorage()->getImage("blurred");
+    auto blurred = app.getDataStorage()->getImage("voronoiblurred");
     if (heightmap == nullptr)
     {
         heightmap = ImagePtr(new sf::Image());

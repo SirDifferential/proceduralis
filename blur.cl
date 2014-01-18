@@ -1,8 +1,8 @@
-float4 blurred_value(int2 coord, __read_only image2d_t input_data)
+float4 blurred_value(int2 coord, __read_only image2d_t input_data, __global int* blursize)
 {
     const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
 
-    int blur_size = 20;
+    int blur_size = *blursize;
     float sum_x = 0.0f;
     float sum_y = 0.0f;
     float sum_z = 0.0f;
@@ -30,7 +30,7 @@ float4 blurred_value(int2 coord, __read_only image2d_t input_data)
     return out;
 }
 
-__kernel void blur(__read_only image2d_t input_image, __write_only image2d_t output_image)
+__kernel void blur(__read_only image2d_t input_image, __write_only image2d_t output_image, __global int* blursize)
 {
     const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
     int x = get_global_id(0);
@@ -38,7 +38,7 @@ __kernel void blur(__read_only image2d_t input_image, __write_only image2d_t out
 	
 	int2 coord = (int2) (x, y);
     
-    float4 outvalue = blurred_value(coord, input_image);
+    float4 outvalue = blurred_value(coord, input_image, blursize);
 
     write_imagef(output_image, coord, outvalue);
 }

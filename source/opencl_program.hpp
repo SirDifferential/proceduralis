@@ -21,6 +21,7 @@ protected:
     std::string sourcepath;
 
     SpritePtr outputTarget;
+    std::string outputName;
 
 public:
     CL_Program(std::string s);
@@ -29,7 +30,7 @@ public:
     virtual void loadProgram() = 0;
     virtual void runKernel() = 0;
 
-    void setOutputTarget(SpritePtr s);
+    void setOutputTarget(SpritePtr s, std::string n);
 
     void print_errors(std::string function, cl_int error);
     void printPlatformInfo(cl::Platform p);

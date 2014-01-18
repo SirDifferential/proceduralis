@@ -166,10 +166,12 @@ void CL_Voronoi::runKernel()
         delete[] map_done;
         return;
     }
-    app.getSpriteUtils()->setPixels(outputTarget, "voronoi_cells", map_done, 1024, 1024);
+    app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
 
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
     temp->setInputBuffer(map_done);
+    temp->setBlurSize(20);
+    temp->setOutputTarget(app.getDataStorage()->getSprite("voronoiblurred"), "voronoiblurred");
     temp->runKernel();
     temp->setInputBuffer(NULL);
 

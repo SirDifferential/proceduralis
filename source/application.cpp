@@ -111,13 +111,13 @@ int Application::run()
     int start_s = clock();
 
     cl_voronoi->loadProgram();
-    cl_voronoi->setOutputTarget(datastorage->getSprite("voronoi_cells"));
+    cl_voronoi->setOutputTarget(datastorage->getSprite("voronoi_cells"), "voronoi_cells");
 
     cl_perlin->loadProgram();
-    cl_perlin->setOutputTarget(datastorage->getSprite("perlinnoise"));
+    cl_perlin->setOutputTarget(datastorage->getSprite("perlinnoise"), "perlinnoise");
 
     cl_blur->loadProgram();
-    cl_blur->setOutputTarget(datastorage->getSprite("blurred"));
+    cl_blur->setOutputTarget(datastorage->getSprite("voronoiblurred"), "voronoiblurred");
 
     programs["voronoi"] = cl_voronoi;
     programs["perlin"] = cl_perlin;

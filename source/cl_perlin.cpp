@@ -7,6 +7,7 @@
 #include "spriteutils.hpp"
 #include "datastorage.hpp"
 #include "worldGenerator.hpp"
+#include "cl_blur.hpp"
 
 CL_Perlin::CL_Perlin(std::string s) : CL_Program(s)
 {
@@ -155,7 +156,16 @@ void CL_Perlin::runKernel()
         delete[] map_done;
         return;
     }
-    app.getSpriteUtils()->setPixels(outputTarget, "perlinnoise", map_done, 1024, 1024);
+    app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
+
+    app.forceredraw();
+
+    std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
+    temp->setBlurSize(30);
+    temp->setInputBuffer(map_done);
+    temp->setOutputTarget(app.getDataStorage()->getSprite("perlinblurred"), "perlinblurred");
+    temp->runKernel();
+    temp->setInputBuffer(NULL);
 
     delete[] map_done;
 }

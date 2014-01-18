@@ -9,6 +9,8 @@
 
 CL_Blur::CL_Blur(std::string s) : CL_Program(s)
 {
+    blur_size = new int();
+    *blur_size = 5;
 }
 
 void CL_Blur::loadProgram()
@@ -24,6 +26,25 @@ void CL_Blur::loadProgram()
     {
         std::cout << "-OpenCL Exception: " << err.what() << ", " << err.err() << std::endl;
         print_errors("kernel()", error);
+    }
+
+    try
+    {    
+        cl_blur_size = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &error);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error at creating buffers: " << e.what() << ", " << e.err() << std::endl;
+    }
+
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_blur_size, CL_TRUE, 0, sizeof(int), blur_size, NULL, &event);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error pushing data in the device buffers: " << e.what() << ", " << e.err() << std::endl;
+        print_errors("commandQueue.enqueueWriteBuffer", error);
     }
 }
 
@@ -49,7 +70,7 @@ void CL_Blur::runKernel()
         delete[] map_done;
         return;
     }
-    app.getSpriteUtils()->setPixels(outputTarget, "blurred", map_done, 1024, 1024);
+    app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
 
     delete[] map_done;
 }
@@ -83,6 +104,8 @@ void CL_Blur::setInputBuffer(float* in)
     int y = 0;
     float value = 0.0f;
     
+    if (image_buffer_out != NULL)
+        delete[] image_buffer_out;
     image_buffer_out = new float[image_size];
     row_pitch = 1024 * 4 * sizeof(float);
     origin.push_back(0);
@@ -122,6 +145,21 @@ void CL_Blur::setInputBuffer(float* in)
     {
         std::cout << "-OpenCL: Error setting kernel arguments: " << err.what() << ", " << err.err() << std::endl;
         print_errors("kernel.setArg", error);
+    }
+}
+
+void CL_Blur::setBlurSize(int i)
+{
+    *blur_size = i;
+    try
+    {
+        error = commandQueue.enqueueWriteBuffer(cl_blur_size, CL_TRUE, 0, sizeof(int), blur_size, NULL, &event);
+        error = kernel.setArg(2, cl_blur_size);
+    }
+    catch (cl::Error err)
+    {
+        std::cout << "-OpenCL: Error setting blur size: " << err.what() << ", " << err.err() << std::endl;
+        print_errors("commandQueue.enqueueWriteBuffer", error);
     }
 }
 

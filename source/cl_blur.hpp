@@ -9,10 +9,12 @@ private:
     // Input and output buffers in CPU memory
     float* image_buffer_in;
     float* image_buffer_out;
+    int* blur_size;
 
     // Input and output buffers in OpenCL memory
     cl::Image2D* image_a;
     cl::Image2D* image_b;
+    cl::Buffer cl_blur_size;
 
     // Values used for setting offsets in image read / write operations
     cl::size_t<3> origin;
@@ -26,6 +28,7 @@ public:
     void cleanup();
 
     void setInputBuffer(float* in);
+    void setBlurSize(int i);
 
     // Events for changing constants
     void event1();

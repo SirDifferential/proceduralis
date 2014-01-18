@@ -19,24 +19,28 @@ void World::draw()
 {
     // Temp code: Render all sprites next to each other
     auto s1 = app.getDataStorage()->getSprite("voronoi_cells");
-    auto s2 = app.getDataStorage()->getSprite("perlinnoise");
+    auto s2 = app.getDataStorage()->getSprite("perlinblurred");
     auto s3 = app.getDataStorage()->getSprite("heightmap");
-    auto s4 = app.getDataStorage()->getSprite("blurred");
+    auto s4 = app.getDataStorage()->getSprite("voronoiblurred");
+    auto s5 = app.getDataStorage()->getSprite("perlinnoise");
 
     s1->setScale(0.2, 0.2);
     s2->setScale(0.2, 0.2);
     s3->setScale(0.2, 0.2);
     s4->setScale(0.2, 0.2);
+    s5->setScale(0.2, 0.2);
 
     s1->setPosition(10, 10);
     s2->setPosition(220, 10);
     s3->setPosition(430, 10);
     s4->setPosition(10, 220);
+    s5->setPosition(220, 220);
 
     app.getRenderer()->getRenderWindow()->draw(*s1);
     app.getRenderer()->getRenderWindow()->draw(*s2);
     app.getRenderer()->getRenderWindow()->draw(*s3);
     app.getRenderer()->getRenderWindow()->draw(*s4);
+    app.getRenderer()->getRenderWindow()->draw(*s5);
 }
 
 void World::work()
