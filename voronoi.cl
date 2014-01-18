@@ -5,9 +5,16 @@ float myhypot(float x, float y)
     return sqrt((x*x) + (y*y));
 }
 
-float mystrangehypot(float x, float y)
+float myabs(float x)
 {
-    return (sqrt((x*x) + (y*y)));
+    if (x < 0)
+        return x * -1;
+    return x;
+}
+
+float manhattan(float x1, float x2, float y1, float y2)
+{
+    return (myabs(x1 - x2) + myabs(y1 - y2));
 }
 
 // Simple brute force voronoi diagram
@@ -28,7 +35,8 @@ __kernel void voronoi(__global float* voronoi_points_x, __global float*  voronoi
     // to this (x,y) coordinate. This is stupid brute-forcing, but works on the GPU    
     for (int i = 0; i < *data_points; i++)
     {
-        d = myhypot(voronoi_points_x[i]-x, voronoi_points_y[i]-y);
+        //d = myhypot(voronoi_points_x[i]-x, voronoi_points_y[i]-y);
+        d = manhattan(voronoi_points_x[i], x, voronoi_points_y[i],y);
         if (d < dmin)
         {
             dmin = d;
@@ -49,7 +57,8 @@ __kernel void voronoi(__global float* voronoi_points_x, __global float*  voronoi
     
     for (int i = 0; i < *supercount; i++)
     {
-        d = mystrangehypot(superregions_x[i]-x, superregions_y[i]-y);
+        //d = myhypot(superregions_x[i]-x, superregions_y[i]-y);
+        d = manhattan(superregions_x[i], x, superregions_y[i],y);
         if (d < dmin)
         {
             dmin = d;
