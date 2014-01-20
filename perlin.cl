@@ -22,6 +22,16 @@ float Noise(int x, int y)
 float4 imageNoise(int x, int y, __read_only image2d_t random_values)
 {
     int2 coords = (int2)(x, y);
+    int2 s = get_image_dim(random_values);
+    if (coords.x < 0)
+        coords.x = 0;
+    else if (coords.x >= s.x)
+        coords.x = s.x - 1;
+    if (coords.y < 0)
+        coords.y = 0;
+    else if (coords.y >= s.y)
+        coords.y = s.y - 1;
+    
     
     return read_imagef(random_values, sampler, coords);
 }
