@@ -51,7 +51,7 @@ void CL_Voronoi::loadProgram()
     *data_points = 500;
 
     superregions = new int();
-    *superregions = 50;
+    *superregions = 80;
 
     voronoi_points_x = new float[*data_points];
     voronoi_points_y = new float[*data_points];
@@ -106,12 +106,28 @@ void CL_Voronoi::loadProgram()
     // Assign some color for each superregion
     // It is assumed here that the number of superregions is much smaller than the voronoi datapoints,
     // and a multiplication by 10 is performed without any checks
+
+    float sea_percentage = 70;
+    float lowlands_percentage = 80;
+    float midlands_percentage = 90;
+    float super_percentage = 0.0f;
+
     for (int i = 0; i < *superregions; i++)
     {
+        super_percentage = i / ((float)*superregions) * 100;
+        
         superregions_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         superregions_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        superregion_colors[i] = app.getToolbox()->giveRandomInt(1, 3)*0.1f;
+
+        if (super_percentage < sea_percentage)
+            superregion_colors[i] = 0.15f;
+        else if (super_percentage > sea_percentage && super_percentage < lowlands_percentage)
+            superregion_colors[i] = 0.2f;
+        else
+            superregion_colors[i] = 0.25f;
     }
+
+    //std::random_shuffle(superregion_colors, superregion_colors + *superregions);
 
     //std::sort(superregions_x, superregions_x + *superregions, std::greater<int>());
     //std::sort(superregions_y, superregions_y + *superregions, std::greater<int>());
@@ -194,9 +210,10 @@ void CL_Voronoi::runKernel()
     }
     app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
 
+    
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
     temp->setInputBuffer(map_done);
-    temp->setBlurSize(20);
+    temp->setBlurSize(15);
     temp->setOutputTarget(app.getDataStorage()->getSprite("voronoiblurred"), "voronoiblurred");
     temp->runKernel();
     temp->setInputBuffer(NULL);

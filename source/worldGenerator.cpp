@@ -30,7 +30,7 @@ void WorldGenerator::formSuperRegions()
 {
     std::cout << "+WorldGenerator: Combining images" << std::endl;
     auto cells = app.getDataStorage()->getImage("voronoi_cells");
-    //auto perlin = app.getDataStorage()->getImage("perlinnoise");
+    auto perlinblurred = app.getDataStorage()->getImage("perlinblurred");
     auto perlin = app.getDataStorage()->getImage("perlinnoise");
     auto heightmap = app.getDataStorage()->getImage("heightmap");
     auto voronoiblurred = app.getDataStorage()->getImage("voronoiblurred");
@@ -44,6 +44,7 @@ void WorldGenerator::formSuperRegions()
     sf::Color perlin_col;
     sf::Color voronoi_col;
     sf::Color blurred_voronoi_col;
+    sf::Color blurred_perlin_col;
     
     sf::Color output_col;
     sf::Color averaged_col;
@@ -54,12 +55,17 @@ void WorldGenerator::formSuperRegions()
         {
             perlin_col = perlin->getPixel(i, j);
             blurred_voronoi_col = voronoiblurred->getPixel(i, j);
+            blurred_perlin_col = perlinblurred->getPixel(i, j);
             voronoi_col = cells->getPixel(i, j);
 
             // The blurred large voronoi cells mark oceans
-            output_col.r = blurred_voronoi_col.g / 270.0 * perlin_col.r;
-            
-            if (output_col.r < 100)
+            //output_col.r = (blurred_voronoi_col.g / 270.0) * (blurred_perlin_col.r/255.0) * 100;// * (perlin_col.r);
+            float height = blurred_voronoi_col.g / 255.0;
+            height = (1.5*height) * (blurred_perlin_col.r / 255.0);
+
+            output_col.r = height * 255;
+
+            if (height < 0.5)
             {
                 // Ocean
                 output_col.r = 0;
@@ -70,33 +76,9 @@ void WorldGenerator::formSuperRegions()
             {
                 // Land
 
-                //output_col.r = voronoi_col.r * (perlin_col.r / 100);
-
-                if (voronoi_col.r > 70)
-                {
-                    output_col.r = (perlin_col.r);
-                    output_col.g = (perlin_col.r);
-                    output_col.b = (perlin_col.r);
-                }
-                else if (voronoi_col.r > 45 && voronoi_col.r < 60)
-                {
-                    output_col.r = 100;
-                    output_col.g = 150;
-                    output_col.b = 100;
-                }
-                else
-                {
-                    output_col.r = 150;
-                    output_col.g = 255;
-                    output_col.b = 150;
-                }
-
-                //outputcol.r = perlincol.r * (cellcol.r+1);
-                //output_col.g = output_col.r;
-                //output_col.b = output_col.r;
-
-                //outputcol.b = 50;;
-                //outputcol.g = 150;
+                output_col.r = app.getToolbox()->linearInterpolate(0.0, 0.50, height) * 255;
+                output_col.g = app.getToolbox()->linearInterpolate(0.0, 0.50, height) * 255;
+                output_col.b = app.getToolbox()->linearInterpolate(0.0, 0.50, height) * 255;
             }
 
             averaged_col.r = (output_col.r + output_col.g + output_col.b) / 3;

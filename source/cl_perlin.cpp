@@ -12,11 +12,13 @@
 CL_Perlin::CL_Perlin(std::string s) : CL_Program(s)
 {
     frequency = new float();
-    *frequency = 0.3f;
+    //*frequency = 0.3f;
+    *frequency = 0.35f;
     persistence = new float();
-    *persistence = 1.3f;
+    //*persistence = 1.3f;
+    *persistence = 0.8f;
     octaves = new int();
-    *octaves = 10;
+    *octaves = 11;
 }
 
 void CL_Perlin::loadProgram()
@@ -47,6 +49,25 @@ void CL_Perlin::loadProgram()
     int x = -1;
     int y = 0;
     float value = 0.0f;
+
+    float low_areas = 70;
+    float medium_areas = 99.85;
+    float percentage_added = 0;
+
+    std::vector<float> perlin_randoms;
+    for (int i = 0; i < 1024*1024; i++)
+    {
+        percentage_added = (i / (1024.0*1024.0)) * 100;
+        if (percentage_added <= low_areas)
+            perlin_randoms.push_back(0.1f);//app.getToolbox()->giveRandomInt(0, 50) / 255.0f);
+        else if (percentage_added > low_areas && percentage_added <= medium_areas)
+            perlin_randoms.push_back(0.2f);//app.getToolbox()->giveRandomInt(50, 150) / 255.0f);
+        else
+            perlin_randoms.push_back(1.0f);//app.getToolbox()->giveRandomInt(150, 255) / 255.0f);
+    }
+
+    std::random_shuffle(perlin_randoms.begin(), perlin_randoms.end());
+
     for (int i = 3; i < 1024*1024*4; i += 4)
     {
         x += 1;
@@ -74,8 +95,8 @@ void CL_Perlin::loadProgram()
         image_buffer_in[i] = 1.0f;
         */
 
-        // Random values
-        value = app.getToolbox()->giveRandomInt(50, 255) / 255.0f;
+        // Random values from manually built random table
+        value = perlin_randoms.at(i/4);
         image_buffer_in[i-3] = value;
         image_buffer_in[i-2] = value;
         image_buffer_in[i-1] = value;
@@ -160,14 +181,12 @@ void CL_Perlin::runKernel()
 
     app.forceredraw();
 
-    /*
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
-    temp->setBlurSize(2);
+    temp->setBlurSize(10);
     temp->setInputBuffer(map_done);
     temp->setOutputTarget(app.getDataStorage()->getSprite("perlinblurred"), "perlinblurred");
     temp->runKernel();
     temp->setInputBuffer(NULL);
-    */
 
     delete[] map_done;
 }
