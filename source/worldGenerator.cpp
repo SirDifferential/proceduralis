@@ -58,14 +58,15 @@ void WorldGenerator::formSuperRegions()
             blurred_perlin_col = perlinblurred->getPixel(i, j);
             voronoi_col = cells->getPixel(i, j);
 
-            // The blurred large voronoi cells mark oceans
-            //output_col.r = (blurred_voronoi_col.g / 270.0) * (blurred_perlin_col.r/255.0) * 100;// * (perlin_col.r);
+            // The blurred large voronoi cells form the basic oceans / continents
             float height = blurred_voronoi_col.g / 255.0;
-            height = (1.5*height) * (blurred_perlin_col.r / 255.0);
+            // Perlin contains values 0.1, 0.2, 1.0, which have been blurred to form smooth areas
+            float perlin_multiplier = blurred_perlin_col.r / 255.0;
 
-            output_col.r = height * 255;
+            // To the height the blurred perlin noise is added to form some fractaline coastline / islands
+            height = height * (app.getToolbox()->linearInterpolate(0.45, 1.25, perlin_multiplier));
 
-            if (height < 0.5)
+            if (height < 0.62)
             {
                 // Ocean
                 output_col.r = 0;
@@ -76,9 +77,9 @@ void WorldGenerator::formSuperRegions()
             {
                 // Land
 
-                output_col.r = app.getToolbox()->linearInterpolate(0.0, 0.50, height) * 255;
-                output_col.g = app.getToolbox()->linearInterpolate(0.0, 0.50, height) * 255;
-                output_col.b = app.getToolbox()->linearInterpolate(0.0, 0.50, height) * 255;
+                output_col.r = app.getToolbox()->linearInterpolate(0.62, 1.0, height) * 255;
+                output_col.g = app.getToolbox()->linearInterpolate(0.62, 1.0, height) * 255;
+                output_col.b = app.getToolbox()->linearInterpolate(0.62, 1.0, height) * 255;
             }
 
             averaged_col.r = (output_col.r + output_col.g + output_col.b) / 3;

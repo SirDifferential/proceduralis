@@ -51,7 +51,7 @@ void CL_Voronoi::loadProgram()
     *data_points = 500;
 
     superregions = new int();
-    *superregions = 80;
+    *superregions = 55;
 
     voronoi_points_x = new float[*data_points];
     voronoi_points_y = new float[*data_points];
@@ -122,7 +122,7 @@ void CL_Voronoi::loadProgram()
         if (super_percentage < sea_percentage)
             superregion_colors[i] = 0.15f;
         else if (super_percentage > sea_percentage && super_percentage < lowlands_percentage)
-            superregion_colors[i] = 0.2f;
+            superregion_colors[i] = 0.20f;
         else
             superregion_colors[i] = 0.25f;
     }
@@ -213,7 +213,7 @@ void CL_Voronoi::runKernel()
     
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
     temp->setInputBuffer(map_done);
-    temp->setBlurSize(15);
+    temp->setBlurSize(10);
     temp->setOutputTarget(app.getDataStorage()->getSprite("voronoiblurred"), "voronoiblurred");
     temp->runKernel();
     temp->setInputBuffer(NULL);
