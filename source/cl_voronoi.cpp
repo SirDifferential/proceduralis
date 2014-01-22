@@ -51,7 +51,7 @@ void CL_Voronoi::loadProgram()
     *data_points = 500;
 
     superregions = new int();
-    *superregions = 55;
+    *superregions = 105;
 
     voronoi_points_x = new float[*data_points];
     voronoi_points_y = new float[*data_points];
@@ -107,9 +107,9 @@ void CL_Voronoi::loadProgram()
     // It is assumed here that the number of superregions is much smaller than the voronoi datapoints,
     // and a multiplication by 10 is performed without any checks
 
-    float sea_percentage = 70;
-    float lowlands_percentage = 80;
-    float midlands_percentage = 90;
+    float sea_percentage = 60;
+    float lowlands_percentage = 70;
+    float midlands_percentage = 80;
     float super_percentage = 0.0f;
 
     for (int i = 0; i < *superregions; i++)
