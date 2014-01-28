@@ -11,9 +11,9 @@ float4 blurred_value(int2 coord, __read_only image2d_t input_data, __global int*
     
     int2 s = get_image_dim(input_data);
 
-    for (int a = -blur_size; a < blur_size; a++)
+    for (int a = -blur_size; a <= blur_size; a++)
     {
-        for (int b = -blur_size; b < blur_size; b++)
+        for (int b = -blur_size; b <= blur_size; b++)
         {
             int2 coords = (int2)(coord.x + a, coord.y + b);
             if (coords.x < 0)

@@ -33,7 +33,7 @@ void SpriteUtils::setPixels(SpritePtr target, std::string name, float* buffer, u
         c.r = buffer[i-3]*255;
         c.g = buffer[i-2]*255;
         c.b = buffer[i-1]*255;
-        c.a = buffer[i]*255;
+        c.a = 255 + buffer[i]*255;
         sprite_image->setPixel(x, y, c);
     }
 

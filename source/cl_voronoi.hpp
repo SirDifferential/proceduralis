@@ -22,9 +22,11 @@ private:
     // Constants used by the OpenCL program, in CPU memory
     float* voronoi_points_x;
     float* voronoi_points_y;
+    int* region_indices;
     float* superregions_x;
     float* superregions_y;
     float* superregion_colors;
+    int* superregion_indices;
     int* data_points;
     int* superregions;
     float* colors;
@@ -35,8 +37,10 @@ private:
     cl::Buffer cl_superregions;
     cl::Buffer cl_voronoi_points_x;
     cl::Buffer cl_voronoi_points_y;
+    cl::Buffer cl_region_indices;
     cl::Buffer cl_superregions_x;
     cl::Buffer cl_superregions_y;
+    cl::Buffer cl_superregion_indices;
     cl::Buffer cl_colors;
     cl::Buffer cl_middle_colors;
     cl::Buffer cl_superregion_colors;

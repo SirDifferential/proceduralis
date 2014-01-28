@@ -60,41 +60,48 @@ void CL_Voronoi::loadProgram()
     colors = new float[*data_points];
     middle_colors = new float[*data_points];
     superregion_colors = new float[*superregions];
+    region_indices = new int[*data_points];
+    superregion_indices = new int[*superregions];
 
     // Create random coordiantes to work as the datapoints in the voronoi diagram
     // Also create colors according to the number of datapoints
 
-    int mountains = 100;
-    int flats = 300;
-    int hills = 100;
-    int mountains_added = 0;
-    int flats_added = 0;
-    int hills_added = 0;
+    float region_mountains = 20;
+    float region_flats = 60;
+    float region_hills = 80;
+    float region_lowland = 100;
+    float percentage_added = 0.0f;
 
     for (int i = 0; i < *data_points; i++)
     {
         voronoi_points_x[i] = app.getToolbox()->giveRandomInt(0, 1024);
         voronoi_points_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
-        if (mountains_added < mountains)
+
+        percentage_added  = i / ((float)*data_points) * 100;
+
+        if (percentage_added < region_mountains)
         {
-            mountains_added++;
-            colors[i] = 0.3f;
+            colors[i] = 1.0f;
         }
-        else if (flats_added < flats)
+        else if (percentage_added > region_mountains && percentage_added < region_flats)
         {
-            flats_added++;
-            colors[i] = 0.1f;
+            colors[i] = 0.5f;
         }
-        else if (hills_added < hills)
+        else if (percentage_added > region_flats && percentage_added < region_hills)
         {
-            hills_added++;
+            colors[i] = 0.7f;
+        }
+        else if (percentage_added > region_hills && percentage_added < region_lowland)
+        {
             colors[i] = 0.2f;
         }
         else
         {
+            // should not happen
             colors[i] = 0.0f;
         }
         middle_colors[i] = 0.0f;
+        region_indices[i] = i;
     }
     std::random_shuffle(colors, colors + *data_points);
 
@@ -120,11 +127,16 @@ void CL_Voronoi::loadProgram()
         superregions_y[i] = app.getToolbox()->giveRandomInt(0, 1024);
 
         if (super_percentage < sea_percentage)
+        {
             superregion_colors[i] = 0.15f;
+            //std::cout << "Created sea region to " << superregions_x[i] << ", " << superregions_y[i] << std::endl;
+        }
         else if (super_percentage > sea_percentage && super_percentage < lowlands_percentage)
             superregion_colors[i] = 0.20f;
         else
             superregion_colors[i] = 0.25f;
+
+        superregion_indices[i] = i;
     }
 
     //std::random_shuffle(superregion_colors, superregion_colors + *superregions);
@@ -147,6 +159,8 @@ void CL_Voronoi::loadProgram()
         cl_superregions_y = cl::Buffer(context, CL_MEM_READ_WRITE, superregions_size, NULL, &error);
         cl_superregions = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &error);
         cl_superregion_colors = cl::Buffer(context, CL_MEM_READ_WRITE, superregions_size, NULL, &error);
+        cl_region_indices = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int) * *data_points, NULL, &error);
+        cl_superregion_indices = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int) * *superregions, NULL, &error);
     }
     catch (cl::Error e)
     {
@@ -165,6 +179,8 @@ void CL_Voronoi::loadProgram()
         error = commandQueue.enqueueWriteBuffer(cl_superregions_y, CL_TRUE, 0, superregions_size, superregions_y, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_superregion_colors, CL_TRUE, 0, superregions_size, superregion_colors, NULL, &event);
         error = commandQueue.enqueueWriteBuffer(cl_superregions, CL_TRUE, 0, sizeof(int), superregions, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_region_indices, CL_TRUE, 0, sizeof(int), region_indices, NULL, &event);
+        error = commandQueue.enqueueWriteBuffer(cl_superregion_indices, CL_TRUE, 0, sizeof(int), superregion_indices, NULL, &event);
     }
     catch (cl::Error e)
     {
@@ -184,6 +200,8 @@ void CL_Voronoi::loadProgram()
         error = kernel.setArg(7, cl_superregions);
         error = kernel.setArg(8, *image_b);
         error = kernel.setArg(9, cl_middle_colors);
+        error = kernel.setArg(10, cl_region_indices);
+        error = kernel.setArg(11, cl_superregion_indices);
     }
     catch (cl::Error err)
     {
@@ -237,6 +255,9 @@ void CL_Voronoi::cleanup()
     delete[] colors;
     delete[] superregion_colors;
     delete[] middle_colors;
+
+    delete[] region_indices;
+    delete[] superregion_indices;
 
     delete data_points;
     delete superregions;

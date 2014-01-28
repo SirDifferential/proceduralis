@@ -64,9 +64,26 @@ void WorldGenerator::formSuperRegions()
             float perlin_multiplier = blurred_perlin_col.r / 255.0;
 
             // To the height the blurred perlin noise is added to form some fractaline coastline / islands
-            height = height * (app.getToolbox()->linearInterpolate(0.45, 1.25, perlin_multiplier));
+            height = height * (app.getToolbox()->linearInterpolate(0.50, 1.25, perlin_multiplier));
 
-            if (height < 0.62)
+            // The smaller voronoi cells are in range of 0.1 - 0.5
+            // 0.1: lowlands
+            // 0.5: flats
+            // 0.7: hills
+            // 1.0 mountains
+            // First interpolate the small region value to range 0.8-1.2)
+            // Take the existing height and multiply it by the small cell height
+            float region_multiplier_1 = blurred_voronoi_col.r / 255.0;
+            float region_multiplier_2 = voronoi_col.r / 255.0;
+            height = height * (app.getToolbox()->linearInterpolate(0.8, 1.2, region_multiplier_1)) * (app.getToolbox()->linearInterpolate(0.8, 1.2, region_multiplier_2)) ;
+
+            // Temperature zones are affected by the following: Latitude, height, mountains, oceanic currents
+            // Latitude: In DF style, pick one end of the map by random and use that for cold. Use the other as hot
+            // Height: Decrease temperature based on height using some kind of logarithmic function
+            // Mountains: Split temperature zones near mountains
+            // Oceanic currents: Generate some random streams that increase the temperature on some areas of the world
+
+            if (height < 0.60)
             {
                 // Ocean
                 output_col.r = 0;
