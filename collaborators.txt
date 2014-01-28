@@ -1,0 +1,1 @@
+RantingHuman: Fixed a bug with blur.cl having off-by-one error
