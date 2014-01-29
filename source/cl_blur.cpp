@@ -11,7 +11,7 @@ CL_Blur::CL_Blur(std::string s) : CL_Program(s)
 {
     blur_size = new int();
     *blur_size = 5;
-    kernelSigma = 20.5;
+    kernelSigma = 200;
 }
 
 void CL_Blur::loadProgram()

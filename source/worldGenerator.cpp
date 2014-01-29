@@ -59,12 +59,13 @@ void WorldGenerator::formSuperRegions()
             voronoi_col = cells->getPixel(i, j);
 
             // The blurred large voronoi cells form the basic oceans / continents
+            // Possible values are 0.10, 0.20, 0.25, which are blurred smoothly
             float height = blurred_voronoi_col.g / 255.0;
-            // Perlin contains values 0.1, 0.2, 1.0, which have been blurred to form smooth areas
+            // Perlin contains values 0.1, 0.5, 1.0, which have been blurred to form smooth areas
             float perlin_multiplier = blurred_perlin_col.r / 255.0;
 
             // To the height the blurred perlin noise is added to form some fractaline coastline / islands
-            height = height * (app.getToolbox()->linearInterpolate(0.50, 1.25, perlin_multiplier));
+            height = height * (app.getToolbox()->linearInterpolate(0.8, 1.75, perlin_multiplier));
 
             // The smaller voronoi cells are in range of 0.1 - 0.5
             // 0.1: lowlands
@@ -75,7 +76,7 @@ void WorldGenerator::formSuperRegions()
             // Take the existing height and multiply it by the small cell height
             float region_multiplier_1 = blurred_voronoi_col.r / 255.0;
             float region_multiplier_2 = voronoi_col.r / 255.0;
-            height = height * (app.getToolbox()->linearInterpolate(0.8, 1.2, region_multiplier_1)) * (app.getToolbox()->linearInterpolate(0.8, 1.2, region_multiplier_2)) ;
+            height = height * (app.getToolbox()->linearInterpolate(0.5, 1.2, region_multiplier_1)) * (app.getToolbox()->linearInterpolate(0.9, 1.1, region_multiplier_2)) ;
 
             // Temperature zones are affected by the following: Latitude, height, mountains, oceanic currents
             // Latitude: In DF style, pick one end of the map by random and use that for cold. Use the other as hot
@@ -83,7 +84,7 @@ void WorldGenerator::formSuperRegions()
             // Mountains: Split temperature zones near mountains
             // Oceanic currents: Generate some random streams that increase the temperature on some areas of the world
 
-            if (height < 0.15)
+            if (height < 0.19)
             {
                 // Ocean
                 output_col.r = 0;
@@ -94,9 +95,9 @@ void WorldGenerator::formSuperRegions()
             {
                 // Land
 
-                output_col.r = app.getToolbox()->linearInterpolate(0.62, 1.0, height) * 255;
-                output_col.g = app.getToolbox()->linearInterpolate(0.62, 1.0, height) * 255;
-                output_col.b = app.getToolbox()->linearInterpolate(0.62, 1.0, height) * 255;
+                output_col.r = app.getToolbox()->linearInterpolate(0.19, 1.0, height) * 255;
+                output_col.g = app.getToolbox()->linearInterpolate(0.19, 1.0, height) * 255;
+                output_col.b = app.getToolbox()->linearInterpolate(0.19, 1.0, height) * 255;
             }
 
             averaged_col.r = (output_col.r + output_col.g + output_col.b) / 3;

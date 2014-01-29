@@ -50,8 +50,8 @@ void CL_Perlin::loadProgram()
     int y = 0;
     float value = 0.0f;
 
-    float low_areas = 70;
-    float medium_areas = 99.85;
+    float low_areas = 90;
+    float medium_areas = 95;
     float percentage_added = 0;
 
     std::vector<float> perlin_randoms;
@@ -59,9 +59,9 @@ void CL_Perlin::loadProgram()
     {
         percentage_added = (i / (1024.0*1024.0)) * 100;
         if (percentage_added <= low_areas)
-            perlin_randoms.push_back(0.1f);//app.getToolbox()->giveRandomInt(0, 50) / 255.0f);
+            perlin_randoms.push_back(0.01);//app.getToolbox()->giveRandomInt(0, 50) / 255.0f);
         else if (percentage_added > low_areas && percentage_added <= medium_areas)
-            perlin_randoms.push_back(0.2f);//app.getToolbox()->giveRandomInt(50, 150) / 255.0f);
+            perlin_randoms.push_back(0.5f);//app.getToolbox()->giveRandomInt(50, 150) / 255.0f);
         else
             perlin_randoms.push_back(1.0f);//app.getToolbox()->giveRandomInt(150, 255) / 255.0f);
     }

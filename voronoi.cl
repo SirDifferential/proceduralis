@@ -18,7 +18,7 @@ float manhattan(float x1, float x2, float y1, float y2)
 }
 
 // Simple brute force voronoi diagram
-__kernel void voronoi(__global float* voronoi_points_x, __global float*  voronoi_points_y, __global float* colors, __global int* data_points, __global float* superregions_x, __global float* superregions_y, __global float* supercolors, __global int* supercount, __write_only image2d_t heightmap, __global float* middle_colors)
+__kernel void voronoi(__global float* voronoi_points_x, __global float*  voronoi_points_y, __global float* colors, __global int* data_points, __global float* superregions_x, __global float* superregions_y, __global float* supercolors, __global int* supercount, __write_only image2d_t heightmap, __global float* middle_colors, __global int* region_indices, __global int* superregion_indices)
 {
     // Get the (x,y) coordinates of our desired point
     int x = get_global_id(0);
@@ -48,6 +48,9 @@ __kernel void voronoi(__global float* voronoi_points_x, __global float*  voronoi
     float uppercell = middle_colors[voronoi_cell];
 	float4 outvalue;
 	outvalue.x = voronoi_color;
+
+    // Remember the index used for this pixel
+    outvalue.z = region_indices[voronoi_cell];
     
     // Now see to which superregion this point belongs
     
@@ -69,7 +72,11 @@ __kernel void voronoi(__global float* voronoi_points_x, __global float*  voronoi
     float supercol = supercolors[super_cell];
     
 	outvalue.y = supercol;
-	outvalue.z = 0.0f;
-	outvalue.w = 1.0f;
+	
+    // Remember the superindex used for this pixel
+    outvalue.w = superregion_indices[super_cell];
+
+    outvalue.w = 1;
+
 	write_imagef(heightmap, coord, outvalue);
 }

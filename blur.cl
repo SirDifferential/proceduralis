@@ -52,13 +52,23 @@ float4 gaussianBlur(int2 coord, __read_only image2d_t input_data, __global int* 
     float sum_y = 0.0f;
     float sum_z = 0.0f;
     float sum_w = 0.0f;
+    int2 s = get_image_dim(input_data);
 
-    for (int i = -blur_size/2; i < blur_size/2; i++)
+    for (int i = -blur_size/2; i <= blur_size/2; i++)
     {
-        for (int j = -blur_size/2; j < blur_size/2; j++)
+        for (int j = -blur_size/2; j <= blur_size/2; j++)
         {
-            int2 kernelcoords = (int2) (i + blur_size/2, j + blur_size/2);
+            int2 kernelcoords = (int2) (i + (blur_size/2), j + (blur_size/2));
             int2 coords = (int2)(coord.x + i, coord.y + j);
+
+            if (coords.x < 0)
+                coords.x = s.x - abs(i);
+            else if (coords.x >= s.x)
+                coords.x = abs(i);
+            if (coords.y < 0)
+                coords.y = s.y - abs(j);
+            else if (coords.y >= s.y)
+                coords.y = abs(j);
 
             color = read_imagef(input_data, sampler, coords);
             multiplier = read_imagef(blurkernel, sampler, kernelcoords).x;
@@ -86,6 +96,7 @@ __kernel void blur(__read_only image2d_t input_image, __write_only image2d_t out
 	int2 coord = (int2) (x, y);
     
     float4 outvalue = gaussianBlur(coord, input_image, blursize, blurkernel);
+    //float4 outvalue = blurredValue(coord, input_image, blursize);
 
     write_imagef(output_image, coord, outvalue);
 }
