@@ -3,7 +3,7 @@ float4 blurred_value(int2 coord, __read_only image2d_t input_data, __global int*
     const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
 
     int blur_size = *blursize;
-    int blur_size_squared = blur_size*blur_size;
+    int blur_size_squared = (2*blur_size)*(2*blur_size);
     float sum_x = 0.0f;
     float sum_y = 0.0f;
     float sum_z = 0.0f;
@@ -40,7 +40,44 @@ float4 blurred_value(int2 coord, __read_only image2d_t input_data, __global int*
     return out;
 }
 
-__kernel void blur(__read_only image2d_t input_image, __write_only image2d_t output_image, __global int* blursize)
+float4 gaussianBlur(int2 coord, __read_only image2d_t input_data, __global int* blursize, __read_only image2d_t blurkernel)
+{
+
+    const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+
+    int blur_size = *blursize;
+    float4 color;
+    float multiplier = 0.0f;
+    float sum_x = 0.0f;
+    float sum_y = 0.0f;
+    float sum_z = 0.0f;
+    float sum_w = 0.0f;
+
+    for (int i = -blur_size/2; i < blur_size/2; i++)
+    {
+        for (int j = -blur_size/2; j < blur_size/2; j++)
+        {
+            int2 kernelcoords = (int2) (i + blur_size/2, j + blur_size/2);
+            int2 coords = (int2)(coord.x + i, coord.y + j);
+
+            color = read_imagef(input_data, sampler, coords);
+            multiplier = read_imagef(blurkernel, sampler, kernelcoords).x;
+            sum_x += color.x * multiplier;
+            sum_y += color.y * multiplier;
+            sum_z += color.z * multiplier;
+            sum_w += color.w * multiplier;
+        }
+    }
+
+    float4 out;
+    out.x = sum_x;
+    out.y = sum_y;
+    out.z = sum_z;
+    out.w = sum_w;
+    return out;
+}
+
+__kernel void blur(__read_only image2d_t input_image, __write_only image2d_t output_image, __global int* blursize, __read_only image2d_t blurkernel)
 {
     const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
     int x = get_global_id(0);
@@ -48,7 +85,7 @@ __kernel void blur(__read_only image2d_t input_image, __write_only image2d_t out
 	
 	int2 coord = (int2) (x, y);
     
-    float4 outvalue = blurred_value(coord, input_image, blursize);
+    float4 outvalue = gaussianBlur(coord, input_image, blursize, blurkernel);
 
     write_imagef(output_image, coord, outvalue);
 }

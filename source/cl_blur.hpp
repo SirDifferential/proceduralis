@@ -10,11 +10,14 @@ private:
     float* image_buffer_in;
     float* image_buffer_out;
     int* blur_size;
+    float** gaussKernel;
+    double kernelSigma;
 
     // Input and output buffers in OpenCL memory
     cl::Image2D* image_a;
     cl::Image2D* image_b;
     cl::Buffer cl_blur_size;
+    cl::Image2D* cl_gaussKernel;
 
     // Values used for setting offsets in image read / write operations
     cl::size_t<3> origin;
@@ -26,6 +29,8 @@ public:
     void loadProgram();
     void runKernel();
     void cleanup();
+
+    void createGaussKernel(int rad, double sig);
 
     void setInputBuffer(float* in);
     void setBlurSize(int i);

@@ -182,7 +182,7 @@ void CL_Perlin::runKernel()
     app.forceredraw();
 
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
-    temp->setBlurSize(10);
+    temp->setBlurSize(11);
     temp->setInputBuffer(map_done);
     temp->setOutputTarget(app.getDataStorage()->getSprite("perlinblurred"), "perlinblurred");
     temp->runKernel();

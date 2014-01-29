@@ -11,6 +11,7 @@ CL_Blur::CL_Blur(std::string s) : CL_Program(s)
 {
     blur_size = new int();
     *blur_size = 5;
+    kernelSigma = 20.5;
 }
 
 void CL_Blur::loadProgram()
@@ -73,6 +74,126 @@ void CL_Blur::runKernel()
     app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
 
     delete[] map_done;
+}
+
+// Calculates Gaussian convolution
+double gaussianConvolution(int x, int y, double sigma)
+{
+    double e = 2.71828182846;
+    double pi = 3.14159;
+    double left_side = 1 / (2.0 * pi * (sigma*sigma));
+    double right_side = pow(e, -1*( (x*x) + (y*y) / (2 * (sigma*sigma)) ));
+    double out = left_side * right_side;
+    return out;
+}
+
+void CL_Blur::createGaussKernel(int radius, double sigma)
+{
+    if (gaussKernel != NULL)
+        delete[] gaussKernel;
+    
+    gaussKernel = app.getToolbox()->giveFloatArray2D(radius, radius);
+
+    int distance_x = 0;
+    int distance_y = 0;
+    double sum = 0.0;
+
+    int W = radius;
+    double mean = W/2;
+    for (int x = 0; x < W; ++x) for (int y = 0; y < W; ++y)
+    {
+        gaussKernel[x][y] = exp( -0.5 * (pow((x-mean)/sigma, 2.0) + pow((y-mean)/sigma,2.0)) )
+                            / (2 * 3.14159 * sigma * sigma);
+        sum += gaussKernel[x][y];
+    }
+    
+    
+    /*
+    // calculate gaussian convolution kernel
+    for (int i = 0; i < radius; i++)
+    {
+        for (int j = 0; j < radius; j++)
+        {
+            // How far this element is from the center
+            distance_x = abs(radius/2 - i);
+            distance_y = abs(radius/2 - j);
+
+            // calculate the actual gaussian convolution value for this element
+            gaussKernel[i][j] = gaussianConvolution(distance_x, distance_y, sigma);
+
+            // Remember the total sum of all values so normalization can be performed
+            sum += gaussKernel[i][j];
+        }
+    }
+    */
+
+    // Normalize values so the kernel adds up to 1
+    for (int i = 0; i < radius; i++)
+    {
+        for (int j = 0; j < radius; j++)
+        {
+            gaussKernel[i][j] = gaussKernel[i][j] / sum;
+        }
+    }
+
+    float* tempkern = new float[radius*radius];
+    int i = 0;
+    for (int x = 0; x < radius; x++)
+    {
+        for (int y = 0; y < radius; y++)
+        {
+            tempkern[i] = gaussKernel[x][y];
+            i++;
+        }
+    }
+
+    cl::ImageFormat format;
+    format.image_channel_data_type = CL_FLOAT;
+    format.image_channel_order = CL_LUMINANCE;
+
+    size_t row_pitch2 = radius * sizeof(float);
+    cl::size_t<3> origin2;
+    origin2.push_back(0);
+    origin2.push_back(0);
+    origin2.push_back(0);
+
+    cl::size_t<3> region2;
+    region2.push_back(radius);
+    region2.push_back(radius);
+    region2.push_back(1);
+
+    int image_size = radius*radius;
+
+    try
+    {
+        cl_gaussKernel = new cl::Image2D(context, CL_MEM_READ_ONLY, format, radius, radius, 0);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error at creating buffers: " << e.what() << ", " << e.err() << std::endl;
+    }
+
+    try
+    {
+        error = commandQueue.enqueueWriteImage(*cl_gaussKernel, CL_TRUE, origin2, region2, row_pitch2, 0, (void*) tempkern);
+    }
+    catch (cl::Error e)
+    {
+        std::cout << "!OpenCL: Error pushing data in the device buffers: " << e.what() << ", " << e.err() << std::endl;
+        print_errors("commandQueue.enqueueWriteBuffer", error);
+    }
+
+    try
+    {
+        error = kernel.setArg(3, *cl_gaussKernel);
+    }
+    catch (cl::Error err)
+    {
+        std::cout << "-OpenCL: Error setting kernel arguments: " << err.what() << ", " << err.err() << std::endl;
+        print_errors("kernel.setArg", error);
+    }
+
+    delete[] tempkern;
 }
 
 
@@ -151,6 +272,9 @@ void CL_Blur::setInputBuffer(float* in)
 void CL_Blur::setBlurSize(int i)
 {
     *blur_size = i;
+
+    createGaussKernel(*blur_size, kernelSigma);
+
     try
     {
         error = commandQueue.enqueueWriteBuffer(cl_blur_size, CL_TRUE, 0, sizeof(int), blur_size, NULL, &event);

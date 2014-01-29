@@ -83,7 +83,7 @@ void WorldGenerator::formSuperRegions()
             // Mountains: Split temperature zones near mountains
             // Oceanic currents: Generate some random streams that increase the temperature on some areas of the world
 
-            if (height < 0.60)
+            if (height < 0.15)
             {
                 // Ocean
                 output_col.r = 0;
