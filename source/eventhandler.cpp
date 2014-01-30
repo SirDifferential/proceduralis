@@ -2,6 +2,7 @@
 #include "eventhandler.hpp"
 #include "renderer.hpp"
 #include "toolbox.hpp"
+#include "datastorage.hpp"
 
 #include "opencl_program.hpp"
 
@@ -64,6 +65,30 @@ void EventHandler::checkEvents()
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
     {
-        // Do something with left
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
+        auto pos = heightmap->getPosition();
+        pos.x += 5;
+        heightmap->setPosition(pos);
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    {
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
+        auto pos = heightmap->getPosition();
+        pos.x -= 5;
+        heightmap->setPosition(pos);
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    {
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
+        auto pos = heightmap->getPosition();
+        pos.y += 5;
+        heightmap->setPosition(pos);
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    {
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
+        auto pos = heightmap->getPosition();
+        pos.y -= 5;
+        heightmap->setPosition(pos);
     }
 }

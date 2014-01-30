@@ -66,7 +66,7 @@ void CL_Voronoi::loadProgram()
     // Create random coordiantes to work as the datapoints in the voronoi diagram
     // Also create colors according to the number of datapoints
 
-    float region_mountains = 20;
+    float region_mountains = 40;
     float region_flats = 60;
     float region_hills = 80;
     float region_lowland = 100;

@@ -11,10 +11,10 @@ public:
     void init();
 
     void generate();
-    float** diamondSquare();
     ImagePtr voronoi();
 
     void formSuperRegions();
+    void runRivers();
 };
 
 #endif

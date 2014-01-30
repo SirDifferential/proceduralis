@@ -47,7 +47,6 @@ void WorldGenerator::formSuperRegions()
     sf::Color blurred_perlin_col;
     
     sf::Color output_col;
-    sf::Color averaged_col;
     
     for (int i = 0; i < cells->getSize().x; i++)
     {
@@ -65,7 +64,7 @@ void WorldGenerator::formSuperRegions()
             float perlin_multiplier = blurred_perlin_col.r / 255.0;
 
             // To the height the blurred perlin noise is added to form some fractaline coastline / islands
-            height = height * (app.getToolbox()->linearInterpolate(0.8, 1.75, perlin_multiplier));
+            height = height * (app.getToolbox()->linearInterpolate(0.8, 2.10, perlin_multiplier));
 
             // The smaller voronoi cells are in range of 0.1 - 0.5
             // 0.1: lowlands
@@ -76,7 +75,7 @@ void WorldGenerator::formSuperRegions()
             // Take the existing height and multiply it by the small cell height
             float region_multiplier_1 = blurred_voronoi_col.r / 255.0;
             float region_multiplier_2 = voronoi_col.r / 255.0;
-            height = height * (app.getToolbox()->linearInterpolate(0.5, 1.2, region_multiplier_1)) * (app.getToolbox()->linearInterpolate(0.9, 1.1, region_multiplier_2)) ;
+            height = height * (app.getToolbox()->linearInterpolate(0.5, 1.2, region_multiplier_1));// * (app.getToolbox()->linearInterpolate(0.99, 1.01, region_multiplier_2)) ;
 
             // Temperature zones are affected by the following: Latitude, height, mountains, oceanic currents
             // Latitude: In DF style, pick one end of the map by random and use that for cold. Use the other as hot
@@ -100,10 +99,6 @@ void WorldGenerator::formSuperRegions()
                 output_col.b = app.getToolbox()->linearInterpolate(0.19, 1.0, height) * 255;
             }
 
-            averaged_col.r = (output_col.r + output_col.g + output_col.b) / 3;
-            averaged_col.g = averaged_col.r;
-            averaged_col.b = averaged_col.r;
-            averaged_col.a = 255;
             heightmap->setPixel(i, j, output_col);
         }
     }
@@ -111,9 +106,192 @@ void WorldGenerator::formSuperRegions()
     app.getSpriteUtils()->setPixels(app.getDataStorage()->getSprite("heightmap"), "heightmap", heightmap);
 }
 
-float** WorldGenerator::diamondSquare()
+void WorldGenerator::runRivers()
 {
-    return nullptr;
+    // Get the finished heightmap
+    auto heightmap = app.getDataStorage()->getImage("heightmap");
+    
+    // Pick a random spot that is higher than the mountain limit height
+    sf::Color pixel;
+
+    sf::Vector2i riverOrigin(-1, -1);
+    unsigned int max_river_steps = 10000;
+
+    float mountain_min_height = 0.50f * 255;
+
+    float height_topleft = 0;
+    float height_top = 0;
+    float height_topright = 0;
+    float height_left = 0;
+    float height_right = 0;
+    float height_bottomleft = 0;
+    float height_bottom = 0;
+    float height_bottomright = 0;
+
+    bool checkleft = false;
+    bool checkright = false;
+    bool checktop = false;
+    bool checkbottom = false;
+    bool riverEnded = false;
+
+    sf::Vector2i current_river_coords;
+    sf::Vector2i next_river_coords;
+    unsigned int stepsTaken = 0;
+
+    for (int i = 0; i < heightmap->getSize().x; i++)
+    {
+        for (int j = 0; j < heightmap->getSize().y; j++)
+        {
+            pixel = heightmap->getPixel(i,j);
+            if (pixel.r >= mountain_min_height)
+            {
+                riverOrigin.x = i;
+                riverOrigin.y = j;
+                heightmap->setPixel(i, j, sf::Color::Red);
+                
+                // From this location, start going downhill
+                //bool riverEnded = false;
+
+                current_river_coords = riverOrigin;
+                float current_min = 0;
+                riverEnded = false;
+
+                while (!riverEnded || stepsTaken < max_river_steps)
+                {
+                    stepsTaken++;
+                    current_min = heightmap->getPixel(current_river_coords.x, current_river_coords.y).r;
+                    heightmap->setPixel(current_river_coords.x, current_river_coords.y, sf::Color::Green);
+
+                    checkleft = true;
+                    checkright = true;
+                    checktop = true;
+                    checkbottom = true;
+
+                    height_topleft = 1000;
+                    height_top = 1000;
+                    height_topright = 1000;
+                    height_left = 1000;
+                    height_right = 1000;
+                    height_bottomleft = 1000;
+                    height_bottom = 1000;
+                    height_bottomright = 1000;
+
+                    // See which direction has sharpest declining height
+                    if (current_river_coords.x <= 0)
+                    {
+                        checkleft = false;
+                    }
+                    else if (current_river_coords.x >= heightmap->getSize().x -1)
+                    {
+                        checkright = false;
+                    }
+                    if (current_river_coords.y <= 0)
+                    {
+                        checktop = false;
+                    }
+                    else if (current_river_coords.y >= heightmap->getSize().y -1)
+                    {
+                        checkbottom = false;
+                    }
+
+                    if (checkleft && checktop)
+                    {
+                        height_topleft = heightmap->getPixel(current_river_coords.x-1, current_river_coords.y-1).r;
+                        if (height_topleft < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y-1);
+                            current_min = height_topleft;
+                        }
+                    }
+                    if (checktop)
+                    {
+                        height_top = heightmap->getPixel(current_river_coords.x, current_river_coords.y-1).r;
+                        if (height_top < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x, current_river_coords.y-1);
+                            current_min = height_top;
+                        }
+                    }
+                    if (checktop && checkright)
+                    {
+                        height_topright = heightmap->getPixel(current_river_coords.x+1, current_river_coords.y-1).r;
+                        if (height_topright < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y-1);
+                            current_min = height_topright;
+                        }
+                    }
+                    if (checkleft)
+                    {
+                        height_left = heightmap->getPixel(current_river_coords.x-1, current_river_coords.y).r;
+                        if (height_left < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y);
+                            current_min = height_left;
+                        }
+                    }
+                    if (checkright)
+                    {
+                        height_right = heightmap->getPixel(current_river_coords.x+1, current_river_coords.y).r;
+                        if (height_right < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y);
+                            current_min = height_right;
+                        }
+                    }
+                    if (checkleft && checkbottom)
+                    {
+                        height_bottomleft = heightmap->getPixel(current_river_coords.x-1, current_river_coords.y+1).r;
+                        if (height_bottomleft < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y+1);
+                            current_min = height_bottomleft;
+                        }
+                    }
+                    if (checkbottom)
+                    {
+                        height_bottom = heightmap->getPixel(current_river_coords.x, current_river_coords.y+1).r;
+                        if (height_bottom < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x, current_river_coords.y+1);
+                            current_min = height_bottom;
+                        }
+                    }
+                    if (checkright && checkbottom)
+                    {
+                        height_bottomright = heightmap->getPixel(current_river_coords.x+1, current_river_coords.y+1).r;
+                        if (height_bottomright < current_min)
+                        {
+                            next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y+1);
+                            current_min = height_bottomright;
+                        }
+                    }
+
+                    if (current_min == heightmap->getPixel(current_river_coords.x, current_river_coords.y).r)
+                    if (checkleft)
+                        next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y);
+                    else if (checkbottom && checkright)
+                        next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y+1);
+                    else if (checktop && checkright)
+                        next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y-1);
+                    
+                    current_river_coords = next_river_coords;
+
+                    
+
+                    if (current_min < 0.20*255)
+                        riverEnded = true;
+
+                }
+            }
+        }
+    }
+
+    std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");
+
+    heightmap_text->update(*heightmap);
+    std::shared_ptr<sf::Sprite> heightmap_sprite = app.getDataStorage()->getSprite("heightmap");
+    heightmap_sprite->setTexture(*heightmap_text);
 }
 
 ImagePtr WorldGenerator::voronoi()
