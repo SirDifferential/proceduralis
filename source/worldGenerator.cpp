@@ -83,20 +83,24 @@ void WorldGenerator::formSuperRegions()
             // Mountains: Split temperature zones near mountains
             // Oceanic currents: Generate some random streams that increase the temperature on some areas of the world
 
-            if (height < 0.19)
+            if (height < 0.17)
             {
                 // Ocean
                 output_col.r = 0;
                 output_col.b = 50;
                 output_col.g = 0;
+                output_col.a = 255;
+                sea_pixels.push_back(sf::Vector2i(i, j));
             }
             else
             {
                 // Land
 
-                output_col.r = app.getToolbox()->linearInterpolate(0.19, 1.0, height) * 255;
-                output_col.g = app.getToolbox()->linearInterpolate(0.19, 1.0, height) * 255;
-                output_col.b = app.getToolbox()->linearInterpolate(0.19, 1.0, height) * 255;
+                // Add some more perlin noise to spice things up a tiny bit
+                height *= app.getToolbox()->linearInterpolate(0.9, 1.1, (blurred_perlin_col.r / 255.0));
+                output_col.r = app.getToolbox()->linearInterpolate(0.05, 1.0, height) * 255;
+                output_col.g = app.getToolbox()->linearInterpolate(0.05, 1.0, height) * 255;
+                output_col.b = app.getToolbox()->linearInterpolate(0.05, 1.0, height) * 255;
             }
 
             heightmap->setPixel(i, j, output_col);
@@ -104,6 +108,44 @@ void WorldGenerator::formSuperRegions()
     }
 
     app.getSpriteUtils()->setPixels(app.getDataStorage()->getSprite("heightmap"), "heightmap", heightmap);
+}
+
+const int dx[] = {+1, 0, -1, 0};
+const int dy[] = {0, +1, 0, -1};
+
+int component = 0;
+int recursion_depth = 0;
+
+void dfs(int x, int y, int current_label, int** labels, ImagePtr data)
+{
+    int row_count = 1024;
+    int column_count = 1024;
+    recursion_depth++;
+
+    if (x < 0 || x == row_count)
+        return;
+    if (y < 0 || y == column_count)
+        return;
+
+    int a = component;
+    int b = labels[x][y];
+
+    // If the label is already set or if this area is land (not ocean)
+    if (labels[x][y] != -1 || data->getPixel(x, y).b != 50)
+        return;
+
+    if (recursion_depth > 1000)
+    {
+        //std::cout << "Recursion depth maxed: " << recursion_depth << std::endl;
+        labels[x][y] = current_label;
+        return;
+    }
+
+    labels[x][y] = current_label;
+
+    for (int direction = 0; direction < 4; ++direction)
+        dfs(x +dx[direction], y + dy[direction], current_label, labels, data);
+
 }
 
 void WorldGenerator::runRivers()
@@ -114,174 +156,226 @@ void WorldGenerator::runRivers()
     // Pick a random spot that is higher than the mountain limit height
     sf::Color pixel;
 
-    sf::Vector2i riverOrigin(-1, -1);
-    unsigned int max_river_steps = 10000;
+    int sea_size = sea_pixels.size();
 
-    float mountain_min_height = 0.50f * 255;
+    sf::Color sea_color(0, 0, 50, 255);
+    int current_ocean = 0;
 
-    float height_topleft = 0;
-    float height_top = 0;
-    float height_topright = 0;
-    float height_left = 0;
-    float height_right = 0;
-    float height_bottomleft = 0;
-    float height_bottom = 0;
-    float height_bottomright = 0;
+    int** labels = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
+    for (int i = 0; i < heightmap->getSize().x; i++)
+    {
+        for (int j = 0; j < heightmap->getSize().y; j++)
+            labels[i][j] = -1;
+    }
 
-    bool checkleft = false;
-    bool checkright = false;
-    bool checktop = false;
-    bool checkbottom = false;
-    bool riverEnded = false;
 
-    sf::Vector2i current_river_coords;
-    sf::Vector2i next_river_coords;
-    unsigned int stepsTaken = 0;
+    /*
+    int recursion_capped = 0;
+
+    // Connected components labeling algorithm
+    for (int i = 0; i < heightmap->getSize().x; i++)
+    {
+        for (int j = 0; j < heightmap->getSize().y; j++)
+        {
+            // If the label for this pixel is unset
+            if (labels[i][j] == -1)
+            {
+                //std::cout << i << ", " << j << ", " << component << std::endl;
+                // If the heightmap at this coordinate is sea
+                if (heightmap->getPixel(i, j).b == 50)
+                {
+                    if (recursion_depth > 1000)
+                    {
+                        recursion_depth = 0;
+                        recursion_capped++;
+                        dfs(i, j, component, labels, heightmap);
+                    }
+                    else
+                    {
+                        dfs(i, j, ++component, labels, heightmap);
+                    }
+                }
+            }
+        }
+    }
+    */
+    //std::cout << "There are " << component << " ocean zones" << std::endl;
+    //std::cout << "Recursion capped: " << recursion_capped << std::endl;
+
+    // Mark each sea region with matching color
+    /*
+    sf::Color c;
+    c.r = 0;
+    c.b = 0;
+    c.a = 255;
+    float step_size = 255 / (float)component;
 
     for (int i = 0; i < heightmap->getSize().x; i++)
     {
         for (int j = 0; j < heightmap->getSize().y; j++)
         {
-            pixel = heightmap->getPixel(i,j);
-            if (pixel.r >= mountain_min_height)
+            if (labels[i][j] != -1)
             {
-                riverOrigin.x = i;
-                riverOrigin.y = j;
-                heightmap->setPixel(i, j, sf::Color::Red);
-                
-                // From this location, start going downhill
-                //bool riverEnded = false;
+                c.g = labels[i][j] * step_size;
+                heightmap->setPixel(i, j, c);
+            }
+        }
+    }
+    */
 
-                current_river_coords = riverOrigin;
-                float current_min = 0;
-                riverEnded = false;
+    std::stack<sf::Vector2i> stack;
+    
+    std::vector<sf::Vector2i> regions;
+    sf::Color c;
 
-                while (!riverEnded || stepsTaken < max_river_steps)
+    int** regionmap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
+    for (int i = 0; i < heightmap->getSize().x; i++)
+    {
+        for (int j = 0; j < heightmap->getSize().y; j++)
+        {
+            regionmap[i][j] = -1;
+        }
+    }
+
+    for (auto p : sea_pixels)
+        regionmap[p.x][p.y] = 0;
+
+    int current_region = 0;
+    int current_size = 0;
+    bool finished = false;
+
+    std::map<int, int> regionsizes;
+
+    int current_x = -1;
+    int current_y = 0;
+
+    while (finished == false)
+    {
+        std::cout << "Region: " << current_region << ", size: " << current_size << std::endl;
+
+        regionsizes[current_region] = current_size;
+        current_size = 0;
+        current_region++;
+
+        while (current_x < heightmap->getSize().x || current_y < heightmap->getSize().y)
+        {
+            current_x++;
+            if (current_x == heightmap->getSize().x && current_y < heightmap->getSize().y)
+            {
+                current_x = 0;
+                current_y++;
+            }
+
+            if (current_x == 0 && current_y == heightmap->getSize().y)
+            {
+                finished = true;
+                while (stack.empty() == false)
+                    stack.pop();
+                break;
+            }
+
+            if (regionmap[current_x][current_y] == 0)
+            {
+                stack.push(sf::Vector2i(current_x, current_y));
+                regionmap[current_x][current_y] = current_region;
+                current_size++;
+                break;
+            }
+
+        }
+
+        while (stack.empty() == false)
+        {
+            sf::Vector2i coord = stack.top();
+            stack.pop();
+            c = heightmap->getPixel(coord.x, coord.y);
+
+            if (coord.x > 0)
+            {
+                auto temp = sf::Vector2i(coord.x-1, coord.y);
+                c = heightmap->getPixel(coord.x-1, coord.y);
+                if (heightmap->getPixel(coord.x-1, coord.y) == sea_color && regionmap[temp.x][temp.y] != current_region)
                 {
-                    stepsTaken++;
-                    current_min = heightmap->getPixel(current_river_coords.x, current_river_coords.y).r;
-                    heightmap->setPixel(current_river_coords.x, current_river_coords.y, sf::Color::Green);
+                    auto p = sf::Vector2i(coord.x-1, coord.y);
+                    stack.push(p);
+                    regions.push_back(p);
+                    regionmap[p.x][p.y] = current_region;
+                    current_size++;
+                }
+            }
+            if (coord.y > 0)
+            {
+                auto temp = sf::Vector2i(coord.x, coord.y-1);
+                c = heightmap->getPixel(coord.x, coord.y-1);
+                if (heightmap->getPixel(coord.x, coord.y-1) == sea_color && regionmap[temp.x][temp.y] != current_region)
+                {
+                    auto p = sf::Vector2i(coord.x, coord.y-1);
+                    stack.push(p);
+                    regions.push_back(p);
+                    regionmap[p.x][p.y] = current_region;
+                    current_size++;
+                }
+            }
+            if (coord.x < heightmap->getSize().x-1)
+            {
+                auto temp = sf::Vector2i(coord.x+1, coord.y);
+                c = heightmap->getPixel(coord.x+1, coord.y);
+                if (heightmap->getPixel(coord.x+1, coord.y) == sea_color && regionmap[temp.x][temp.y] != current_region)
+                {
+                    auto p = sf::Vector2i(coord.x+1, coord.y);
+                    stack.push(p);
+                    regions.push_back(p);
+                    regionmap[p.x][p.y] = current_region;
+                    current_size++;
+                }
+            }
+            if (coord.y < heightmap->getSize().y-1)
+            {
+                auto temp = sf::Vector2i(coord.x, coord.y+1);
+                c = heightmap->getPixel(coord.x, coord.y+1);
+                if (heightmap->getPixel(coord.x, coord.y+1) == sea_color && regionmap[temp.x][temp.y] != current_region)
+                {
+                    auto p = sf::Vector2i(coord.x, coord.y+1);
+                    stack.push(p);
+                    regions.push_back(p);
+                    regionmap[p.x][p.y] = current_region;
+                    current_size++;
+                }
+            }
+        }
+    }
 
-                    checkleft = true;
-                    checkright = true;
-                    checktop = true;
-                    checkbottom = true;
+    sf::Color waterreg;
+    waterreg.r = 0;
+    waterreg.b = 50;
+    waterreg.g = 0;
+    waterreg.a = 255;
+    
+    std::cout << "Total regions: " << current_region << std::endl;
 
-                    height_topleft = 1000;
-                    height_top = 1000;
-                    height_topright = 1000;
-                    height_left = 1000;
-                    height_right = 1000;
-                    height_bottomleft = 1000;
-                    height_bottom = 1000;
-                    height_bottomright = 1000;
-
-                    // See which direction has sharpest declining height
-                    if (current_river_coords.x <= 0)
-                    {
-                        checkleft = false;
-                    }
-                    else if (current_river_coords.x >= heightmap->getSize().x -1)
-                    {
-                        checkright = false;
-                    }
-                    if (current_river_coords.y <= 0)
-                    {
-                        checktop = false;
-                    }
-                    else if (current_river_coords.y >= heightmap->getSize().y -1)
-                    {
-                        checkbottom = false;
-                    }
-
-                    if (checkleft && checktop)
-                    {
-                        height_topleft = heightmap->getPixel(current_river_coords.x-1, current_river_coords.y-1).r;
-                        if (height_topleft < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y-1);
-                            current_min = height_topleft;
-                        }
-                    }
-                    if (checktop)
-                    {
-                        height_top = heightmap->getPixel(current_river_coords.x, current_river_coords.y-1).r;
-                        if (height_top < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x, current_river_coords.y-1);
-                            current_min = height_top;
-                        }
-                    }
-                    if (checktop && checkright)
-                    {
-                        height_topright = heightmap->getPixel(current_river_coords.x+1, current_river_coords.y-1).r;
-                        if (height_topright < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y-1);
-                            current_min = height_topright;
-                        }
-                    }
-                    if (checkleft)
-                    {
-                        height_left = heightmap->getPixel(current_river_coords.x-1, current_river_coords.y).r;
-                        if (height_left < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y);
-                            current_min = height_left;
-                        }
-                    }
-                    if (checkright)
-                    {
-                        height_right = heightmap->getPixel(current_river_coords.x+1, current_river_coords.y).r;
-                        if (height_right < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y);
-                            current_min = height_right;
-                        }
-                    }
-                    if (checkleft && checkbottom)
-                    {
-                        height_bottomleft = heightmap->getPixel(current_river_coords.x-1, current_river_coords.y+1).r;
-                        if (height_bottomleft < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y+1);
-                            current_min = height_bottomleft;
-                        }
-                    }
-                    if (checkbottom)
-                    {
-                        height_bottom = heightmap->getPixel(current_river_coords.x, current_river_coords.y+1).r;
-                        if (height_bottom < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x, current_river_coords.y+1);
-                            current_min = height_bottom;
-                        }
-                    }
-                    if (checkright && checkbottom)
-                    {
-                        height_bottomright = heightmap->getPixel(current_river_coords.x+1, current_river_coords.y+1).r;
-                        if (height_bottomright < current_min)
-                        {
-                            next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y+1);
-                            current_min = height_bottomright;
-                        }
-                    }
-
-                    if (current_min == heightmap->getPixel(current_river_coords.x, current_river_coords.y).r)
-                    if (checkleft)
-                        next_river_coords = sf::Vector2i(current_river_coords.x-1, current_river_coords.y);
-                    else if (checkbottom && checkright)
-                        next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y+1);
-                    else if (checktop && checkright)
-                        next_river_coords = sf::Vector2i(current_river_coords.x+1, current_river_coords.y-1);
-                    
-                    current_river_coords = next_river_coords;
-
-                    
-
-                    if (current_min < 0.20*255)
-                        riverEnded = true;
-
+    // Color the ocean pixels tagged above
+    for (int i = 0; i < heightmap->getSize().x; i++)
+    {
+        for (int j = 0; j < heightmap->getSize().y; j++)
+        {
+            if (regionmap[i][j] != -1)
+            {
+                if  (regionsizes[regionmap[i][j]] < 10)
+                {
+                    heightmap->setPixel(i, j, sf::Color::Red);
+                }
+                else if  (regionsizes[regionmap[i][j]] > 10 && regionsizes[regionmap[i][j]] < 300)
+                {
+                    heightmap->setPixel(i, j, sf::Color::Yellow);
+                }
+                else if  (regionsizes[regionmap[i][j]] > 300 && regionsizes[regionmap[i][j]] < 50000)
+                {
+                    heightmap->setPixel(i, j, sf::Color::Green);
+                }
+                else
+                {
+                    waterreg.b = app.getToolbox()->linearInterpolate(0, current_region, regionmap[i][j])*255;
+                    heightmap->setPixel(i, j, sf::Color::Blue);
                 }
             }
         }

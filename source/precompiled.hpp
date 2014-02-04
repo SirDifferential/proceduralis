@@ -8,6 +8,8 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <stack>
+#include <functional>
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>

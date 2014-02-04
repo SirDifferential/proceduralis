@@ -6,6 +6,8 @@
 class WorldGenerator
 {
 private:
+    std::map<int, std::vector<sf::Vector2i>> seas;
+    std::vector<sf::Vector2i> sea_pixels;
 public:
     WorldGenerator();
     void init();

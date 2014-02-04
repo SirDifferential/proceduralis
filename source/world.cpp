@@ -24,18 +24,17 @@ void World::draw()
     auto s4 = app.getDataStorage()->getSprite("voronoiblurred");
     auto s5 = app.getDataStorage()->getSprite("perlinblurred");
 
-    s1->setScale(0.2, 0.2);
-    s2->setScale(0.2, 0.2);
-    //s3->setScale(0.2, 0.2);
-    s4->setScale(0.2, 0.2);
-    s5->setScale(0.2, 0.2);
+    //s1->setScale(0.2, 0.2);
+    //s2->setScale(0.2, 0.2);
+    s3->setScale(0.2, 0.2);
+    //s4->setScale(0.2, 0.2);
+    //s5->setScale(0.2, 0.2);
 
-    s1->setPosition(10, 10);
-    s2->setPosition(220, 10);
-    //s3->setPosition(220, 220);
-    s4->setPosition(10, 220);
-    s5->setPosition(440, 220);
-    
+    //s1->setPosition(10, 10);
+    //s2->setPosition(220, 10);
+    s3->setPosition(220, 220);
+    //s4->setPosition(10, 220);
+    //s5->setPosition(440, 220);
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
     //app.getRenderer()->getRenderWindow()->draw(*s2);

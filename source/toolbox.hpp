@@ -60,12 +60,14 @@ public:
     std::vector<std::string> splitTextByString(char separator, std::string text);
     std::string splitTextInLines(size_t line_length, std::string text);
 
+    int** giveIntArray2D(int size_x, int size_y);
     float** giveFloatArray2D(int sizeX, int sizeY);
     float*** giveFloatArray3D(int sizeX, int sizeY, int sizeZ);
     void clearFloatArray2D(float** arr, int sizeX, int sizeY);
     void deleteFloatArray2D(float** arr, int sizeX);
     void clearFloatArray3D(float*** arr, int sizeX, int sizeY, int sizeZ);
     void deleteFloatArray3D(float*** arr, int sizeX, int sizeY);
+    void deleteIntArray2D(int** arr, int size_x);
 
 
 	template <class T>

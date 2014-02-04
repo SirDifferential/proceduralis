@@ -296,6 +296,17 @@ double Toolbox::degreesToRadians(double degs)
     return degs * (3.14159 / 180.0);
 }
 
+int** Toolbox::giveIntArray2D(int size_x, int size_y)
+{
+    int** out;
+    out = new int*[size_x];
+    for (int i = 0; i < size_x; i++)
+    {
+        out[i]= new int[size_y];
+    }
+    return out;
+}
+
 // Returns a two dimensional array of floats
 float** Toolbox::giveFloatArray2D(int sizeX, int sizeY)
 {
@@ -349,6 +360,12 @@ void Toolbox::clearFloatArray3D(float*** arr, int sizeX, int sizeY, int sizeZ)
             }
         }
     }
+}
+
+void Toolbox::deleteIntArray2D(int** arr, int size_x)
+{
+    for (unsigned int i = 0; i < size_x; i++)
+        delete[] arr[i];
 }
 
 void Toolbox::deleteFloatArray2D(float** arr, int sizeX)
