@@ -7,6 +7,11 @@
 
 WorldGenerator::WorldGenerator()
 {
+    // codes used for indexing the world's regionmap in specific types of areas
+    ocean_index_start = 50;
+    mountain_index_start = 5000;
+    hill_index_start = 10000;
+    flat_index_start = 20000;
 }
 
 void WorldGenerator::init()
@@ -19,7 +24,6 @@ void WorldGenerator::init()
     app.getDataStorage()->storeSprite("voronoiblurred", blurred);
     SpritePtr perlinblurred = SpritePtr(new sf::Sprite());
     app.getDataStorage()->storeSprite("perlinblurred", blurred);
-
 }
 
 void WorldGenerator::generate()
@@ -110,30 +114,40 @@ void WorldGenerator::formSuperRegions()
     app.getSpriteUtils()->setPixels(app.getDataStorage()->getSprite("heightmap"), "heightmap", heightmap);
 }
 
-void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, int** regionmap, std::map<int, int>& regionsizes)
+/**
+* Finds areas of the world heightmap that match a specific height
+* and performs a neighbor search to form continous regions with the matching code
+* The data is saved in the worldgenerator's variable int** regionmap, where
+* each region will be a number at least regionCodeStartRange+1
+* The rsizes is a reference to one of the region_size maps store in WorldGenerator, and
+* is used for getting an idea of how large each region of specific type is.
+* For example, the ocean region number 55 might be 10 pixels in size,
+* while ocean region number 56 might be 196919 pixels in size
+* regionCodeStartRange is used in regionMap for splitting specific types of regions
+* Oceans may be, for example, indexed from 50 to up, and mountains from 5000 upwards
+* The code is the search term which the solver will attempt to match, and tolerance describes how much
+* the search will allow there to be a difference to the desired code
+* Using tolerance of sf::Color(0,0,0,0) will mean only absolute matches will be considered
+*/
+void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<int, int>& rsizes, int regionCodeStartRange)
 {
     // Get the finished heightmap
     auto heightmap = app.getDataStorage()->getImage("heightmap");
 
     std::stack<sf::Vector2i> stack;
 
-    sf::Color c;
-
     for (int i = 0; i < heightmap->getSize().x; i++)
     {
         for (int j = 0; j < heightmap->getSize().y; j++)
         {
             // If this current pixel is within the specified range to trigger this region code
-            // If not, use code -1 for marking this pixel as non-connecting
-            // If yes, use 0 to mark this area as a not-yet-computed important pixel
-            if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(i, j), tolerance) == false)
-                regionmap[i][j] = -1;
-            else
-                regionmap[i][j] = 0;
+            // If yes, use start range code to mark this area as a not-yet-computed important pixel
+            if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(i, j), tolerance) == true)
+                regionmap[i][j] = regionCodeStartRange;
         }
     }
 
-    int current_region = 0;
+    int current_region = regionCodeStartRange;
     int current_size = 0;
     bool finished = false;
 
@@ -142,11 +156,13 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, int** reg
 
     std::cout << "Solving region with code " << code.r << ", " << code.g << ", " << code.b << ", " << code.a << " and tolerance " << tolerance.r << ", " << tolerance.g << ", " << tolerance.b << ", " << tolerance.a << std::endl; 
 
+    sf::Color c;
+
     while (finished == false)
     {
         std::cout << "Region: " << current_region << ", size: " << current_size << std::endl;
 
-        regionsizes[current_region] = current_size;
+        rsizes[current_region] = current_size;
         current_size = 0;
         current_region++;
 
@@ -167,7 +183,8 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, int** reg
                 break;
             }
 
-            if (regionmap[current_x][current_y] == 0)
+            // If the current pixel has been marked for computation, but is not yet solved to be a member of some region
+            if (regionmap[current_x][current_y] == regionCodeStartRange)
             {
                 stack.push(sf::Vector2i(current_x, current_y));
                 regionmap[current_x][current_y] = current_region;
@@ -234,37 +251,55 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, int** reg
         }
     }
 
-    std::cout << "Total regions: " << current_region << std::endl;
+    std::cout << "Total regions: " << current_region-regionCodeStartRange << ": [" << regionCodeStartRange << ", " << current_region << "]" << std::endl;
 }
 
+/**
+* This function assumes that a heightmap has been generated
+* The function will perform various region searches attempting to form continuous regions that share some property
+* This search is usually called Connected Component Searching or something along those lines
+* After this function, the int regionmap** will be populated with region codes
+* In addition, the various std::map<int,int> will describe how large each region is
+*/
 void WorldGenerator::formRegions()
 {
     // Get the finished heightmap
     auto heightmap = app.getDataStorage()->getImage("heightmap");
 
-    int** regionmap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
-    std::map<int,int> regionsizes;
+    if (regionmap != NULL)
+        app.getToolbox()->deleteIntArray2D(regionmap, heightmap->getSize().x);
+    regionmap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
+    for (int i = 0; i < heightmap->getSize().x; i++)
+    {
+        for (int j = 0; j < heightmap->getSize().y; j++)
+        {
+            regionmap[i][j] = -1;
+        }
+    }
 
     sf::Color sea_color(0, 0, 50, 255);
     sf::Color tolerance(0, 0, 0, 0);
-    solveRegions(sea_color, tolerance, regionmap, regionsizes);
+    int ocean_tag_start = 50;
+    int land_tag_start = 500;
+    solveRegions(sea_color, tolerance, ocean_region_sizes, ocean_tag_start);
+    ocean_regions = ocean_region_sizes.size();
 
     // Color the ocean pixels tagged above
     for (int i = 0; i < heightmap->getSize().x; i++)
     {
         for (int j = 0; j < heightmap->getSize().y; j++)
         {
-            if (regionmap[i][j] != -1)
+            if (regionmap[i][j] > ocean_tag_start && regionmap[i][j] <= ocean_tag_start + ocean_regions)
             {
-                if  (regionsizes[regionmap[i][j]] < 10)
+                if  (ocean_region_sizes[regionmap[i][j]] < 10)
                 {
                     heightmap->setPixel(i, j, sf::Color::Red);
                 }
-                else if  (regionsizes[regionmap[i][j]] > 10 && regionsizes[regionmap[i][j]] < 300)
+                else if (ocean_region_sizes[regionmap[i][j]] > 10 && ocean_region_sizes[regionmap[i][j]] < 300)
                 {
                     heightmap->setPixel(i, j, sf::Color::Yellow);
                 }
-                else if  (regionsizes[regionmap[i][j]] > 300 && regionsizes[regionmap[i][j]] < 50000)
+                else if  (ocean_region_sizes[regionmap[i][j]] > 300 && ocean_region_sizes[regionmap[i][j]] < 50000)
                 {
                     heightmap->setPixel(i, j, sf::Color::Green);
                 }
