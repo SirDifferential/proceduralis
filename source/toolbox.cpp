@@ -580,16 +580,20 @@ sf::Color Toolbox::int_to_sfmlcolor(int i)
 * tolerance: a sf::Color containing the allowed difference for each color channel
 * for example, sf::Color(10, 0, 5, 0) would mean the red channel is allowed to differ 10 units,
 * green not at all, blue 5 units, alpha not at all
+* Only considers values down from the targetcolor, not absolute distance
 */
 bool Toolbox::colorValidRange(sf::Color targetColor, sf::Color testColor, sf::Color tolerance)
 {
-    if (abs(targetColor.r - testColor.r) > tolerance.r)
+    if (testColor.r > targetColor.r || testColor.g > targetColor.g || testColor.b > targetColor.b || testColor.a > targetColor.a)
         return false;
-    if (abs(targetColor.g - testColor.g) > tolerance.g)
+
+    if (targetColor.r - testColor.r > tolerance.r)
         return false;
-    if (abs(targetColor.b - testColor.b) > tolerance.b)
+    if (targetColor.g - testColor.g > tolerance.g)
         return false;
-    if (abs(targetColor.a - testColor.a) > tolerance.a)
+    if (targetColor.b - testColor.b > tolerance.b)
+        return false;
+    if (targetColor.a - testColor.a > tolerance.a)
         return false;
     return true;
 }

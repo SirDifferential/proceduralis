@@ -10,6 +10,8 @@
 #include <string>
 #include <stack>
 #include <functional>
+#include <chrono>
+#include <ctime>
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>

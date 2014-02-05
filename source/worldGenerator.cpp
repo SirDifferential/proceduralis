@@ -128,6 +128,8 @@ void WorldGenerator::formSuperRegions()
 * The code is the search term which the solver will attempt to match, and tolerance describes how much
 * the search will allow there to be a difference to the desired code
 * Using tolerance of sf::Color(0,0,0,0) will mean only absolute matches will be considered
+* There are two tolerances: down and up. The down tolerance means the allowed differences down from the
+* code color, while up refers tolerance of colors that are higher than the code color
 */
 void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<int, int>& rsizes, int regionCodeStartRange)
 {
@@ -142,7 +144,8 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<
         {
             // If this current pixel is within the specified range to trigger this region code
             // If yes, use start range code to mark this area as a not-yet-computed important pixel
-            if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(i, j), tolerance) == true)
+            // Only check pixels that aren't already checked
+            if (regionmap[i][j] == -1 && app.getToolbox()->colorValidRange(code, heightmap->getPixel(i, j), tolerance) == true)
                 regionmap[i][j] = regionCodeStartRange;
         }
     }
@@ -157,10 +160,12 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<
     std::cout << "Solving region with code " << code.r << ", " << code.g << ", " << code.b << ", " << code.a << " and tolerance " << tolerance.r << ", " << tolerance.g << ", " << tolerance.b << ", " << tolerance.a << std::endl; 
 
     sf::Color c;
+    sf::Vector2i p;
+    sf::Vector2i temp;
 
     while (finished == false)
     {
-        std::cout << "Region: " << current_region << ", size: " << current_size << std::endl;
+        //std::cout << "Region: " << current_region << ", size: " << current_size << std::endl;
 
         rsizes[current_region] = current_size;
         current_size = 0;
@@ -202,11 +207,11 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<
 
             if (coord.x > 0)
             {
-                auto temp = sf::Vector2i(coord.x-1, coord.y);
+                temp = sf::Vector2i(coord.x-1, coord.y);
                 c = heightmap->getPixel(coord.x-1, coord.y);
-                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x-1, coord.y), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
+                if (regionmap[temp.x][temp.y] == regionCodeStartRange && app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x-1, coord.y), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
-                    auto p = sf::Vector2i(coord.x-1, coord.y);
+                    p = sf::Vector2i(coord.x-1, coord.y);
                     stack.push(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
@@ -214,11 +219,11 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<
             }
             if (coord.y > 0)
             {
-                auto temp = sf::Vector2i(coord.x, coord.y-1);
+                temp = sf::Vector2i(coord.x, coord.y-1);
                 c = heightmap->getPixel(coord.x, coord.y-1);
-                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x, coord.y-1), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
+                if (regionmap[temp.x][temp.y] == regionCodeStartRange && app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x, coord.y-1), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
-                    auto p = sf::Vector2i(coord.x, coord.y-1);
+                    p = sf::Vector2i(coord.x, coord.y-1);
                     stack.push(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
@@ -226,11 +231,11 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<
             }
             if (coord.x < heightmap->getSize().x-1)
             {
-                auto temp = sf::Vector2i(coord.x+1, coord.y);
+                temp = sf::Vector2i(coord.x+1, coord.y);
                 c = heightmap->getPixel(coord.x+1, coord.y);
-                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x+1, coord.y), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
+                if (regionmap[temp.x][temp.y] == regionCodeStartRange && app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x+1, coord.y), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
-                    auto p = sf::Vector2i(coord.x+1, coord.y);
+                    p = sf::Vector2i(coord.x+1, coord.y);
                     stack.push(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
@@ -238,11 +243,11 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<
             }
             if (coord.y < heightmap->getSize().y-1)
             {
-                auto temp = sf::Vector2i(coord.x, coord.y+1);
+                temp = sf::Vector2i(coord.x, coord.y+1);
                 c = heightmap->getPixel(coord.x, coord.y+1);
-                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x, coord.y+1), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
+                if (regionmap[temp.x][temp.y] == regionCodeStartRange && app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x, coord.y+1), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
-                    auto p = sf::Vector2i(coord.x, coord.y+1);
+                    p = sf::Vector2i(coord.x, coord.y+1);
                     stack.push(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
@@ -251,6 +256,8 @@ void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, std::map<
         }
     }
 
+    if (code == sf::Color(0,0,50,255))
+        timer1 = std::chrono::system_clock::now();
     std::cout << "Total regions: " << current_region-regionCodeStartRange << ": [" << regionCodeStartRange << ", " << current_region << "]" << std::endl;
 }
 
@@ -278,44 +285,114 @@ void WorldGenerator::formRegions()
     }
 
     sf::Color sea_color(0, 0, 50, 255);
-    sf::Color tolerance(0, 0, 0, 0);
-    int ocean_tag_start = 50;
-    int land_tag_start = 500;
-    solveRegions(sea_color, tolerance, ocean_region_sizes, ocean_tag_start);
+    sf::Color tolerance(0,0,0,0);
+    
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    
+    start = std::chrono::system_clock::now();
+
+    std::cout << "Solving oceans..." << std::endl;
+
+    solveRegions(sea_color, tolerance, ocean_region_sizes, ocean_index_start);
+    timer2 = std::chrono::system_clock::now();
     ocean_regions = ocean_region_sizes.size();
 
+    end = std::chrono::system_clock::now();
+    int elapsed_seconds_1 = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
+    
+    std::cout << "Solving mountains..." << std::endl;
+
+    sf::Color mountain_color(255, 255, 255, 255);
+    tolerance = sf::Color(155, 155, 155, 0);
+    solveRegions(mountain_color, tolerance, mountain_region_sizes, mountain_index_start);
+    timer2 = std::chrono::system_clock::now();
+    mountain_regions = mountain_region_sizes.size();
+
+    end = std::chrono::system_clock::now();
+    int elapsed_seconds_2 = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
+
+    std::cout << "Solving hills..." << std::endl;
+
+    sf::Color hill_color(99, 99, 99, 255);
+    tolerance = sf::Color(19, 19, 19, 0);
+    solveRegions(hill_color, tolerance, hill_region_sizes, hill_index_start);
+    hill_regions = hill_region_sizes.size();
+
+    end = std::chrono::system_clock::now();
+    int elapsed_seconds_3 = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
+
+    std::cout << "Solving flats..." << std::endl;
+    sf::Color flat_color(79, 79, 79, 255);
+    tolerance = sf::Color(79, 79, 79, 0);
+    solveRegions(flat_color, tolerance, flat_region_sizes, flat_index_start);
+    flat_regions = flat_region_sizes.size();
+
+    end = std::chrono::system_clock::now();
+    int elapsed_seconds_4 = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
+
+    std::cout << "Colorizing..." << std::endl;
     // Color the ocean pixels tagged above
     for (int i = 0; i < heightmap->getSize().x; i++)
     {
         for (int j = 0; j < heightmap->getSize().y; j++)
         {
-            if (regionmap[i][j] > ocean_tag_start && regionmap[i][j] <= ocean_tag_start + ocean_regions)
+            if (regionmap[i][j] > ocean_index_start && regionmap[i][j] <= ocean_index_start + ocean_regions)
             {
                 if  (ocean_region_sizes[regionmap[i][j]] < 10)
                 {
-                    heightmap->setPixel(i, j, sf::Color::Red);
+                    heightmap->setPixel(i, j, sf::Color(135, 135, 245, 255));
                 }
                 else if (ocean_region_sizes[regionmap[i][j]] > 10 && ocean_region_sizes[regionmap[i][j]] < 300)
                 {
-                    heightmap->setPixel(i, j, sf::Color::Yellow);
+                    heightmap->setPixel(i, j, sf::Color(12, 12, 162, 255));
                 }
                 else if  (ocean_region_sizes[regionmap[i][j]] > 300 && ocean_region_sizes[regionmap[i][j]] < 50000)
                 {
-                    heightmap->setPixel(i, j, sf::Color::Green);
+                    heightmap->setPixel(i, j, sf::Color(8, 8, 92, 255));
                 }
                 else
                 {
-                    heightmap->setPixel(i, j, sf::Color::Blue);
+                    heightmap->setPixel(i, j, sf::Color(0,0,30,255));
                 }
+            }
+            else if (regionmap[i][j] > mountain_index_start && regionmap[i][j] <= mountain_index_start + mountain_regions)
+            {
+                heightmap->setPixel(i, j, sf::Color(233, 222, 197, 255));
+            }
+            else if (regionmap[i][j] > hill_index_start && regionmap[i][j] <= hill_index_start + hill_regions)
+            {
+                heightmap->setPixel(i, j, sf::Color(220, 169, 60, 255));
+            }
+            else if (regionmap[i][j] > flat_index_start && regionmap[i][j] <= flat_index_start + flat_regions)
+            {
+                heightmap->setPixel(i, j, sf::Color(14, 36, 20, 255));
             }
         }
     }
+
+    end = std::chrono::system_clock::now();
+    int elapsed_seconds_5 = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
+    int waited = std::chrono::duration_cast<std::chrono::seconds> (timer2-timer1).count();
 
     std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");
 
     heightmap_text->update(*heightmap);
     std::shared_ptr<sf::Sprite> heightmap_sprite = app.getDataStorage()->getSprite("heightmap");
     heightmap_sprite->setTexture(*heightmap_text);
+
+    end = std::chrono::system_clock::now();
+    int sprites_updated = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
+
+    std::cout << "Operation\tTime" << std::endl;
+    std::cout << "oceans   \t" << elapsed_seconds_1 << std::endl;
+    std::cout << "mountains\t" << elapsed_seconds_2 << std::endl;
+    std::cout << "hills    \t" << elapsed_seconds_3 << std::endl;
+    std::cout << "flats    \t" << elapsed_seconds_4 << std::endl;
+    std::cout << "coloring \t" << elapsed_seconds_5 << std::endl;
+    std::cout << "total    \t" << elapsed_seconds_1 + elapsed_seconds_2 + elapsed_seconds_3 + elapsed_seconds_4 + elapsed_seconds_5 << std::endl;
+    std::cout << "waiting  \t" << waited << std::endl;
+    std::cout << "sprites  \t" << sprites_updated << std::endl;
+    
 }
 
 ImagePtr WorldGenerator::voronoi()
