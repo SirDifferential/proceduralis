@@ -130,7 +130,7 @@ int Application::run()
 
     worldgenerator->formSuperRegions();
     forceredraw();
-    worldgenerator->runRivers();
+    worldgenerator->formRegions();
 
     int stop_s = clock();
     std::cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;

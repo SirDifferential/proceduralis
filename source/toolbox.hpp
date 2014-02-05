@@ -80,6 +80,8 @@ public:
     const char* opencl_error_string(cl_int errorcode);
 
     sf::Color int_to_sfmlcolor(int i);
+
+    bool colorValidRange(sf::Color target, sf::Color input, sf::Color tolerance);
 };
 
 #endif

@@ -575,3 +575,22 @@ sf::Color Toolbox::int_to_sfmlcolor(int i)
     return sf::Color(i,i,i,255);
 }
 
+/**
+* Returns true if the testColor is within the specified range of the targetColor
+* tolerance: a sf::Color containing the allowed difference for each color channel
+* for example, sf::Color(10, 0, 5, 0) would mean the red channel is allowed to differ 10 units,
+* green not at all, blue 5 units, alpha not at all
+*/
+bool Toolbox::colorValidRange(sf::Color targetColor, sf::Color testColor, sf::Color tolerance)
+{
+    if (abs(targetColor.r - testColor.r) > tolerance.r)
+        return false;
+    if (abs(targetColor.g - testColor.g) > tolerance.g)
+        return false;
+    if (abs(targetColor.b - testColor.b) > tolerance.b)
+        return false;
+    if (abs(targetColor.a - testColor.a) > tolerance.a)
+        return false;
+    return true;
+}
+

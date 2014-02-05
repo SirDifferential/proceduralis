@@ -110,144 +110,37 @@ void WorldGenerator::formSuperRegions()
     app.getSpriteUtils()->setPixels(app.getDataStorage()->getSprite("heightmap"), "heightmap", heightmap);
 }
 
-const int dx[] = {+1, 0, -1, 0};
-const int dy[] = {0, +1, 0, -1};
-
-int component = 0;
-int recursion_depth = 0;
-
-void dfs(int x, int y, int current_label, int** labels, ImagePtr data)
-{
-    int row_count = 1024;
-    int column_count = 1024;
-    recursion_depth++;
-
-    if (x < 0 || x == row_count)
-        return;
-    if (y < 0 || y == column_count)
-        return;
-
-    int a = component;
-    int b = labels[x][y];
-
-    // If the label is already set or if this area is land (not ocean)
-    if (labels[x][y] != -1 || data->getPixel(x, y).b != 50)
-        return;
-
-    if (recursion_depth > 1000)
-    {
-        //std::cout << "Recursion depth maxed: " << recursion_depth << std::endl;
-        labels[x][y] = current_label;
-        return;
-    }
-
-    labels[x][y] = current_label;
-
-    for (int direction = 0; direction < 4; ++direction)
-        dfs(x +dx[direction], y + dy[direction], current_label, labels, data);
-
-}
-
-void WorldGenerator::runRivers()
+void WorldGenerator::solveRegions(sf::Color code, sf::Color tolerance, int** regionmap, std::map<int, int>& regionsizes)
 {
     // Get the finished heightmap
     auto heightmap = app.getDataStorage()->getImage("heightmap");
-    
-    // Pick a random spot that is higher than the mountain limit height
-    sf::Color pixel;
-
-    int sea_size = sea_pixels.size();
-
-    sf::Color sea_color(0, 0, 50, 255);
-    int current_ocean = 0;
-
-    int** labels = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
-    for (int i = 0; i < heightmap->getSize().x; i++)
-    {
-        for (int j = 0; j < heightmap->getSize().y; j++)
-            labels[i][j] = -1;
-    }
-
-
-    /*
-    int recursion_capped = 0;
-
-    // Connected components labeling algorithm
-    for (int i = 0; i < heightmap->getSize().x; i++)
-    {
-        for (int j = 0; j < heightmap->getSize().y; j++)
-        {
-            // If the label for this pixel is unset
-            if (labels[i][j] == -1)
-            {
-                //std::cout << i << ", " << j << ", " << component << std::endl;
-                // If the heightmap at this coordinate is sea
-                if (heightmap->getPixel(i, j).b == 50)
-                {
-                    if (recursion_depth > 1000)
-                    {
-                        recursion_depth = 0;
-                        recursion_capped++;
-                        dfs(i, j, component, labels, heightmap);
-                    }
-                    else
-                    {
-                        dfs(i, j, ++component, labels, heightmap);
-                    }
-                }
-            }
-        }
-    }
-    */
-    //std::cout << "There are " << component << " ocean zones" << std::endl;
-    //std::cout << "Recursion capped: " << recursion_capped << std::endl;
-
-    // Mark each sea region with matching color
-    /*
-    sf::Color c;
-    c.r = 0;
-    c.b = 0;
-    c.a = 255;
-    float step_size = 255 / (float)component;
-
-    for (int i = 0; i < heightmap->getSize().x; i++)
-    {
-        for (int j = 0; j < heightmap->getSize().y; j++)
-        {
-            if (labels[i][j] != -1)
-            {
-                c.g = labels[i][j] * step_size;
-                heightmap->setPixel(i, j, c);
-            }
-        }
-    }
-    */
 
     std::stack<sf::Vector2i> stack;
-    
-    std::vector<sf::Vector2i> regions;
+
     sf::Color c;
 
-    int** regionmap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
     for (int i = 0; i < heightmap->getSize().x; i++)
     {
         for (int j = 0; j < heightmap->getSize().y; j++)
         {
-            regionmap[i][j] = -1;
+            // If this current pixel is within the specified range to trigger this region code
+            // If not, use code -1 for marking this pixel as non-connecting
+            // If yes, use 0 to mark this area as a not-yet-computed important pixel
+            if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(i, j), tolerance) == false)
+                regionmap[i][j] = -1;
+            else
+                regionmap[i][j] = 0;
         }
     }
-
-    for (auto p : sea_pixels)
-        regionmap[p.x][p.y] = 0;
 
     int current_region = 0;
     int current_size = 0;
     bool finished = false;
 
-    std::map<int, int> regionsizes;
-
     int current_x = -1;
     int current_y = 0;
+
+    std::cout << "Solving region with code " << code.r << ", " << code.g << ", " << code.b << ", " << code.a << " and tolerance " << tolerance.r << ", " << tolerance.g << ", " << tolerance.b << ", " << tolerance.a << std::endl; 
 
     while (finished == false)
     {
@@ -294,11 +187,10 @@ void WorldGenerator::runRivers()
             {
                 auto temp = sf::Vector2i(coord.x-1, coord.y);
                 c = heightmap->getPixel(coord.x-1, coord.y);
-                if (heightmap->getPixel(coord.x-1, coord.y) == sea_color && regionmap[temp.x][temp.y] != current_region)
+                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x-1, coord.y), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
                     auto p = sf::Vector2i(coord.x-1, coord.y);
                     stack.push(p);
-                    regions.push_back(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
                 }
@@ -307,11 +199,10 @@ void WorldGenerator::runRivers()
             {
                 auto temp = sf::Vector2i(coord.x, coord.y-1);
                 c = heightmap->getPixel(coord.x, coord.y-1);
-                if (heightmap->getPixel(coord.x, coord.y-1) == sea_color && regionmap[temp.x][temp.y] != current_region)
+                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x, coord.y-1), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
                     auto p = sf::Vector2i(coord.x, coord.y-1);
                     stack.push(p);
-                    regions.push_back(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
                 }
@@ -320,11 +211,10 @@ void WorldGenerator::runRivers()
             {
                 auto temp = sf::Vector2i(coord.x+1, coord.y);
                 c = heightmap->getPixel(coord.x+1, coord.y);
-                if (heightmap->getPixel(coord.x+1, coord.y) == sea_color && regionmap[temp.x][temp.y] != current_region)
+                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x+1, coord.y), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
                     auto p = sf::Vector2i(coord.x+1, coord.y);
                     stack.push(p);
-                    regions.push_back(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
                 }
@@ -333,11 +223,10 @@ void WorldGenerator::runRivers()
             {
                 auto temp = sf::Vector2i(coord.x, coord.y+1);
                 c = heightmap->getPixel(coord.x, coord.y+1);
-                if (heightmap->getPixel(coord.x, coord.y+1) == sea_color && regionmap[temp.x][temp.y] != current_region)
+                if (app.getToolbox()->colorValidRange(code, heightmap->getPixel(coord.x, coord.y+1), tolerance) == true && regionmap[temp.x][temp.y] != current_region)
                 {
                     auto p = sf::Vector2i(coord.x, coord.y+1);
                     stack.push(p);
-                    regions.push_back(p);
                     regionmap[p.x][p.y] = current_region;
                     current_size++;
                 }
@@ -345,13 +234,20 @@ void WorldGenerator::runRivers()
         }
     }
 
-    sf::Color waterreg;
-    waterreg.r = 0;
-    waterreg.b = 50;
-    waterreg.g = 0;
-    waterreg.a = 255;
-    
     std::cout << "Total regions: " << current_region << std::endl;
+}
+
+void WorldGenerator::formRegions()
+{
+    // Get the finished heightmap
+    auto heightmap = app.getDataStorage()->getImage("heightmap");
+
+    int** regionmap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
+    std::map<int,int> regionsizes;
+
+    sf::Color sea_color(0, 0, 50, 255);
+    sf::Color tolerance(0, 0, 0, 0);
+    solveRegions(sea_color, tolerance, regionmap, regionsizes);
 
     // Color the ocean pixels tagged above
     for (int i = 0; i < heightmap->getSize().x; i++)
@@ -374,7 +270,6 @@ void WorldGenerator::runRivers()
                 }
                 else
                 {
-                    waterreg.b = app.getToolbox()->linearInterpolate(0, current_region, regionmap[i][j])*255;
                     heightmap->setPixel(i, j, sf::Color::Blue);
                 }
             }

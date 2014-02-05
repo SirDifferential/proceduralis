@@ -16,7 +16,8 @@ public:
     ImagePtr voronoi();
 
     void formSuperRegions();
-    void runRivers();
+    void solveRegions(sf::Color code, sf::Color tolerance, int** regionmap, std::map<int,int>& regionsizes);
+    void formRegions();
 };
 
 #endif
