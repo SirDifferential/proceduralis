@@ -11,6 +11,7 @@
 #include "worldGenerator.hpp"
 #include "datastorage.hpp"
 #include "spriteutils.hpp"
+#include "mouseHoverer.hpp"
 #include "cl_voronoi.hpp"
 #include "cl_perlin.hpp"
 #include "cl_blur.hpp"
@@ -36,6 +37,7 @@ Application::Application()
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
     datastorage = DataStoragePtr(new DataStorage());
     spriteutils = SpriteUtilsPtr(new SpriteUtils());
+    mousehoverer = MouseHovererPtr(new MouseHoverer());
 }
 
 int Application::readConfig()
@@ -174,7 +176,7 @@ void Application::windowWasClosed()
 */
 void Application::forceredraw()
 {
-    world->work();
+    world->draw();
     renderer->work();
 }
 
@@ -252,3 +254,7 @@ SpriteUtilsPtr Application::getSpriteUtils()
     return spriteutils;
 }
 
+MouseHovererPtr Application::getMouseHoverer()
+{
+    return mousehoverer;
+}

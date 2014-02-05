@@ -16,6 +16,7 @@ private:
     WorldGeneratorPtr worldgenerator;
     DataStoragePtr datastorage;
     SpriteUtilsPtr spriteutils;
+    MouseHovererPtr mousehoverer;
 
     CL_ProgramPtr activeCLProgram;
     CL_VoronoiPtr cl_voronoi;
@@ -51,6 +52,7 @@ public:
     WorldGeneratorPtr getWorldGenerator();
     DataStoragePtr getDataStorage();
     SpriteUtilsPtr getSpriteUtils();
+    MouseHovererPtr getMouseHoverer();
 };
 
 extern Application app;

@@ -3,8 +3,22 @@
 #include "toolbox.hpp"
 #include "renderer.hpp"
 #include "datastorage.hpp"
+#include "mouseHoverer.hpp"
+#include "gui.hpp"
+
 World::World()
 {
+    ocean_index_start = 50;
+    mountain_index_start = 5000;
+    hill_index_start = 10000;
+    flat_index_start = 20000;
+
+    ocean_region_sizes = std::shared_ptr<std::map<int,int>>(new std::map<int,int>());
+    mountain_region_sizes = std::shared_ptr<std::map<int,int>>(new std::map<int,int>());
+    hill_region_sizes = std::shared_ptr<std::map<int,int>>(new std::map<int,int>());
+    flat_region_sizes = std::shared_ptr<std::map<int,int>>(new std::map<int,int>());
+
+    world_reso = sf::Vector2i(1024, 1024);
 }
 
 void World::init()
@@ -46,7 +60,34 @@ void World::draw()
 
 void World::work()
 {
+    // Check where the mouse is hovering
+    sf::Vector2i coords = app.getMouseHoverer()->getCoords();
+
     draw();
+
+    // Get the region type and name for those coords
+    if (coords.x > 0 && coords.y > 0 && coords.x < world_reso.x && coords.y < world_reso.y)
+    {
+        int code = regionmap[coords.x][coords.y];
+        if (code > ocean_index_start && code < ocean_index_start + ocean_regions)
+        {
+            app.getGUI()->drawLocationText("Ocean, sized ", (*ocean_region_sizes)[code]);
+        }
+        else if (code > mountain_index_start && code < mountain_index_start + mountain_regions)
+        {
+            app.getGUI()->drawLocationText("Mountains, sized ", (*mountain_region_sizes)[code]);
+        }
+        else if (code > hill_index_start && code < hill_index_start + hill_regions)
+        {
+            app.getGUI()->drawLocationText("Hills, sized ", (*hill_region_sizes)[code]);
+        }
+        else if (code > flat_index_start && code < flat_index_start + flat_regions)
+        {
+            app.getGUI()->drawLocationText("Flats, sized ", (*flat_region_sizes)[code]);
+        }
+    }
+
+
 }
 
 void World::setWorld(ImagePtr image)
@@ -74,3 +115,63 @@ SpritePtr World::getWorld()
     return app.getDataStorage()->getSprite("heightmap");
 }
 
+void World::setRegion(int** regions)
+{
+    //if (regionmap != regions)
+    //    app.getToolbox()->deleteIntArray2D(regionmap, app.getDataStorage()->getImage("heightmap")->getSize().x);
+    regionmap = regions;
+}
+
+void World::setOceanRegions(std::shared_ptr<std::map<int,int>> r)
+{
+    ocean_region_sizes = r;
+    ocean_regions = r->size();
+}
+
+void World::setMountainRegions(std::shared_ptr<std::map<int,int>> r)
+{
+    mountain_region_sizes = r;
+    mountain_regions = r->size();
+}
+
+void World::setHillRegions(std::shared_ptr<std::map<int,int>> r)
+{
+    hill_region_sizes = r;
+    hill_regions = r->size();
+}
+
+void World::setFlatRegions(std::shared_ptr<std::map<int,int>> r)
+{
+    flat_region_sizes = r;
+    flat_regions = r->size();
+}
+
+int** World::getRegionMap()
+{
+    return regionmap;
+}
+
+std::shared_ptr<std::map<int,int>> World::getOceanRegions()
+{
+    return ocean_region_sizes;
+}
+
+std::shared_ptr<std::map<int,int>> World::getMountainRegions()
+{
+    return mountain_region_sizes;
+}
+
+std::shared_ptr<std::map<int,int>> World::getHillRegions()
+{
+    return hill_region_sizes;
+}
+
+std::shared_ptr<std::map<int,int>> World::getFlatRegions()
+{
+    return flat_region_sizes;
+}
+
+int World::getOceanStartIndex() { return ocean_index_start; }
+int World::getMountainStartIndex() { return mountain_index_start; }
+int World::getHillStartIndex() { return hill_index_start; }
+int World::getFlatStartIndex() { return flat_index_start; }

@@ -11,6 +11,8 @@ public:
 
     void draw();
 
+    void drawLocationText(std::string, int regionsize);
+
     std::string octaveString;
     std::string persistenceString;
     std::string frequencyString;

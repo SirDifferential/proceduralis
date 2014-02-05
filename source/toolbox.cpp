@@ -260,6 +260,20 @@ std::string Toolbox::removeCharsFromString(std::string s, int count)
 }
 
 /**
+* Converts sf::Vector2f to a string
+*/
+std::string Toolbox::vec2ToString(sf::Vector2i i)
+{
+    std::string out;
+    std::stringstream ss;
+    ss << i.x;
+    ss << ", ";
+    ss << i.y;
+    out = ss.str();
+    return out;
+}
+
+/**
 * Calculates a distance between two sf::vector2f
 */
 double Toolbox::vectorDistance(sf::Vector2f a, sf::Vector2f b)

@@ -3,6 +3,7 @@
 #include "renderer.hpp"
 #include "toolbox.hpp"
 #include "datastorage.hpp"
+#include "mouseHoverer.hpp"
 
 #include "opencl_program.hpp"
 
@@ -12,20 +13,20 @@ EventHandler::EventHandler()
 
 void EventHandler::checkEvents()
 {
-	sf::Event e;
-	while (app.getRenderer()->getRenderWindow()->pollEvent(e))
-	{
-		switch (e.type)
-		{
-			case sf::Event::Closed:
-				app.windowWasClosed();
-				break;
-			case sf::Event::Resized:
+    sf::Event e;
+    while (app.getRenderer()->getRenderWindow()->pollEvent(e))
+    {
+        switch (e.type)
+        {
+            case sf::Event::Closed:
+                app.windowWasClosed();
+                break;
+            case sf::Event::Resized:
                 app.getRenderer()->OnWindowResize();
-				break;
-			case sf::Event::KeyReleased:
-				break;
-			case sf::Event::KeyPressed:
+                break;
+            case sf::Event::KeyReleased:
+                break;
+            case sf::Event::KeyPressed:
                 switch (e.key.code)
                 {
                     case sf::Keyboard::A:
@@ -59,9 +60,14 @@ void EventHandler::checkEvents()
                         app.exit();
                         break;
                 }
-				break;
-		}
-	}
+                break;
+            case sf::Event::MouseMoved:
+                int x = e.mouseMove.x;
+                int y = e.mouseMove.x;
+                app.getMouseHoverer()->updateCoords(sf::Vector2i(x, y));
+                break;
+        }
+    }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
     {

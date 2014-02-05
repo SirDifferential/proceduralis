@@ -49,6 +49,7 @@ public:
     std::string combineIntAndString(int i, std::string s);
     std::string removeCharsFromString(std::string s, int count);
     std::string combineStringAndFloat(std::string s, float f);
+    std::string vec2ToString(sf::Vector2i i);
 
     double vectorDistance(sf::Vector2f a, sf::Vector2f b);
     double linearInterpolate(double x0, double x1, double alpha);
