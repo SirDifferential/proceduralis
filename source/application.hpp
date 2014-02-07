@@ -22,6 +22,7 @@ private:
     CL_VoronoiPtr cl_voronoi;
     CL_PerlinPtr cl_perlin;
     CL_BlurPtr cl_blur;
+    CL_WinddirPtr cl_winddir;
 
     std::map<std::string, std::shared_ptr<CL_Program>> programs;
 

@@ -19,6 +19,19 @@ void WorldGenerator::init()
     app.getDataStorage()->storeSprite("voronoiblurred", blurred);
     SpritePtr perlinblurred = SpritePtr(new sf::Sprite());
     app.getDataStorage()->storeSprite("perlinblurred", blurred);
+    SpritePtr regionmap = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("regionmap", regionmap);
+    ImagePtr regionmap_image = ImagePtr(new sf::Image());
+    regionmap_image->create(1024, 1024);
+    app.getDataStorage()->storeImage("regionmap", regionmap_image);
+    TexturePtr regionmap_text = TexturePtr(new sf::Texture());
+    regionmap_text->create(1024, 1024);
+    app.getDataStorage()->storeTexture("regionmap", regionmap_text);
+    SpritePtr winddir = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("winddirections", winddir);
+    TexturePtr winddir_text = TexturePtr(new sf::Texture());
+    winddir_text->create(1024, 1024);
+    app.getDataStorage()->storeTexture("winddirections", winddir_text);
 }
 
 void WorldGenerator::generate()
@@ -264,6 +277,7 @@ void WorldGenerator::formRegions()
 {
     // Get the finished heightmap
     auto heightmap = app.getDataStorage()->getImage("heightmap");
+    auto regionmap_image = app.getDataStorage()->getImage("regionmap");
 
     int ocean_index_start = app.getWorld()->getOceanStartIndex();
     int mountain_index_start = app.getWorld()->getMountainStartIndex();
@@ -311,7 +325,7 @@ void WorldGenerator::formRegions()
     std::cout << "Solving mountains..." << std::endl;
 
     sf::Color mountain_color(255, 255, 255, 255);
-    tolerance = sf::Color(155, 155, 155, 0);
+    tolerance = sf::Color(152, 152, 152, 0);
     solveRegions(regionmap, mountain_color, tolerance, mountain_region_sizes, mountain_index_start);
     timer2 = std::chrono::system_clock::now();
     mountain_regions = mountain_region_sizes->size();
@@ -321,8 +335,8 @@ void WorldGenerator::formRegions()
 
     std::cout << "Solving hills..." << std::endl;
 
-    sf::Color hill_color(99, 99, 99, 255);
-    tolerance = sf::Color(19, 19, 19, 0);
+    sf::Color hill_color(102, 102, 102, 255);
+    tolerance = sf::Color(15, 15, 15, 0);
     solveRegions(regionmap, hill_color, tolerance, hill_region_sizes, hill_index_start);
     hill_regions = hill_region_sizes->size();
 
@@ -330,8 +344,8 @@ void WorldGenerator::formRegions()
     int elapsed_seconds_3 = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
 
     std::cout << "Solving flats..." << std::endl;
-    sf::Color flat_color(79, 79, 79, 255);
-    tolerance = sf::Color(79, 79, 79, 0);
+    sf::Color flat_color(86, 86, 86, 255);
+    tolerance = sf::Color(86, 86, 86, 0);
     solveRegions(regionmap, flat_color, tolerance, flat_region_sizes, flat_index_start);
     flat_regions = flat_region_sizes->size();
 
@@ -340,6 +354,7 @@ void WorldGenerator::formRegions()
 
     std::cout << "Colorizing..." << std::endl;
     // Color the ocean pixels tagged above
+    
     for (int i = 0; i < heightmap->getSize().x; i++)
     {
         for (int j = 0; j < heightmap->getSize().y; j++)
@@ -348,45 +363,46 @@ void WorldGenerator::formRegions()
             {
                 if  ((*ocean_region_sizes)[regionmap[i][j]] < 10)
                 {
-                    heightmap->setPixel(i, j, sf::Color(135, 135, 245, 255));
+                    regionmap_image->setPixel(i, j, sf::Color(135, 135, 245, 255));
                 }
                 else if ((*ocean_region_sizes)[regionmap[i][j]] > 10 && (*ocean_region_sizes)[regionmap[i][j]] < 300)
                 {
-                    heightmap->setPixel(i, j, sf::Color(12, 12, 162, 255));
+                    regionmap_image->setPixel(i, j, sf::Color(12, 12, 162, 255));
                 }
                 else if  ((*ocean_region_sizes)[regionmap[i][j]] > 300 && (*ocean_region_sizes)[regionmap[i][j]] < 50000)
                 {
-                    heightmap->setPixel(i, j, sf::Color(8, 8, 92, 255));
+                    regionmap_image->setPixel(i, j, sf::Color(8, 8, 92, 255));
                 }
                 else
                 {
-                    heightmap->setPixel(i, j, sf::Color(0,0,30,255));
+                    regionmap_image->setPixel(i, j, sf::Color(0,0,30,255));
                 }
             }
             else if (regionmap[i][j] > mountain_index_start && regionmap[i][j] <= mountain_index_start + mountain_regions)
             {
-                heightmap->setPixel(i, j, sf::Color(233, 222, 197, 255));
+                regionmap_image->setPixel(i, j, sf::Color(233, 222, 197, 255));
             }
             else if (regionmap[i][j] > hill_index_start && regionmap[i][j] <= hill_index_start + hill_regions)
             {
-                heightmap->setPixel(i, j, sf::Color(220, 169, 60, 255));
+                regionmap_image->setPixel(i, j, sf::Color(220, 169, 60, 255));
             }
             else if (regionmap[i][j] > flat_index_start && regionmap[i][j] <= flat_index_start + flat_regions)
             {
-                heightmap->setPixel(i, j, sf::Color(14, 36, 20, 255));
+                regionmap_image->setPixel(i, j, sf::Color(14, 36, 20, 255));
             }
         }
     }
+    
 
     end = std::chrono::system_clock::now();
     int elapsed_seconds_5 = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
     int waited = std::chrono::duration_cast<std::chrono::seconds> (timer2-timer1).count();
 
-    std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");
+    std::shared_ptr<sf::Texture> regionmap_text = app.getDataStorage()->getTexture("regionmap");
 
-    heightmap_text->update(*heightmap);
-    std::shared_ptr<sf::Sprite> heightmap_sprite = app.getDataStorage()->getSprite("heightmap");
-    heightmap_sprite->setTexture(*heightmap_text);
+    regionmap_text->update(*regionmap_image);
+    std::shared_ptr<sf::Sprite>  regionmap_sprite = app.getDataStorage()->getSprite("regionmap");
+    regionmap_sprite->setTexture(*regionmap_text);
 
     end = std::chrono::system_clock::now();
     int sprites_updated = std::chrono::duration_cast<std::chrono::seconds> (end-start).count();
@@ -406,6 +422,15 @@ void WorldGenerator::formRegions()
     app.getWorld()->setMountainRegions(mountain_region_sizes);
     app.getWorld()->setHillRegions(hill_region_sizes);
     app.getWorld()->setFlatRegions(flat_region_sizes);
+}
+
+void WorldGenerator::runRivers()
+{
+    auto heightmap = app.getDataStorage()->getImage("heightmap");
+    auto regionmap_image = app.getDataStorage()->getImage("regionmap");
+
+    auto regionmap = app.getWorld()->getRegionMap();
+    //auto regioninfo = app.getWorld()->getRegionInfo();
 }
 
 ImagePtr WorldGenerator::voronoi()

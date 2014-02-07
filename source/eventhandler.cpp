@@ -63,7 +63,7 @@ void EventHandler::checkEvents()
                 break;
             case sf::Event::MouseMoved:
                 int x = e.mouseMove.x;
-                int y = e.mouseMove.x;
+                int y = e.mouseMove.y;
                 app.getMouseHoverer()->updateCoords(sf::Vector2i(x, y));
                 break;
         }

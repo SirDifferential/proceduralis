@@ -18,6 +18,7 @@ public:
     void formSuperRegions();
     void solveRegions(int** regionmap, sf::Color code, sf::Color tolerance_down, std::shared_ptr<std::map<int,int>> regionsizes, int regionCodeStartRange);
     void formRegions();
+    void runRivers();
 };
 
 #endif

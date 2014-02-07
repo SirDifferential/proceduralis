@@ -36,7 +36,7 @@ public:
     void draw();
     void work();
 
-    std::pair<std::string, int> getRegionInfo(sf::Vector2i c);
+    //std::pair<std::string, int> getRegionInfo(sf::Vector2i c);
 
     void setWorld(ImagePtr image);
 

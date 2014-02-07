@@ -37,24 +37,32 @@ void World::draw()
     auto s3 = app.getDataStorage()->getSprite("heightmap");
     auto s4 = app.getDataStorage()->getSprite("voronoiblurred");
     auto s5 = app.getDataStorage()->getSprite("perlinblurred");
+    //auto s6 = app.getDataStorage()->getSprite("regionmap");
+    auto s7 = app.getDataStorage()->getSprite("winddirections");
 
     //s1->setScale(0.2, 0.2);
-    //s2->setScale(0.2, 0.2);
+    s2->setScale(0.2, 0.2);
     s3->setScale(0.2, 0.2);
     //s4->setScale(0.2, 0.2);
     //s5->setScale(0.2, 0.2);
+    //s6->setScale(0.2, 0.2);
+    s7->setScale(0.2, 0.2);
 
     //s1->setPosition(10, 10);
-    //s2->setPosition(220, 10);
+    s2->setPosition(220, 10);
     s3->setPosition(220, 220);
     //s4->setPosition(10, 220);
     //s5->setPosition(440, 220);
+    //s6->setPosition(440, 220);
+    s7->setPosition(10, 10);
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
-    //app.getRenderer()->getRenderWindow()->draw(*s2);
-    app.getRenderer()->getRenderWindow()->draw(*s3);
+    app.getRenderer()->getRenderWindow()->draw(*s2);
+    //app.getRenderer()->getRenderWindow()->draw(*s3);
     //app.getRenderer()->getRenderWindow()->draw(*s4);
     //app.getRenderer()->getRenderWindow()->draw(*s5);
+    //app.getRenderer()->getRenderWindow()->draw(*s6);
+    app.getRenderer()->getRenderWindow()->draw(*s7);
     
 }
 
@@ -65,6 +73,7 @@ void World::work()
 
     draw();
 
+    /*
     // Get the region type and name for those coords
     if (coords.x > 0 && coords.y > 0 && coords.x < world_reso.x && coords.y < world_reso.y)
     {
@@ -86,7 +95,7 @@ void World::work()
             app.getGUI()->drawLocationText("Flats, sized ", (*flat_region_sizes)[code]);
         }
     }
-
+    */
 
 }
 

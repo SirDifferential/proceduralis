@@ -48,6 +48,8 @@ void SpriteUtils::setPixels(SpritePtr target, std::string name, float* buffer, u
     app.getDataStorage()->storeTexture(name, sprite_texture);
     app.getDataStorage()->storeSprite(name, target);
 
+    auto temp = app.getDataStorage()->getSprite(name);
+
 }
 
 void SpriteUtils::setPixels(SpritePtr target, std::string name, float** buffer, unsigned int width, unsigned int height)

@@ -15,6 +15,7 @@
 #include "cl_voronoi.hpp"
 #include "cl_perlin.hpp"
 #include "cl_blur.hpp"
+#include "cl_winddir.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -32,6 +33,7 @@ Application::Application()
     cl_voronoi = CL_VoronoiPtr(new CL_Voronoi("voronoi.cl"));
     cl_perlin = CL_PerlinPtr(new CL_Perlin("perlin.cl"));
     cl_blur = CL_BlurPtr(new CL_Blur("blur.cl"));
+    cl_winddir = CL_WinddirPtr(new CL_Winddir("winddirection.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
@@ -121,18 +123,23 @@ int Application::run()
     cl_blur->loadProgram();
     cl_blur->setOutputTarget(datastorage->getSprite("voronoiblurred"), "voronoiblurred");
 
+    cl_winddir->loadProgram();
+    cl_winddir->setOutputTarget(datastorage->getSprite("winddirections"), "winddirections");
+
     programs["voronoi"] = cl_voronoi;
     programs["perlin"] = cl_perlin;
     programs["blur"] = cl_blur;
+    programs["winddir"] = cl_winddir;
 
     activeCLProgram = programs["voronoi"];
     activeCLProgram->runKernel();
 
     cl_perlin->runKernel();
+    cl_winddir->runKernel();
 
     worldgenerator->formSuperRegions();
     forceredraw();
-    worldgenerator->formRegions();
+    //worldgenerator->formRegions();
 
     int stop_s = clock();
     std::cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;
@@ -176,8 +183,8 @@ void Application::windowWasClosed()
 */
 void Application::forceredraw()
 {
-    world->draw();
-    renderer->work();
+    //world->draw();
+    //renderer->work();
 }
 
 void Application::setProgram(std::string name)
