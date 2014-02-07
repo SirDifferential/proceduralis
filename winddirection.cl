@@ -115,6 +115,17 @@ float getLatitudeWinddir(float coord_y)
     // Convert the height coordinate from (0...1) to the range of -90...90
     float latitude = linear_interpolate(90, -90, coord_y);
 
+    if (latitude > 66 && latitude < 67)
+        return 100;
+    if (latitude > 23 && latitude < 24)
+        return 100;
+    if (latitude > 0 && latitude < 1)
+        return 100;
+    if (latitude <  -23 && latitude > -24)
+        return 100;
+    if (latitude <  -66 && latitude > -67)
+        return 100;
+
     // For each latitude range, calculate influence of that wind region
     if (latitude >= 66.33)
     {
@@ -187,6 +198,8 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     outcol.z = 0;
     outcol.w = 0;
 
+    t *= perlin;
+
     // North pole: south, 3.14159 rads
     // North circle: north, 0 rads
     // North tropic: east, 1.570795 rads
@@ -195,17 +208,30 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     // South circle: south, 3.14159 rads
     // South pole: north, 0 rads
 
-    if (t < 1.570795)
-        outcol.x = 1.0;
+    if (t == 100)
+    {
+        outcol.x = 50;
+        outcol.y = 255;
+        outcol.z = 150;
+    }
+    else if (t < 1.570795)
+        outcol.x = linear_interpolate(0.5, 1.0, t / 1.570795);
     else if (t > 1.570795 && t < 3.14159)
-        outcol.y = 1.0;
+        outcol.y = linear_interpolate(0.5, 1.0, (3.14159 - t) / 1.570795);
     else if (t > 3.14159 && t < 4.712385)
-        outcol.z = 1.0;
+        outcol.z = linear_interpolate(0.5, 1.0, (4.712385 - t) / 1.570795);
+    else if (t > 4.712385 && t < 6)
+    {
+        outcol.x = 0.5;
+        outcol.y = 0.5,
+        outcol.z = 0.5;
+    }
     else
     {
-        outcol.x = 1;
-        outcol.y = 1,
-        outcol.z = 1;
+
+        outcol.x = 0.0;
+        outcol.y = 0.0,
+        outcol.z = 0.0;
     }
 
 	write_imagef(windmap, coord, outcol);
