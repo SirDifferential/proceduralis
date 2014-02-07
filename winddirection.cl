@@ -168,6 +168,13 @@ float getLatitudeWinddir(float coord_y)
 
 }
 
+float myabs(float i)
+{
+    if (i < 0)
+        return i*-1;
+    return i;
+}
+
 __kernel void winddirection(__read_only image2d_t random_values,  __write_only image2d_t windmap)
 {
     // Get the (x,y) coordinates of our desired point
@@ -177,9 +184,9 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
 	int2 coord = (int2) (x, y);
     int2 s = get_image_dim(windmap);
 
-    float frequency = 0.06;
-    float persistence = 1.7;
-    int octaves = 8;
+    float frequency = 0.219f;
+    float persistence = 1.1;
+    int octaves = 5;
 
 	float perlin = GetPerlin(x, y, frequency, persistence, octaves, random_values);
 
@@ -198,7 +205,7 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     outcol.z = 0;
     outcol.w = 0;
 
-    t *= perlin;
+    t = t + (0.8 * perlin);
 
     // North pole: south, 3.14159 rads
     // North circle: north, 0 rads
@@ -207,6 +214,12 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     // South tropic: east,  1.570795 rads
     // South circle: south, 3.14159 rads
     // South pole: north, 0 rads
+
+    outcol.x = t;
+    outcol.y = t;
+    outcol.z = t;
+    outcol.w = 0;
+    //write_imagef(windmap, coord, outcol);
 
     if (t == 100)
     {
@@ -229,9 +242,9 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     else
     {
 
-        outcol.x = 0.0;
-        outcol.y = 0.0,
-        outcol.z = 0.0;
+        outcol.x = t;
+        outcol.y = t,
+        outcol.z = t;
     }
 
 	write_imagef(windmap, coord, outcol);
