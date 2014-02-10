@@ -41,23 +41,23 @@ void World::draw()
     auto s7 = app.getDataStorage()->getSprite("winddirections");
 
     //s1->setScale(0.2, 0.2);
-    s2->setScale(0.2, 0.2);
-    s3->setScale(0.2, 0.2);
+    //s2->setScale(0.2, 0.2);
+    //s3->setScale(0.2, 0.2);
     //s4->setScale(0.2, 0.2);
     //s5->setScale(0.2, 0.2);
     //s6->setScale(0.2, 0.2);
     s7->setScale(0.2, 0.2);
 
     //s1->setPosition(10, 10);
-    s2->setPosition(220, 10);
-    s3->setPosition(220, 220);
+    //s2->setPosition(220, 10);
+    //s3->setPosition(440, 220);
     //s4->setPosition(10, 220);
     //s5->setPosition(440, 220);
     //s6->setPosition(440, 220);
     s7->setPosition(10, 10);
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
-    app.getRenderer()->getRenderWindow()->draw(*s2);
+    //app.getRenderer()->getRenderWindow()->draw(*s2);
     //app.getRenderer()->getRenderWindow()->draw(*s3);
     //app.getRenderer()->getRenderWindow()->draw(*s4);
     //app.getRenderer()->getRenderWindow()->draw(*s5);

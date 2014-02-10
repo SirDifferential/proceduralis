@@ -48,7 +48,7 @@ void CL_Winddir::loadProgram()
 
     for (int i = 3; i < 1024*1024*4; i += 4)
     {
-        value = app.getToolbox()->giveRandomFloat() * 0.2f;
+        value = app.getToolbox()->giveRandomFloat() + 0.001f;// * 0.6f;
         image_buffer_in[i-3] = value;
         image_buffer_in[i-2] = value;
         image_buffer_in[i-1] = value;
@@ -110,7 +110,7 @@ void CL_Winddir::runKernel()
         delete[] map_done;
         return;
     }
-    app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
+    app.getSpriteUtils()->setPixelsNorerange(outputTarget, outputName, map_done, 1024, 1024);
     auto temp = app.getDataStorage()->getSprite("winddirections");
 
     delete[] map_done;

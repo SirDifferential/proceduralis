@@ -424,6 +424,148 @@ void WorldGenerator::formRegions()
     app.getWorld()->setFlatRegions(flat_region_sizes);
 }
 
+void WorldGenerator::rainclouds()
+{
+    auto w = app.getDataStorage()->getImage("winddirections");
+
+    sf::Vector2i origin(512, 512);
+    sf::Vector2i current = origin;
+    sf::Vector2i old = current;
+    sf::Color clouds(255, 255, 0, 255);
+
+    int stepsTaken = 0;
+    int stepLimit = 50000;
+
+    // Angles are in radians multiplied by 100
+    // The 100 is there so that integers can represent small angles
+
+    float sectorrange = 3.14159 / 8.0;
+
+    std::stack<sf::Vector2i> windpoints;
+    
+    
+    for (int i = 0; i < 100; i++)
+    {
+        windpoints.push(sf::Vector2i(app.getToolbox()->giveRandomInt(0, 1023), app.getToolbox()->giveRandomInt(0, 1023)));
+    }
+
+    /*
+    windpoints.push(sf::Vector2i(512, 1023));
+    windpoints.push(sf::Vector2i(10, 1023));
+    windpoints.push(sf::Vector2i(1000, 1023));
+    windpoints.push(sf::Vector2i(10, 0));
+    windpoints.push(sf::Vector2i(512, 0));
+    
+    windpoints.push(sf::Vector2i(1023, 0));
+    
+    windpoints.push(sf::Vector2i(512, 100));
+    
+    windpoints.push(sf::Vector2i(15, 1000));
+    
+    
+    windpoints.push(sf::Vector2i(128, 20));
+    
+    windpoints.push(sf::Vector2i(768, 128));
+    
+    windpoints.push(sf::Vector2i(768, 768));
+    
+    windpoints.push(sf::Vector2i(512, 402));
+    */
+    while (windpoints.empty() == false)
+    {
+        origin = windpoints.top();
+        windpoints.pop();
+        current = origin;
+        old = origin;
+        stepsTaken = 0;
+
+        while (stepsTaken < stepLimit)
+        {
+            stepsTaken++;
+
+            clouds.b = w->getPixel(old.x, old.y).b;
+
+            w->setPixel(old.x, old.y, clouds);
+            old = current;
+
+            // Get the angle at this coord
+            float rads = w->getPixel(current.x, current.y).b / 100.0;
+            if (rads < sectorrange)
+            {
+                // Go up
+                current.y++;
+            }
+            else if (rads >= sectorrange && rads < sectorrange * 3)
+            {
+                // Go up right
+                current.x++;
+                current.y++;
+            }
+            else if (rads >= sectorrange * 3 && rads < 5 * sectorrange)
+            {
+                // Go right
+                current.x++;
+            }
+            else if (rads >= 5 * sectorrange && rads < 7 * sectorrange)
+            {
+                // Go down right
+                current.x++;
+                current.y--;
+            }
+            else if (rads >= 7 * sectorrange && rads < 9 * sectorrange)
+            {
+                // Go down
+                current.y++;
+            }
+            else if (rads >= 9 * sectorrange && rads < 11 * sectorrange)
+            {
+                // go down left
+                current.x--;
+                current.y--;
+            }
+            else if (rads >= 11 * sectorrange && rads < 13 * sectorrange)
+            {
+                // go left
+                current.x--;
+            }
+            else if (rads >= 13 * sectorrange && rads < 15 * sectorrange)
+            {
+                // go up left
+                current.x--;
+                current.y++;
+            }
+            else
+            {
+                std::cout << "Weird angle " << rads << std::endl;
+                current.x++;
+            }
+        
+            if (current.y < 0)
+            {
+                current.y = 2;
+                current.x++;
+            }
+            else if (current.y > w->getSize().y -1)
+            {
+                current.y = w->getSize().y -2;
+                current.x++;
+            }
+
+            if (current.x < 0)
+                current.x = w->getSize().x -1;
+            else if (current.x > w->getSize().x-1)
+                current.x = 0;
+        }
+    }
+
+    std::shared_ptr<sf::Texture> windmap_text = app.getDataStorage()->getTexture("winddirections");
+
+    windmap_text->update(*w);
+    std::shared_ptr<sf::Sprite>  windmap_sprite = app.getDataStorage()->getSprite("winddirections");
+    windmap_sprite->setTexture(*windmap_text);
+
+}
+
 void WorldGenerator::runRivers()
 {
     auto heightmap = app.getDataStorage()->getImage("heightmap");

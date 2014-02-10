@@ -1,3 +1,5 @@
+// http://www.dungeonleague.com/2010/03/28/wind-direction/
+
 const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
 
 float Cosine_Interpolate(float a, float b, float x)
@@ -115,23 +117,23 @@ float getLatitudeWinddir(float coord_y)
     // Convert the height coordinate from (0...1) to the range of -90...90
     float latitude = linear_interpolate(90, -90, coord_y);
 
-    if (latitude > 66 && latitude < 67)
-        return 100;
-    if (latitude > 23 && latitude < 24)
-        return 100;
-    if (latitude > 0 && latitude < 1)
-        return 100;
-    if (latitude <  -23 && latitude > -24)
-        return 100;
-    if (latitude <  -66 && latitude > -67)
-        return 100;
+    //if (latitude > 66 && latitude < 67)
+    //    return 100;
+    //if (latitude > 23 && latitude < 24)
+    //    return 100;
+    //if (latitude > 0 && latitude < 1)
+    //    return 100;
+    //if (latitude <  -23 && latitude > -24)
+    //    return 100;
+    //if (latitude <  -66 && latitude > -67)
+    //    return 100;
 
     // For each latitude range, calculate influence of that wind region
     if (latitude >= 66.33)
     {
         // North pole - north cicle
         // First figure out relative position to the end points of this region (0...1)
-        float latitude_influence = (90.0 - latitude) / 23.67; // 90 - 63.66
+        float latitude_influence = (90.0 - latitude) / 23.34; // 90 - 63.66
         // Then calculate the total wind direction by using linear interpolation between the two wind points
         return linear_interpolate(3.14159, 0, latitude_influence);
     }
@@ -162,7 +164,7 @@ float getLatitudeWinddir(float coord_y)
     else
     {
         // South circle - south pole
-        float latitude_influence = (-66.33 - latitude) / 23.67; // 90 - 63.66;
+        float latitude_influence = (-66.33 - latitude) / 23.34; // 90 - 63.66;
         return linear_interpolate(3.14159, 0, latitude_influence);
     }
 
@@ -185,8 +187,8 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     int2 s = get_image_dim(windmap);
 
     float frequency = 0.219f;
-    float persistence = 1.1;
-    int octaves = 5;
+    float persistence = 1.5;
+    int octaves = 3;
 
 	float perlin = GetPerlin(x, y, frequency, persistence, octaves, random_values);
 
@@ -197,15 +199,23 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
 
     float interpolated_direction = getLatitudeWinddir(coord_y);
 
+    float random_offset = read_imagef(random_values, sampler, coord).x;
+
     float t = interpolated_direction;
+    if (t <= 0)
+        t = random_offset / 0.8;
 
     float4 outcol;
     outcol.x = 0;
     outcol.y = 0;
     outcol.z = 0;
-    outcol.w = 0;
+    outcol.w = 255;
 
-    t = t + (0.8 * perlin);
+
+    t = t * myabs(sin(random_offset)/0.5) / perlin;
+    if (t > 1.8*3.14159)
+        t = 1.8 * 3.14159 - random_offset;
+    //t = perlin;
 
     // North pole: south, 3.14159 rads
     // North circle: north, 0 rads
@@ -215,37 +225,18 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     // South circle: south, 3.14159 rads
     // South pole: north, 0 rads
 
-    outcol.x = t;
-    outcol.y = t;
-    outcol.z = t;
-    outcol.w = 0;
+    //outcol.x = t;
+    //outcol.y = t;
+    //outcol.z = t;
+    //outcol.w = 0;
     //write_imagef(windmap, coord, outcol);
 
-    if (t == 100)
-    {
-        outcol.x = 50;
-        outcol.y = 255;
-        outcol.z = 150;
-    }
-    else if (t < 1.570795)
-        outcol.x = linear_interpolate(0.5, 1.0, t / 1.570795);
-    else if (t > 1.570795 && t < 3.14159)
-        outcol.y = linear_interpolate(0.5, 1.0, (3.14159 - t) / 1.570795);
-    else if (t > 3.14159 && t < 4.712385)
-        outcol.z = linear_interpolate(0.5, 1.0, (4.712385 - t) / 1.570795);
-    else if (t > 4.712385 && t < 6)
-    {
-        outcol.x = 0.5;
-        outcol.y = 0.5,
-        outcol.z = 0.5;
-    }
-    else
-    {
+    if (t > 2 * 3.14159 || t <= 0)
+        t = 0.1;
 
-        outcol.x = t;
-        outcol.y = t,
-        outcol.z = t;
-    }
+    //outcol.x = linear_interpolate(0.1, 1.0, myabs(t - 3.14159) / 3.14159)*100; 
+    //outcol.y = linear_interpolate(0.1, 1.0, myabs(t - 1.570795) / 1.570975)*100;
+    outcol.z = t*50;
 
 	write_imagef(windmap, coord, outcol);
 }
