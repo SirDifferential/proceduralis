@@ -16,6 +16,7 @@
 #include "cl_perlin.hpp"
 #include "cl_blur.hpp"
 #include "cl_winddir.hpp"
+#include "cl_precipitation.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -34,6 +35,7 @@ Application::Application()
     cl_perlin = CL_PerlinPtr(new CL_Perlin("perlin.cl"));
     cl_blur = CL_BlurPtr(new CL_Blur("blur.cl"));
     cl_winddir = CL_WinddirPtr(new CL_Winddir("winddirection.cl"));
+    cl_precipitation = CL_PrecipitationPtr(new CL_Precipitation("precipitation.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
@@ -130,6 +132,7 @@ int Application::run()
     programs["perlin"] = cl_perlin;
     programs["blur"] = cl_blur;
     programs["winddir"] = cl_winddir;
+    programs["precipitation"] = cl_precipitation;
 
     activeCLProgram = programs["voronoi"];
     activeCLProgram->runKernel();
@@ -139,8 +142,12 @@ int Application::run()
 
     worldgenerator->formSuperRegions();
     forceredraw();
-    //worldgenerator->formRegions();
+    worldgenerator->formRegions();
     worldgenerator->rainclouds();
+
+    cl_precipitation->loadProgram();
+    cl_precipitation->setOutputTarget(datastorage->getSprite("precipitation"), "precipitation");
+    cl_precipitation->runKernel();
 
     int stop_s = clock();
     std::cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;

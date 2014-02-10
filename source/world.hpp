@@ -26,6 +26,8 @@ private:
     std::shared_ptr<std::map<int,int>> hill_region_sizes;
     std::shared_ptr<std::map<int,int>> flat_region_sizes;
 
+    std::shared_ptr<std::map<long, RegionPtr>> regions;
+
     sf::Vector2i world_reso;
 
 public:
@@ -47,6 +49,7 @@ public:
     void setFlatRegions(std::shared_ptr<std::map<int,int>> r);
 
     int** getRegionMap();
+    std::shared_ptr<std::map<long, RegionPtr>> getRegions();
     std::shared_ptr<std::map<int,int>> getOceanRegions();
     std::shared_ptr<std::map<int,int>> getMountainRegions();
     std::shared_ptr<std::map<int,int>> getHillRegions();

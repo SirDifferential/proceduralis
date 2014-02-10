@@ -5,6 +5,7 @@
 #include "datastorage.hpp"
 #include "mouseHoverer.hpp"
 #include "gui.hpp"
+#include "region.hpp"
 
 World::World()
 {
@@ -19,6 +20,8 @@ World::World()
     flat_region_sizes = std::shared_ptr<std::map<int,int>>(new std::map<int,int>());
 
     world_reso = sf::Vector2i(1024, 1024);
+
+    regions = std::shared_ptr<std::map<long, RegionPtr>>(new std::map<long, RegionPtr>());
 }
 
 void World::init()
@@ -39,6 +42,7 @@ void World::draw()
     auto s5 = app.getDataStorage()->getSprite("perlinblurred");
     //auto s6 = app.getDataStorage()->getSprite("regionmap");
     auto s7 = app.getDataStorage()->getSprite("winddirections");
+    auto s8 = app.getDataStorage()->getSprite("precipitation");
 
     //s1->setScale(0.2, 0.2);
     //s2->setScale(0.2, 0.2);
@@ -47,6 +51,7 @@ void World::draw()
     //s5->setScale(0.2, 0.2);
     //s6->setScale(0.2, 0.2);
     s7->setScale(0.2, 0.2);
+    s8->setScale(0.2, 0.2);
 
     //s1->setPosition(10, 10);
     //s2->setPosition(220, 10);
@@ -55,6 +60,7 @@ void World::draw()
     //s5->setPosition(440, 220);
     //s6->setPosition(440, 220);
     s7->setPosition(10, 10);
+    s8->setPosition(220, 10);
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
     //app.getRenderer()->getRenderWindow()->draw(*s2);
@@ -63,7 +69,7 @@ void World::draw()
     //app.getRenderer()->getRenderWindow()->draw(*s5);
     //app.getRenderer()->getRenderWindow()->draw(*s6);
     app.getRenderer()->getRenderWindow()->draw(*s7);
-    
+    app.getRenderer()->getRenderWindow()->draw(*s8);
 }
 
 void World::work()
@@ -184,3 +190,4 @@ int World::getOceanStartIndex() { return ocean_index_start; }
 int World::getMountainStartIndex() { return mountain_index_start; }
 int World::getHillStartIndex() { return hill_index_start; }
 int World::getFlatStartIndex() { return flat_index_start; }
+std::shared_ptr<std::map<long, RegionPtr>> World::getRegions() { return regions; }

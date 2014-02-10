@@ -4,6 +4,7 @@
 #include "world.hpp"
 #include "datastorage.hpp"
 #include "spriteutils.hpp"
+#include "region.hpp"
 
 WorldGenerator::WorldGenerator()
 {
@@ -32,6 +33,14 @@ void WorldGenerator::init()
     TexturePtr winddir_text = TexturePtr(new sf::Texture());
     winddir_text->create(1024, 1024);
     app.getDataStorage()->storeTexture("winddirections", winddir_text);
+    SpritePtr preci = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("precipitation", preci);
+    TexturePtr preci_text = TexturePtr(new sf::Texture());
+    preci_text->create(1024, 1024);
+    app.getDataStorage()->storeTexture("precipitation", preci_text);
+    ImagePtr preci_img = ImagePtr(new sf::Image());
+    preci_img->create(1024, 1024);
+    app.getDataStorage()->storeImage("precipitation", preci_img);
 }
 
 void WorldGenerator::generate()
@@ -175,6 +184,7 @@ void WorldGenerator::solveRegions(int** regionmap, sf::Color code, sf::Color tol
         (*rsizes)[current_region] = current_size;
         current_size = 0;
         current_region++;
+
 
         while (current_x < heightmap->getSize().x || current_y < heightmap->getSize().y)
         {
@@ -354,6 +364,10 @@ void WorldGenerator::formRegions()
 
     std::cout << "Colorizing..." << std::endl;
     // Color the ocean pixels tagged above
+
+    auto regions = app.getWorld()->getRegions();
+    int s = regions->size();
+    
     
     for (int i = 0; i < heightmap->getSize().x; i++)
     {
@@ -377,18 +391,31 @@ void WorldGenerator::formRegions()
                 {
                     regionmap_image->setPixel(i, j, sf::Color(0,0,30,255));
                 }
+
+                if (regions->find(regionmap[i][j]) == regions->end())
+                    (*regions)[regionmap[i][j]] = RegionPtr(new Region(RegionType::Region_Ocean, regionmap[i][j]));
+                (*regions)[regionmap[i][j]]->addSite(sf::Vector2i(i, j));
             }
             else if (regionmap[i][j] > mountain_index_start && regionmap[i][j] <= mountain_index_start + mountain_regions)
             {
                 regionmap_image->setPixel(i, j, sf::Color(233, 222, 197, 255));
+                if (regions->find(regionmap[i][j]) == regions->end())
+                    (*regions)[regionmap[i][j]] = RegionPtr(new Region(RegionType::Region_Mountains, regionmap[i][j]));
+                (*regions)[regionmap[i][j]]->addSite(sf::Vector2i(i, j));
             }
             else if (regionmap[i][j] > hill_index_start && regionmap[i][j] <= hill_index_start + hill_regions)
             {
                 regionmap_image->setPixel(i, j, sf::Color(220, 169, 60, 255));
+                if (regions->find(regionmap[i][j]) == regions->end())
+                    (*regions)[regionmap[i][j]] = RegionPtr(new Region(RegionType::Region_Hills, regionmap[i][j]));
+                (*regions)[regionmap[i][j]]->addSite(sf::Vector2i(i, j));
             }
             else if (regionmap[i][j] > flat_index_start && regionmap[i][j] <= flat_index_start + flat_regions)
             {
                 regionmap_image->setPixel(i, j, sf::Color(14, 36, 20, 255));
+                if (regions->find(regionmap[i][j]) == regions->end())
+                    (*regions)[regionmap[i][j]] = RegionPtr(new Region(RegionType::Region_Flat, regionmap[i][j]));
+                (*regions)[regionmap[i][j]]->addSite(sf::Vector2i(i, j));
             }
         }
     }
@@ -426,7 +453,21 @@ void WorldGenerator::formRegions()
 
 void WorldGenerator::rainclouds()
 {
+    /*
     auto w = app.getDataStorage()->getImage("winddirections");
+    auto regionsprite = app.getDataStorage()->getImage("regionmap");
+    int** regionmap = app.getWorld()->getRegionMap();
+    auto regions = app.getWorld()->getRegions();
+
+    int ocean_index_start = app.getWorld()->getOceanStartIndex();
+    int mountain_index_start = app.getWorld()->getMountainStartIndex();
+    int hill_index_start = app.getWorld()->getHillStartIndex();
+    int flat_index_start = app.getWorld()->getFlatStartIndex();
+    
+    std::shared_ptr<std::map<int,int>> ocean_region_sizes = app.getWorld()->getOceanRegions();
+    std::shared_ptr<std::map<int,int>> mountain_region_sizes = app.getWorld()->getMountainRegions();
+    std::shared_ptr<std::map<int,int>> hill_region_sizes = app.getWorld()->getHillRegions();
+    std::shared_ptr<std::map<int,int>> flat_region_sizes = app.getWorld()->getFlatRegions();
 
     sf::Vector2i origin(512, 512);
     sf::Vector2i current = origin;
@@ -436,49 +477,7 @@ void WorldGenerator::rainclouds()
     int stepsTaken = 0;
     int stepLimit = 50000;
 
-    // Angles are in radians multiplied by 100
-    // The 100 is there so that integers can represent small angles
-
     float sectorrange = 3.14159 / 8.0;
-
-    std::stack<sf::Vector2i> windpoints;
-    
-    
-    for (int i = 0; i < 100; i++)
-    {
-        windpoints.push(sf::Vector2i(app.getToolbox()->giveRandomInt(0, 1023), app.getToolbox()->giveRandomInt(0, 1023)));
-    }
-
-    /*
-    windpoints.push(sf::Vector2i(512, 1023));
-    windpoints.push(sf::Vector2i(10, 1023));
-    windpoints.push(sf::Vector2i(1000, 1023));
-    windpoints.push(sf::Vector2i(10, 0));
-    windpoints.push(sf::Vector2i(512, 0));
-    
-    windpoints.push(sf::Vector2i(1023, 0));
-    
-    windpoints.push(sf::Vector2i(512, 100));
-    
-    windpoints.push(sf::Vector2i(15, 1000));
-    
-    
-    windpoints.push(sf::Vector2i(128, 20));
-    
-    windpoints.push(sf::Vector2i(768, 128));
-    
-    windpoints.push(sf::Vector2i(768, 768));
-    
-    windpoints.push(sf::Vector2i(512, 402));
-    */
-    while (windpoints.empty() == false)
-    {
-        origin = windpoints.top();
-        windpoints.pop();
-        current = origin;
-        old = origin;
-        stepsTaken = 0;
-
         while (stepsTaken < stepLimit)
         {
             stepsTaken++;
@@ -489,6 +488,8 @@ void WorldGenerator::rainclouds()
             old = current;
 
             // Get the angle at this coord
+            // Angles are in radians multiplied by 100
+            // The 100 is there so that integers can represent small angles
             float rads = w->getPixel(current.x, current.y).b / 100.0;
             if (rads < sectorrange)
             {
@@ -556,13 +557,13 @@ void WorldGenerator::rainclouds()
             else if (current.x > w->getSize().x-1)
                 current.x = 0;
         }
-    }
 
     std::shared_ptr<sf::Texture> windmap_text = app.getDataStorage()->getTexture("winddirections");
 
     windmap_text->update(*w);
     std::shared_ptr<sf::Sprite>  windmap_sprite = app.getDataStorage()->getSprite("winddirections");
     windmap_sprite->setTexture(*windmap_text);
+    */
 
 }
 

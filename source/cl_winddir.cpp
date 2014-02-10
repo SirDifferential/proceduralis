@@ -96,8 +96,16 @@ void CL_Winddir::runKernel()
         return;
     }
 
-    error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
-    print_errors("commandQueue.enqueueNDRangeKernel", error);
+    try
+    {
+        error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
+    }
+    catch (cl::Error err)
+    {
+        std::cout << "-CL_Winddir: Error running kernel: " << err.what() << ", " << err.err() << std::endl;
+        print_errors("commandQueue.enqueueNDRangeKernel", error);
+    }
+    
 
     commandQueue.finish();
 

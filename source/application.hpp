@@ -23,6 +23,7 @@ private:
     CL_PerlinPtr cl_perlin;
     CL_BlurPtr cl_blur;
     CL_WinddirPtr cl_winddir;
+    CL_PrecipitationPtr cl_precipitation;
 
     std::map<std::string, std::shared_ptr<CL_Program>> programs;
 
