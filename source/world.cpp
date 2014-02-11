@@ -43,6 +43,7 @@ void World::draw()
     auto s6 = app.getDataStorage()->getSprite("regionmap");
     auto s7 = app.getDataStorage()->getSprite("winddirections");
     auto s8 = app.getDataStorage()->getSprite("precipitation");
+    auto s9 = app.getDataStorage()->getSprite("windblurred");
 
     //s1->setScale(0.2, 0.2);
     //s2->setScale(0.2, 0.2);
@@ -52,6 +53,7 @@ void World::draw()
     s6->setScale(0.2, 0.2);
     s7->setScale(0.2, 0.2);
     s8->setScale(0.2, 0.2);
+    s9->setScale(0.2, 0.2);
 
     //s1->setPosition(10, 10);
     //s2->setPosition(220, 10);
@@ -61,6 +63,7 @@ void World::draw()
     s6->setPosition(440, 220);
     s7->setPosition(10, 10);
     s8->setPosition(220, 10);
+    s9->setPosition(10, 220);
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
     //app.getRenderer()->getRenderWindow()->draw(*s2);
@@ -70,6 +73,7 @@ void World::draw()
     app.getRenderer()->getRenderWindow()->draw(*s6);
     app.getRenderer()->getRenderWindow()->draw(*s7);
     app.getRenderer()->getRenderWindow()->draw(*s8);
+    app.getRenderer()->getRenderWindow()->draw(*s9);
 }
 
 void World::work()

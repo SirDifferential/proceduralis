@@ -24,6 +24,8 @@ private:
     cl::size_t<3> region;
     size_t row_pitch;
 
+    bool rerangeOutput;
+
 public:
     CL_Blur(std::string s);
     void loadProgram();
@@ -34,6 +36,7 @@ public:
 
     void setInputBuffer(float* in);
     void setBlurSize(int i);
+    void setRerange(bool i);
 
     // Events for changing constants
     void event1();

@@ -12,6 +12,7 @@ CL_Blur::CL_Blur(std::string s) : CL_Program(s)
     blur_size = new int();
     *blur_size = 5;
     kernelSigma = 200;
+    rerangeOutput = true;
 }
 
 void CL_Blur::loadProgram()
@@ -71,7 +72,10 @@ void CL_Blur::runKernel()
         delete[] map_done;
         return;
     }
-    app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
+    if (rerangeOutput)
+        app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
+    else
+        app.getSpriteUtils()->setPixelsNorerange(outputTarget, outputName, map_done, 1024, 1024);
 
     delete[] map_done;
 }
@@ -285,6 +289,11 @@ void CL_Blur::setBlurSize(int i)
         std::cout << "-OpenCL: Error setting blur size: " << err.what() << ", " << err.err() << std::endl;
         print_errors("commandQueue.enqueueWriteBuffer", error);
     }
+}
+
+void CL_Blur::setRerange(bool i)
+{
+    rerangeOutput = i;
 }
 
 void CL_Blur::event1()

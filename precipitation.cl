@@ -119,7 +119,7 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
         // Get the wind angle in this area
         float rads = read_imagef(winds, sampler, coord).x;
 
-        int max_steps = 1000;
+        int max_steps = 512;
         int current_steps = 0;
         int2 check_coord = coord;
         int2 next_coords;
@@ -144,7 +144,7 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
             next_coords = getNextSector(inverted_angle, s, check_coord);
 
             // Check what kind of tile it is
-            region_code = read_imagef(winds, sampler, next_coords).x;
+            region_code = read_imagef(regionmap, sampler, next_coords).x;
 
             if (region_code < 5000)
             {
@@ -168,11 +168,9 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
             check_coord = next_coords;
         }
 
-        if (current_steps > 1000)
-            current_steps = 1000;
-
         // Calculate total precipitation based on what was met
-        float precipitation = linear_interpolate(0, 1, (current_steps / 1000.0));//1.0 - (flats_met * 0.0001) + (hills_met * 0.0005) + (mountains_met * 0.010) + (current_steps * 0.0001);
+        float normalized_distance = linear_interpolate(1.0, 0.01, (current_steps / (float)max_steps));
+        float precipitation = normalized_distance - (flats_met * 0.0001) + (hills_met * 0.0005) + (mountains_met * 0.025);
 	    
 	    float4 outvalue;
 	    outvalue.x = precipitation;

@@ -6,6 +6,7 @@
 #include "gui.hpp"
 #include "spriteutils.hpp"
 #include "datastorage.hpp"
+#include "cl_blur.hpp"
 
 CL_Winddir::CL_Winddir(std::string s) : CL_Program(s)
 {
@@ -118,8 +119,19 @@ void CL_Winddir::runKernel()
         delete[] map_done;
         return;
     }
+
     app.getSpriteUtils()->setPixelsNorerange(outputTarget, outputName, map_done, 1024, 1024);
-    auto temp = app.getDataStorage()->getSprite("winddirections");
+
+    // The wind directions contain some local artifacts from perlin noise
+    // Smooth it out by running the blur kernel
+    std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
+    temp->setBlurSize(16);
+    temp->setInputBuffer(map_done);
+    temp->setOutputTarget(app.getDataStorage()->getSprite("windblurred"), "windblurred");
+    temp->setRerange(false);
+    temp->runKernel();
+    temp->setRerange(true);
+    temp->setInputBuffer(NULL);
 
     delete[] map_done;
 }

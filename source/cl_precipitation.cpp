@@ -50,7 +50,7 @@ void CL_Precipitation::loadProgram()
     region.push_back(1);
 
     int** worldregions = app.getWorld()->getRegionMap();
-    auto windsimage = app.getDataStorage()->getImage("winddirections");
+    auto windsimage = app.getDataStorage()->getImage("windblurred");
 
     int count = 0;
     for (int y = 0; y < 1024; y++)

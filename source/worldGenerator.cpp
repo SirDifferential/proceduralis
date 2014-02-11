@@ -33,6 +33,11 @@ void WorldGenerator::init()
     TexturePtr winddir_text = TexturePtr(new sf::Texture());
     winddir_text->create(1024, 1024);
     app.getDataStorage()->storeTexture("winddirections", winddir_text);
+    SpritePtr winddir_blur = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("windblurred", winddir_blur);
+    TexturePtr winddir_text_blur = TexturePtr(new sf::Texture());
+    winddir_text->create(1024, 1024);
+    app.getDataStorage()->storeTexture("windblurred", winddir_text_blur);
     SpritePtr preci = SpritePtr(new sf::Sprite());
     app.getDataStorage()->storeSprite("precipitation", preci);
     TexturePtr preci_text = TexturePtr(new sf::Texture());
