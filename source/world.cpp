@@ -44,6 +44,7 @@ void World::draw()
     auto s7 = app.getDataStorage()->getSprite("winddirections");
     auto s8 = app.getDataStorage()->getSprite("precipitation");
     auto s9 = app.getDataStorage()->getSprite("windblurred");
+    auto s10 = app.getDataStorage()->getSprite("precipitation_blurred");
 
     //s1->setScale(0.2, 0.2);
     //s2->setScale(0.2, 0.2);
@@ -51,9 +52,10 @@ void World::draw()
     //s4->setScale(0.2, 0.2);
     //s5->setScale(0.2, 0.2);
     s6->setScale(0.2, 0.2);
-    s7->setScale(0.2, 0.2);
+    //s7->setScale(0.2, 0.2);
     s8->setScale(0.2, 0.2);
     s9->setScale(0.2, 0.2);
+    s10->setScale(0.2, 0.2);
 
     //s1->setPosition(10, 10);
     //s2->setPosition(220, 10);
@@ -61,9 +63,10 @@ void World::draw()
     //s4->setPosition(10, 220);
     //s5->setPosition(440, 220);
     s6->setPosition(440, 220);
-    s7->setPosition(10, 10);
+    //s7->setPosition(10, 10);
     s8->setPosition(220, 10);
     s9->setPosition(10, 220);
+    s10->setPosition(10, 10);
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
     //app.getRenderer()->getRenderWindow()->draw(*s2);
@@ -71,9 +74,10 @@ void World::draw()
     //app.getRenderer()->getRenderWindow()->draw(*s4);
     //app.getRenderer()->getRenderWindow()->draw(*s5);
     app.getRenderer()->getRenderWindow()->draw(*s6);
-    app.getRenderer()->getRenderWindow()->draw(*s7);
+    //app.getRenderer()->getRenderWindow()->draw(*s7);
     app.getRenderer()->getRenderWindow()->draw(*s8);
     app.getRenderer()->getRenderWindow()->draw(*s9);
+    app.getRenderer()->getRenderWindow()->draw(*s10);
 }
 
 void World::work()

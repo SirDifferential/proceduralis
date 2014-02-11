@@ -46,6 +46,14 @@ void WorldGenerator::init()
     ImagePtr preci_img = ImagePtr(new sf::Image());
     preci_img->create(1024, 1024);
     app.getDataStorage()->storeImage("precipitation", preci_img);
+    SpritePtr preci_blur = SpritePtr(new sf::Sprite());
+    app.getDataStorage()->storeSprite("precipitation_blurred", preci_blur);
+    TexturePtr preci_text_blur = TexturePtr(new sf::Texture());
+    preci_text->create(1024, 1024);
+    app.getDataStorage()->storeTexture("precipitation_blurred", preci_text_blur);
+    ImagePtr preci_img_blur = ImagePtr(new sf::Image());
+    preci_img->create(1024, 1024);
+    app.getDataStorage()->storeImage("precipitation_blurred", preci_img_blur);
 }
 
 void WorldGenerator::generate()

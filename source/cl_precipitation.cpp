@@ -6,6 +6,7 @@
 #include "gui.hpp"
 #include "spriteutils.hpp"
 #include "datastorage.hpp"
+#include "cl_blur.hpp"
 
 CL_Precipitation::CL_Precipitation(std::string s) : CL_Program(s)
 {
@@ -117,6 +118,15 @@ void CL_Precipitation::runKernel()
     }
 
     app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
+
+    // Blur rainfall a bit
+    std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
+    temp->setBlurSize(11);
+    temp->setInputBuffer(map_done);
+    temp->setOutputTarget(app.getDataStorage()->getSprite("precipitation_blurred"), "precipitation_blurred");
+    temp->runKernel();
+    temp->setInputBuffer(NULL);
+
 
     delete[] map_done;
 }
