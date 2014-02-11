@@ -1,4 +1,13 @@
-const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+float linear_interpolate(float x0, float x1, float alpha)
+{
+    if (alpha > 1.0)
+        alpha = 1.0;
+    else if (alpha <= 0)
+        alpha = 0.0;
+    float interpolation = x0 * (1.0 - alpha) + alpha * x1;
+    
+    return interpolation;
+}
 
 float invert_angle(float r)
 {
@@ -84,6 +93,8 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
     int x = get_global_id(0);
 	int y = get_global_id(1);
 
+    const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+
 	int2 coord = (int2) (x, y);
 
     // If this is an ocean tile, do nothing
@@ -95,7 +106,7 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
 	    outvalue.x = 1.0;
 	    outvalue.y = 1.0;
 	    outvalue.z = 1.0;
-	    outvalue.w = 1.0;
+	    outvalue.w = 0;
 	    write_imagef(preci, coord, outvalue);
     }
     else
@@ -157,16 +168,16 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
             check_coord = next_coords;
         }
 
+        if (current_steps > 1000)
+            current_steps = 1000;
+
         // Calculate total precipitation based on what was met
-        float precipitation = 1.0 - (flats_met * 0.0001) + (hills_met * 0.0005) + (mountains_met * 0.010) + (current_steps * 0.0001);
-        
-
-
+        float precipitation = linear_interpolate(0, 1, (current_steps / 1000.0));//1.0 - (flats_met * 0.0001) + (hills_met * 0.0005) + (mountains_met * 0.010) + (current_steps * 0.0001);
 	    
 	    float4 outvalue;
 	    outvalue.x = precipitation;
-	    outvalue.y = 1.0 / hills_met;
-	    outvalue.z = 1.0 / mountains_met;
+	    outvalue.y = outvalue.x;
+	    outvalue.z = outvalue.x;
 	    outvalue.w = 0;
 	    write_imagef(preci, coord, outvalue);
     }

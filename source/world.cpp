@@ -40,7 +40,7 @@ void World::draw()
     auto s3 = app.getDataStorage()->getSprite("heightmap");
     auto s4 = app.getDataStorage()->getSprite("voronoiblurred");
     auto s5 = app.getDataStorage()->getSprite("perlinblurred");
-    //auto s6 = app.getDataStorage()->getSprite("regionmap");
+    auto s6 = app.getDataStorage()->getSprite("regionmap");
     auto s7 = app.getDataStorage()->getSprite("winddirections");
     auto s8 = app.getDataStorage()->getSprite("precipitation");
 
@@ -49,7 +49,7 @@ void World::draw()
     //s3->setScale(0.2, 0.2);
     //s4->setScale(0.2, 0.2);
     //s5->setScale(0.2, 0.2);
-    //s6->setScale(0.2, 0.2);
+    s6->setScale(0.2, 0.2);
     s7->setScale(0.2, 0.2);
     s8->setScale(0.2, 0.2);
 
@@ -58,7 +58,7 @@ void World::draw()
     //s3->setPosition(440, 220);
     //s4->setPosition(10, 220);
     //s5->setPosition(440, 220);
-    //s6->setPosition(440, 220);
+    s6->setPosition(440, 220);
     s7->setPosition(10, 10);
     s8->setPosition(220, 10);
 
@@ -67,7 +67,7 @@ void World::draw()
     //app.getRenderer()->getRenderWindow()->draw(*s3);
     //app.getRenderer()->getRenderWindow()->draw(*s4);
     //app.getRenderer()->getRenderWindow()->draw(*s5);
-    //app.getRenderer()->getRenderWindow()->draw(*s6);
+    app.getRenderer()->getRenderWindow()->draw(*s6);
     app.getRenderer()->getRenderWindow()->draw(*s7);
     app.getRenderer()->getRenderWindow()->draw(*s8);
 }

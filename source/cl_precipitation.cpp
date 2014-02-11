@@ -53,12 +53,12 @@ void CL_Precipitation::loadProgram()
     auto windsimage = app.getDataStorage()->getImage("winddirections");
 
     int count = 0;
-    for (int i = 0; i < 1024; i++)
+    for (int y = 0; y < 1024; y++)
     {
-        for (int j = 0; j < 1024; j++)
+        for (int x = 0; x < 1024; x++)
         {
-            regions[count] = worldregions[i][j];
-            winds[count] = windsimage->getPixel(i, j).b / 50.0;
+            regions[count] = worldregions[x][y];
+            winds[count] = windsimage->getPixel(x, y).b / 50.0;
             count++;
         }
     }
@@ -106,6 +106,7 @@ void CL_Precipitation::runKernel()
     commandQueue.finish();
 
     float* map_done = new float[1024*1024*4];
+    row_pitch = 1024 * 4 * sizeof(float);
     error = commandQueue.enqueueReadImage(*cl_precipitation, CL_TRUE, origin, region, row_pitch, 0, map_done);
     print_errors("commandQueue.enqueueReadImage", error);
 
@@ -114,6 +115,7 @@ void CL_Precipitation::runKernel()
         delete[] map_done;
         return;
     }
+
     app.getSpriteUtils()->setPixels(outputTarget, outputName, map_done, 1024, 1024);
 
     delete[] map_done;
