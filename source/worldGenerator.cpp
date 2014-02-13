@@ -466,127 +466,176 @@ void WorldGenerator::formRegions()
 
 void WorldGenerator::rainclouds()
 {
-    /*
-    auto w = app.getDataStorage()->getImage("winddirections");
-    auto regionsprite = app.getDataStorage()->getImage("regionmap");
-    int** regionmap = app.getWorld()->getRegionMap();
-    auto regions = app.getWorld()->getRegions();
+}
 
-    int ocean_index_start = app.getWorld()->getOceanStartIndex();
-    int mountain_index_start = app.getWorld()->getMountainStartIndex();
-    int hill_index_start = app.getWorld()->getHillStartIndex();
-    int flat_index_start = app.getWorld()->getFlatStartIndex();
-    
-    std::shared_ptr<std::map<int,int>> ocean_region_sizes = app.getWorld()->getOceanRegions();
-    std::shared_ptr<std::map<int,int>> mountain_region_sizes = app.getWorld()->getMountainRegions();
-    std::shared_ptr<std::map<int,int>> hill_region_sizes = app.getWorld()->getHillRegions();
-    std::shared_ptr<std::map<int,int>> flat_region_sizes = app.getWorld()->getFlatRegions();
+/**
+* Returns a vector of neighboring pixels that are lower in height
+* Only matches that are exactly the local minimum height are returned
+* For example, if height is 5, and neighbors involve 2, 2 and 3, then 3 won't be in the vector
+*/
+std::vector<std::pair<sf::Vector2i, float>> WorldGenerator::findLowerNeighbors(sf::Vector2i coords, int h, ImagePtr img)
+{
+    typedef std::pair<sf::Vector2i, float> heightdiff;
 
-    sf::Vector2i origin(512, 512);
-    sf::Vector2i current = origin;
-    sf::Vector2i old = current;
-    sf::Color clouds(255, 255, 0, 255);
+    std::vector<std::pair<sf::Vector2i, float>> out;
 
-    int stepsTaken = 0;
-    int stepLimit = 50000;
+    float height = 0;
+    float current_min = 2000;
 
-    float sectorrange = 3.14159 / 8.0;
-        while (stepsTaken < stepLimit)
+    if (coords.x > 0)
+    {
+        height = img->getPixel(coords.x-1, coords.y).r;
+        if (height < h)
         {
-            stepsTaken++;
-
-            clouds.b = w->getPixel(old.x, old.y).b;
-
-            w->setPixel(old.x, old.y, clouds);
-            old = current;
-
-            // Get the angle at this coord
-            // Angles are in radians multiplied by 100
-            // The 100 is there so that integers can represent small angles
-            float rads = w->getPixel(current.x, current.y).b / 100.0;
-            if (rads < sectorrange)
-            {
-                // Go up
-                current.y++;
-            }
-            else if (rads >= sectorrange && rads < sectorrange * 3)
-            {
-                // Go up right
-                current.x++;
-                current.y++;
-            }
-            else if (rads >= sectorrange * 3 && rads < 5 * sectorrange)
-            {
-                // Go right
-                current.x++;
-            }
-            else if (rads >= 5 * sectorrange && rads < 7 * sectorrange)
-            {
-                // Go down right
-                current.x++;
-                current.y--;
-            }
-            else if (rads >= 7 * sectorrange && rads < 9 * sectorrange)
-            {
-                // Go down
-                current.y++;
-            }
-            else if (rads >= 9 * sectorrange && rads < 11 * sectorrange)
-            {
-                // go down left
-                current.x--;
-                current.y--;
-            }
-            else if (rads >= 11 * sectorrange && rads < 13 * sectorrange)
-            {
-                // go left
-                current.x--;
-            }
-            else if (rads >= 13 * sectorrange && rads < 15 * sectorrange)
-            {
-                // go up left
-                current.x--;
-                current.y++;
-            }
-            else
-            {
-                std::cout << "Weird angle " << rads << std::endl;
-                current.x++;
-            }
-        
-            if (current.y < 0)
-            {
-                current.y = 2;
-                current.x++;
-            }
-            else if (current.y > w->getSize().y -1)
-            {
-                current.y = w->getSize().y -2;
-                current.x++;
-            }
-
-            if (current.x < 0)
-                current.x = w->getSize().x -1;
-            else if (current.x > w->getSize().x-1)
-                current.x = 0;
+            out.push_back(heightdiff(sf::Vector2i(coords.x-1, coords.y), height));
+            current_min = h;
         }
+    }
 
-    std::shared_ptr<sf::Texture> windmap_text = app.getDataStorage()->getTexture("winddirections");
+    
+    if (coords.y > 0)
+    {
+        height = img->getPixel(coords.x, coords.y-1).r;
+        if (height < h)
+            out.push_back(heightdiff(sf::Vector2i(coords.x, coords.y-1), height));
+        if (height < current_min)
+            current_min = height;
+    }
 
-    windmap_text->update(*w);
-    std::shared_ptr<sf::Sprite>  windmap_sprite = app.getDataStorage()->getSprite("winddirections");
-    windmap_sprite->setTexture(*windmap_text);
-    */
+    if (coords.x < img->getSize().x-1)
+    {
+        height = img->getPixel(coords.x+1, coords.y).r;
+        if (height < h)
+            out.push_back(heightdiff(sf::Vector2i(coords.x+1, coords.y), height));
+        if (height < current_min)
+            current_min = height;
+    }
 
+    if (coords.y < img->getSize().y-1)
+    {
+        height = img->getPixel(coords.x, coords.y+1).r;
+        if (height < h)
+            out.push_back(heightdiff(sf::Vector2i(coords.x, coords.y+1), height));
+        if (height < current_min)
+            current_min = height;
+    }
+
+    if (coords.x > 0 && coords.y > 0)
+    {
+        height = img->getPixel(coords.x-1, coords.y-1).r;
+        if (height < h)
+            out.push_back(heightdiff(sf::Vector2i(coords.x-1, coords.y-1), height));
+        if (height < current_min)
+            current_min = height;
+    }
+
+    if (coords.x < img->getSize().x-1 && coords.y > 0)
+    {
+        height = img->getPixel(coords.x+1, coords.y-1).r;
+        if (height < h)
+            out.push_back(heightdiff(sf::Vector2i(coords.x+1, coords.y-1), height));
+        if (height < current_min)
+            current_min = height;
+    }
+
+    if (coords.x < img->getSize().x-1 && coords.y < img->getSize().y-1)
+    {
+        height = img->getPixel(coords.x+1, coords.y+1).r;
+        if (height < h)
+            out.push_back(heightdiff(sf::Vector2i(coords.x+1, coords.y+1), height));
+        if (height < current_min)
+            current_min = height;
+    }
+
+    if (coords.x > 0 && coords.y < img->getSize().y-1)
+    {
+        height = img->getPixel(coords.x-1, coords.y+1).r;
+        if (height < h)
+            out.push_back(heightdiff(sf::Vector2i(coords.x-1, coords.y+1), height));
+        if (height < current_min)
+            current_min = height;
+    }
+
+    // Remove those matches which are greater than the current minimum
+    out.erase(std::remove_if(out.begin(), out.end(), [current_min](heightdiff p)
+        {
+            return p.second >= current_min;
+        }),
+        out.end());
+
+    return out;
 }
 
 void WorldGenerator::runRivers()
 {
     auto heightmap = app.getDataStorage()->getImage("heightmap");
     auto regionmap_image = app.getDataStorage()->getImage("regionmap");
-
+    auto precipitation = app.getDataStorage()->getImage("precipitation_blurred");
     auto regionmap = app.getWorld()->getRegionMap();
-    //auto regioninfo = app.getWorld()->getRegionInfo();
+
+    // Select all high rainfall points on mountain tiles
+    // For each point, begin producing water input
+    // Check all neighbors and find the one that is lowest and not yet visited
+    // Move all water from this tile to that tile
+    // Remove random amount of height from this tile
+
+    int steps_taken = 0;
+    int max_steps = 5000;
+    int height = 0;
+    float preci = 0;
+    int mountain_start = 103;
+    bool drainageFound = false;
+    int river_limit = 200;
+    int water_supply = 0;
+    std::vector<sf::Vector2i> visited_points;
+    sf::Vector2i flow_direction;
+    int random_choice = 0;
+    sf::Vector2i current_position;
+
+    // Iterate the region map, looking for areas to form rivers to
+    for (int i = 0; i < regionmap_image->getSize().x; i++)
+    {
+        for (int j = 0; j < regionmap_image->getSize().y; j++)
+        {
+            height = heightmap->getPixel(i, j).r;
+            // If this pixel is great enough in height for rivers to form
+            if (height > mountain_start)
+            {
+                preci = precipitation->getPixel(i, j).r;
+                
+                // If this area has high enough rainfall to produce rivers
+                if (preci >= river_limit)
+                {
+                    visited_points.push_back(sf::Vector2i(i,j));
+                    water_supply = 100;
+
+                    // Begin stepping the river down towards drainage
+                    while (steps_taken < max_steps && drainageFound == false)
+                    {
+                        // Check neighbors that allow flowing down
+                        auto matches = findLowerNeighbors(sf::Vector2i(i, j), height, heightmap);
+
+                        // No neighbors are lower, form lake
+                        if (matches.size() <= 0)
+                        {
+                        }
+                        else
+                        {
+                            // Choose random direction
+                            if (matches.size() > 1)
+                                random_choice = app.getToolbox()->giveRandomInt(0, matches.size()-1);
+                            else
+                                random_choice = 0;
+
+                            auto flow_direction = matches.at(random_choice);
+
+                            current_position = flow_direction.first;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 ImagePtr WorldGenerator::voronoi()

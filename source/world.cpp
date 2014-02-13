@@ -48,7 +48,7 @@ void World::draw()
 
     //s1->setScale(0.2, 0.2);
     //s2->setScale(0.2, 0.2);
-    //s3->setScale(0.2, 0.2);
+    s3->setScale(0.2, 0.2);
     //s4->setScale(0.2, 0.2);
     //s5->setScale(0.2, 0.2);
     s6->setScale(0.2, 0.2);
@@ -59,7 +59,7 @@ void World::draw()
 
     //s1->setPosition(10, 10);
     //s2->setPosition(220, 10);
-    //s3->setPosition(440, 220);
+    s3->setPosition(440, 10);
     //s4->setPosition(10, 220);
     //s5->setPosition(440, 220);
     s6->setPosition(440, 220);
@@ -70,7 +70,7 @@ void World::draw()
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
     //app.getRenderer()->getRenderWindow()->draw(*s2);
-    //app.getRenderer()->getRenderWindow()->draw(*s3);
+    app.getRenderer()->getRenderWindow()->draw(*s3);
     //app.getRenderer()->getRenderWindow()->draw(*s4);
     //app.getRenderer()->getRenderWindow()->draw(*s5);
     app.getRenderer()->getRenderWindow()->draw(*s6);

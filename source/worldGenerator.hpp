@@ -20,6 +20,8 @@ public:
     void formRegions();
     void runRivers();
     void rainclouds();
+
+    std::vector<std::pair<sf::Vector2i, float>> findLowerNeighbors(sf::Vector2i c, int h, ImagePtr img);
 };
 
 #endif
