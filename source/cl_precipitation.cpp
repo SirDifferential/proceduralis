@@ -121,7 +121,7 @@ void CL_Precipitation::runKernel()
 
     // Blur rainfall a bit
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
-    temp->setBlurSize(11);
+    temp->setBlurSize(25);
     temp->setInputBuffer(map_done);
     temp->setOutputTarget(app.getDataStorage()->getSprite("precipitation_blurred"), "precipitation_blurred");
     temp->runKernel();

@@ -96,6 +96,7 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
     const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
 
 	int2 coord = (int2) (x, y);
+    int2 s = get_image_dim(regionmap);
 
     // If this is an ocean tile, do nothing
     int original_value = read_imagef(regionmap, sampler, coord).x;
@@ -170,8 +171,30 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
 
         // Calculate total precipitation based on what was met
         float normalized_distance = linear_interpolate(1.0, 0.01, (current_steps / (float)max_steps));
-        float precipitation = normalized_distance - (flats_met * 0.0001) + (hills_met * 0.0005) + (mountains_met * 0.025);
-	    
+
+        float latitude = 0;
+        float latitude_coefficient = 0;
+        if (coord.y < s.y / 2.0)
+        {
+            latitude = linear_interpolate(90, 0, coord.y / (s.y / 2.0));
+            latitude_coefficient = linear_interpolate(1.0, 0.6, latitude / 90.0);
+        }
+        else
+        {
+            latitude = linear_interpolate(0, 90, (coord.y - (s.y/2.0)) / (float)(s.y / 2.0));
+            latitude_coefficient = linear_interpolate(1.0, 0.6, latitude / 90.0);
+        }
+
+        
+        float precipitation = (normalized_distance - (flats_met * 0.0001) + (hills_met * 0.0005) + (mountains_met * 0.025)) * latitude_coefficient;
+
+        precipitation = precipitation * latitude_coefficient;
+
+        if (precipitation > 1.0)
+            precipitation = 1.0;
+        else if (precipitation <= 0)
+            precipitation = 0.001;
+
 	    float4 outvalue;
 	    outvalue.x = precipitation;
 	    outvalue.y = outvalue.x;
