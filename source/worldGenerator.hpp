@@ -19,7 +19,6 @@ public:
     void solveRegions(int** regionmap, sf::Color code, sf::Color tolerance_down, std::shared_ptr<std::map<int,int>> regionsizes, int regionCodeStartRange);
     void formRegions();
     void runRivers();
-    void rainclouds();
 
     std::vector<std::pair<sf::Vector2i, float>> findLowerNeighbors(sf::Vector2i c, int h, ImagePtr img);
 };
