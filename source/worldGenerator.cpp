@@ -656,7 +656,6 @@ void WorldGenerator::runRivers()
     bool drainageFound = false;
     int river_limit = 200;
     int water_supply = 0;
-    std::vector<sf::Vector2i> visited_points;
     sf::Vector2i flow_direction;
     int random_choice = 0;
     sf::Vector2i current_position;
@@ -674,8 +673,9 @@ void WorldGenerator::runRivers()
     }
 
     // Iterate the region map, looking for areas to form rivers to
-    for (int i = 0; i < regionmap_image->getSize().x; i++)
+    for (int i = 0; i < 60; i++)//regionmap_image->getSize().x; i++)
     {
+        std::cout << i << std::endl;
         for (int j = 0; j < regionmap_image->getSize().y; j++)
         {
             if (rivermap[i][j] == currentriver)
@@ -690,7 +690,6 @@ void WorldGenerator::runRivers()
                 // If this area has high enough rainfall to produce rivers
                 if (preci >= river_limit)
                 {
-                    visited_points.push_back(sf::Vector2i(i,j));
                     water_supply = 100;
 
                     steps_taken = 0;
@@ -743,6 +742,13 @@ void WorldGenerator::runRivers()
             }
         }
     }
+
+    
+    std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");
+
+    heightmap_text->update(*heightmap);
+    std::shared_ptr<sf::Sprite> heightmap_sprite = app.getDataStorage()->getSprite("heightmap");
+    heightmap_sprite->setTexture(*heightmap_text);
 }
 
 /**
