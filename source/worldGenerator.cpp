@@ -464,6 +464,54 @@ void WorldGenerator::formRegions()
     app.getWorld()->setFlatRegions(flat_region_sizes);
 }
 
+void WorldGenerator::expandLake(sf::Vector2i position, ImagePtr img, int** rivermap, int rivercode)
+{
+    float height = img->getPixel(position.x, position.y).r;
+
+    sf::Color elevated(height+1, height+1, height+1, 255);
+
+    if (position.x > 0)
+    {
+        img->setPixel(position.x-1, position.y, elevated);
+        rivermap[position.x-1][position.y] = rivercode;
+    }
+    if (position.y > 0)
+    {
+        img->setPixel(position.x, position.y-1, elevated);
+        rivermap[position.x][position.y-1] = rivercode;
+    }
+    if (position.x < img->getSize().x -1)
+    {
+        img->setPixel(position.x+1, position.y, elevated);
+        rivermap[position.x+1][position.y] = rivercode;
+    }
+    if (position.y < img->getSize().y -1)
+    {
+        img->setPixel(position.x, position.y+1, elevated);
+        rivermap[position.x][position.y+1] = rivercode;
+    }
+    if (position.x > 0 && position.y > 0)
+    {
+        img->setPixel(position.x-1, position.y-1, elevated);
+        rivermap[position.x-1][position.y-1] = rivercode;
+    }
+    if (position.x < img->getSize().x && position.y > 0)
+    {
+        img->setPixel(position.x+1, position.y-1, elevated);
+        rivermap[position.x+1][position.y-1] = rivercode;
+    }
+    if (position.x < img->getSize().x -1 && position.y < img->getSize().y-1)
+    {
+        img->setPixel(position.x+1, position.y+1, elevated);
+        rivermap[position.x+1][position.y+1] = rivercode;
+    }
+    if (position.x > 0 && position.y < img->getSize().y-1)
+    {
+        img->setPixel(position.x-1, position.y+1, elevated);
+        rivermap[position.x-1][position.y+1] = rivercode;
+    }
+}
+
 /**
 * Returns a vector of neighboring pixels that are lower in height
 * Only matches that are exactly the local minimum height are returned
@@ -562,6 +610,31 @@ std::vector<std::pair<sf::Vector2i, float>> WorldGenerator::findLowerNeighbors(s
     return out;
 }
 
+sf::Vector2i WorldGenerator::getRandomDirection(sf::Vector2i coords, ImagePtr img)
+{
+    sf::Vector2i out = coords;
+
+    if (app.getToolbox()->giveRandomFloat() > 0.5)
+        out.x--;
+    else
+        out.x++;
+    if (app.getToolbox()->giveRandomFloat() > 0.5)
+        out.y++;
+    else
+        out.y--;
+
+    if (out.x <= 0)
+        out.x = 2;
+    else if (out.x > img->getSize().x-1)
+        out.x = img->getSize().x-3;
+    if (out.y <= 0)
+        out.y = 2;
+    else if (out.y > img->getSize().y-1)
+        out.y = img->getSize().y-3;
+
+    return out;
+}
+
 void WorldGenerator::runRivers()
 {
     auto heightmap = app.getDataStorage()->getImage("heightmap");
@@ -576,7 +649,7 @@ void WorldGenerator::runRivers()
     // Remove random amount of height from this tile
 
     int steps_taken = 0;
-    int max_steps = 5000;
+    int max_steps = 50;
     int height = 0;
     float preci = 0;
     int mountain_start = 103;
@@ -587,6 +660,7 @@ void WorldGenerator::runRivers()
     sf::Vector2i flow_direction;
     int random_choice = 0;
     sf::Vector2i current_position;
+    int currentriver = 0;
     int** rivermap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
 
     int oceanEndIndex = app.getWorld()->getOceanStartIndex() + app.getWorld()->getOceanRegions()->size();
@@ -604,6 +678,8 @@ void WorldGenerator::runRivers()
     {
         for (int j = 0; j < regionmap_image->getSize().y; j++)
         {
+            if (rivermap[i][j] == currentriver)
+                continue;
             height = heightmap->getPixel(i, j).r;
             current_position = sf::Vector2i(i, j);
             // If this pixel is great enough in height for rivers to form
@@ -618,12 +694,16 @@ void WorldGenerator::runRivers()
                     water_supply = 100;
 
                     steps_taken = 0;
+                    currentriver++;
+                    drainageFound = false;
 
                     // Begin stepping the river down towards drainage
                     while (steps_taken < max_steps && drainageFound == false)
                     {
                         if (regionmap[current_position.x][current_position.y] <= oceanEndIndex)
                             drainageFound = true;
+
+                        rivermap[current_position.x][current_position.y] = currentriver;
 
                         // Form the river by decreasing height one unit
                         height = heightmap->getPixel(current_position.x, current_position.y).r;
@@ -638,11 +718,13 @@ void WorldGenerator::runRivers()
                                 { return rivermap[e.first.x][e.first.y] != -1; }),
                             matches.end());
 
-                        // No neighbors are lower, form lake
                         if (matches.size() <= 0)
                         {
-                            // Temp code, just return
-                            drainageFound = true;
+                            // No neighbors are lower, form lake
+                            expandLake(current_position, heightmap, rivermap, currentriver);
+                            // Pick random direction to continue the river
+                            current_position = getRandomDirection(current_position, heightmap);
+                            
                         }
                         else
                         {
@@ -663,6 +745,10 @@ void WorldGenerator::runRivers()
     }
 }
 
+/**
+* Simple brute force Voronoi diagram generator
+* Slow and not practical on the CPU
+*/
 ImagePtr WorldGenerator::voronoi()
 {
     ImagePtr out = ImagePtr(new sf::Image());

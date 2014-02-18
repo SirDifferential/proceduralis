@@ -21,6 +21,8 @@ public:
     void runRivers();
 
     std::vector<std::pair<sf::Vector2i, float>> findLowerNeighbors(sf::Vector2i c, int h, ImagePtr img);
+    void expandLake(sf::Vector2i position, ImagePtr img, int** rivermap, int rivercode);
+    sf::Vector2i getRandomDirection(sf::Vector2i coords, ImagePtr img);
 };
 
 #endif
