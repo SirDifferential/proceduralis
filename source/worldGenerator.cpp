@@ -703,7 +703,7 @@ void WorldGenerator::runRivers()
     int random_choice = 0;
     int currentriver = 0;
     int** rivermap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
-    int ocean_end_height = 60;
+    int ocean_end_height = 10;
     float river_probability = 0.25f;
     float tolerance = 7;
     int rainfall_supply = 100;
@@ -760,11 +760,12 @@ void WorldGenerator::runRivers()
 
                     std::pair<sf::Vector2i, float> choice;
                     if (lower.size() > 1)
-                        auto choice = lower.at(app.getToolbox()->giveRandomInt(0, lower.size()-1));
+                        choice = lower.at(app.getToolbox()->giveRandomInt(0, lower.size()-1));
                     else if (lower.size() == 0)
                     {
-                        drainageFound = true;
-                        continue;
+                        auto temp = getRandomDirection(current_coords, heightmap);
+                        choice.first = temp;
+                        choice.second = heightmap->getPixel(temp.x, temp.y).r;
                     }
                     else
                         choice = lower.at(0);
