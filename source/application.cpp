@@ -148,6 +148,7 @@ int Application::run()
     cl_precipitation->setOutputTarget(datastorage->getSprite("precipitation"), "precipitation");
     cl_precipitation->runKernel();
 
+    forceredraw();
     worldgenerator->runRivers();
 
     int stop_s = clock();
@@ -192,8 +193,8 @@ void Application::windowWasClosed()
 */
 void Application::forceredraw()
 {
-    //world->draw();
-    //renderer->work();
+    world->draw();
+    renderer->work();
 }
 
 void Application::setProgram(std::string name)

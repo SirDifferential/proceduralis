@@ -468,7 +468,7 @@ void WorldGenerator::expandLake(sf::Vector2i position, ImagePtr img, int** river
 {
     float height = img->getPixel(position.x, position.y).r;
 
-    sf::Color elevated(height+1, height+1, height+1, 255);
+    sf::Color elevated(height+1, 200, height+1, 255);
 
     if (position.x > 0)
     {
@@ -495,7 +495,7 @@ void WorldGenerator::expandLake(sf::Vector2i position, ImagePtr img, int** river
         img->setPixel(position.x-1, position.y-1, elevated);
         rivermap[position.x-1][position.y-1] = rivercode;
     }
-    if (position.x < img->getSize().x && position.y > 0)
+    if (position.x < img->getSize().x -1 && position.y > 0)
     {
         img->setPixel(position.x+1, position.y-1, elevated);
         rivermap[position.x+1][position.y-1] = rivercode;
@@ -517,11 +517,13 @@ void WorldGenerator::expandLake(sf::Vector2i position, ImagePtr img, int** river
 * Only matches that are exactly the local minimum height are returned
 * For example, if height is 5, and neighbors involve 2, 2 and 3, then 3 won't be in the vector
 */
-std::vector<std::pair<sf::Vector2i, float>> WorldGenerator::findLowerNeighbors(sf::Vector2i coords, int h, ImagePtr img)
+std::vector<std::pair<sf::Vector2i, float>> WorldGenerator::findLowerNeighbors(sf::Vector2i coords, int current_height, ImagePtr img, float tolerance)
 {
     typedef std::pair<sf::Vector2i, float> heightdiff;
 
     std::vector<std::pair<sf::Vector2i, float>> out;
+
+    int h = current_height + tolerance;
 
     float height = 0;
     float current_min = 2000;
@@ -601,11 +603,13 @@ std::vector<std::pair<sf::Vector2i, float>> WorldGenerator::findLowerNeighbors(s
     }
 
     // Remove those matches which are greater than the current minimum
+    /*
     out.erase(std::remove_if(out.begin(), out.end(), [current_min](heightdiff p)
         {
             return p.second > current_min;
         }),
         out.end());
+    */
 
     return out;
 }
@@ -635,6 +639,45 @@ sf::Vector2i WorldGenerator::getRandomDirection(sf::Vector2i coords, ImagePtr im
     return out;
 }
 
+/**
+* Returns true if the specified coordinate is bordered by a river
+* Returns false if not
+* parameters:
+* coord: The coordinate that is checked
+* source: the coordinate from where this search is coming from. Ignored in the test.
+*/
+bool WorldGenerator::bordersRiver(sf::Vector2i coord, sf::Vector2i source, ImagePtr img, int** rivermap)
+{
+    if (coord.x < 0 || coord.y < 0 || coord.x > img->getSize().x-1 || coord.y > img->getSize().y-1)
+        return false;
+
+    sf::Vector2i temp;
+
+    for (int i = -1; i < 2; i++)
+    {
+        for (int j = -1; j < 2; j++)
+        {
+            temp.x = coord.x + i;
+            temp.y = coord.y + j;
+
+            if (temp.x >= 0 && temp.x < img->getSize().x -1)
+            {
+                if (temp.y >= 0 && temp.y < img->getSize().y -1)
+                {
+                    if (temp.x != source.x || temp.y != source.y)
+                    {
+                        if (rivermap[temp.x][temp.y] != -1)
+                            return true;
+                    }
+                } 
+            }
+        }
+    }
+
+    // No bordering rivers except for source
+    return false;
+}
+
 void WorldGenerator::runRivers()
 {
     auto heightmap = app.getDataStorage()->getImage("heightmap");
@@ -649,7 +692,7 @@ void WorldGenerator::runRivers()
     // Remove random amount of height from this tile
 
     int steps_taken = 0;
-    int max_steps = 50;
+    int max_steps = 300;
     int height = 0;
     float preci = 0;
     int mountain_start = 103;
@@ -658,9 +701,17 @@ void WorldGenerator::runRivers()
     int water_supply = 0;
     sf::Vector2i flow_direction;
     int random_choice = 0;
-    sf::Vector2i current_position;
     int currentriver = 0;
     int** rivermap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
+    int ocean_end_height = 60;
+    float river_probability = 0.25f;
+    float tolerance = 7;
+    int rainfall_supply = 100;
+    sf::Vector2i dir;
+    sf::Vector2i current_coords;
+    sf::Color rivercolor(0, 255, 0, 255);
+    int river_start_height = 115;
+    sf::Vector2i previous(-1, -1);
 
     int oceanEndIndex = app.getWorld()->getOceanStartIndex() + app.getWorld()->getOceanRegions()->size();
 
@@ -672,24 +723,153 @@ void WorldGenerator::runRivers()
         }
     }
 
+    float pixel_h = 0;
+
     // Iterate the region map, looking for areas to form rivers to
-    for (int i = 0; i < 60; i++)//regionmap_image->getSize().x; i++)
+    for (int i = 0; i < regionmap_image->getSize().x; i++)
     {
         std::cout << i << std::endl;
         for (int j = 0; j < regionmap_image->getSize().y; j++)
         {
-            if (rivermap[i][j] == currentriver)
+            current_coords = sf::Vector2i(i, j);
+
+            preci = precipitation->getPixel(i, j).r;
+            pixel_h = heightmap->getPixel(i, j).r;
+            float r = app.getToolbox()->giveRandomFloat();
+            float current_height = 0;
+            steps_taken = 0;
+            drainageFound = false;
+            bool done = false;
+
+            if (pixel_h > river_start_height && r > river_probability)
+            {
+                currentriver++;
+                while (drainageFound == false && steps_taken < max_steps)
+                {
+                    steps_taken++;
+
+                    rivermap[current_coords.x][current_coords.y] = currentriver;
+                    current_height = heightmap->getPixel(current_coords.x, current_coords.y).r;
+                    heightmap->setPixel(current_coords.x, current_coords.y, rivercolor);
+                    
+                    auto lower = findLowerNeighbors(current_coords, current_height, heightmap, tolerance);
+                    lower.erase(std::remove_if(lower.begin(), lower.end(),
+                        [rivermap](const std::pair<sf::Vector2i, float> e)
+                            { return rivermap[e.first.x][e.first.y] != -1; }),
+                        lower.end());
+
+                    std::pair<sf::Vector2i, float> choice;
+                    if (lower.size() > 1)
+                        auto choice = lower.at(app.getToolbox()->giveRandomInt(0, lower.size()-1));
+                    else if (lower.size() == 0)
+                    {
+                        drainageFound = true;
+                        continue;
+                    }
+                    else
+                        choice = lower.at(0);
+
+                    current_coords = choice.first;
+                    if (choice.second < ocean_end_height)
+                        drainageFound = true;
+                }
+            }
+        }
+    }
+            /*
+
+            previous.x = current_coords.x;
+            previous.y = current_coords.y-1;
+
+            if (preci > river_limit && heightmap->getPixel(i, j).r >= river_start_height && rivermap[i][j] == -1)
+            {
+                currentriver++;
+                steps_taken = 0;
+                drainageFound = false;
+                while (drainageFound == false &&  steps_taken < max_steps)
+                {
+                    steps_taken++;
+
+                    if (bordersRiver(current_coords, previous, heightmap, rivermap) == true)
+                    {
+                        break;
+                    }
+
+                    rivermap[current_coords.x][current_coords.y] = currentriver;
+                    height = heightmap->getPixel(current_coords.x, current_coords.y).r;
+                    heightmap->setPixel(current_coords.x, current_coords.y, rivercolor);
+
+                    auto matches = findLowerNeighbors(sf::Vector2i(i, j), height, heightmap, tolerance);
+                    int random_choice = 0;
+                    if (matches.size() > 1)
+                        dir = matches.at(app.getToolbox()->giveRandomInt(0, matches.size()-1)).first;
+                    else if (matches.size() == 0)
+                        dir = getRandomDirection(sf::Vector2i(i, j), heightmap);
+                    else
+                        dir = matches.at(random_choice).first;
+
+                    if (heightmap->getPixel(dir.x, dir.y).r <= ocean_end_height)
+                    {
+                        drainageFound = true;
+                        continue;
+                    }
+            
+                    // Make sure we are not moving in a pixel that is already bordered by a river
+                    // This prevents blobs of lakes forming everywhere
+                    if (bordersRiver(dir, current_coords, heightmap, rivermap) == true)
+                    {
+                        dir = sf::Vector2i(-1, -1);
+                        bool foundUnconnected = false;
+                        // If bordering a river, try all 9 pixels and find one that is not connected
+                        for (int x1 = -1; x1 < 2; x1++)
+                        {
+                            if (foundUnconnected)
+                                break;
+                            for (int y1 = -1; y1 < 2; y1++)
+                            {
+                                if (foundUnconnected)
+                                    break;
+                                if (bordersRiver(sf::Vector2i(current_coords.x+x1,current_coords.y+y1), current_coords, heightmap, rivermap) == false)
+                                {
+                                    dir = sf::Vector2i(x1, y1);
+                                    foundUnconnected = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (dir.x == -1 || dir.y == -1)
+                    {
+                        std::cout << "Could not continue river" << std::endl;
+                        break;
+                    }
+
+                    previous = current_coords;
+                    current_coords = dir;
+                }
+            }
+        }
+    }
+        */
+        
+
+        /*
+            // Don't check if this pixel is already part of a river
+            if (rivermap[i][j] != -1)
                 continue;
             height = heightmap->getPixel(i, j).r;
             current_position = sf::Vector2i(i, j);
             // If this pixel is great enough in height for rivers to form
-            if (height > mountain_start)
+            if (height > ocean_end_height)//mountain_start)
             {
                 preci = precipitation->getPixel(i, j).r;
                 
                 // If this area has high enough rainfall to produce rivers
-                if (preci >= river_limit)
+                if (preci >= river_limit) 
                 {
+                    if (app.getToolbox()->giveRandomFloat() > river_probability)
+                        break;
+
                     water_supply = 100;
 
                     steps_taken = 0;
@@ -702,6 +882,10 @@ void WorldGenerator::runRivers()
                         if (regionmap[current_position.x][current_position.y] <= oceanEndIndex)
                             drainageFound = true;
 
+                        // If the current position belongs to another river
+                        if (rivermap[current_position.x][current_position.y] != -1)
+                            break;
+
                         rivermap[current_position.x][current_position.y] = currentriver;
 
                         // Form the river by decreasing height one unit
@@ -709,7 +893,7 @@ void WorldGenerator::runRivers()
                         heightmap->setPixel(current_position.x, current_position.y, sf::Color(height-1, 255, height-1, 255));
 
                         // Check neighbors that allow flowing down
-                        auto matches = findLowerNeighbors(sf::Vector2i(i, j), height, heightmap);
+                        auto matches = findLowerNeighbors(sf::Vector2i(i, j), height, heightmap, tolerance);
 
                         // remove neighbors that are already in the rivermap
                         matches.erase(std::remove_if(matches.begin(), matches.end(),
@@ -720,10 +904,19 @@ void WorldGenerator::runRivers()
                         if (matches.size() <= 0)
                         {
                             // No neighbors are lower, form lake
-                            expandLake(current_position, heightmap, rivermap, currentriver);
+                            //expandLake(current_position, heightmap, rivermap, currentriver);
                             // Pick random direction to continue the river
-                            current_position = getRandomDirection(current_position, heightmap);
-                            
+                            //current_position = getRandomDirection(current_position, heightmap);
+
+                            // Pick a random direction
+                            int tries = 0;
+                            while (tries < 10)
+                            {
+                                auto next_coords = getRandomDirection(current_position, heightmap);
+                                if (rivermap[next_coords.x][next_coords.y] == -1)
+                                    break;
+                                tries++;
+                            }
                         }
                         else
                         {
@@ -742,6 +935,7 @@ void WorldGenerator::runRivers()
             }
         }
     }
+    */
 
     
     std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");

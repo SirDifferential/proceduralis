@@ -59,7 +59,7 @@ void World::draw()
 
     //s1->setPosition(10, 10);
     //s2->setPosition(220, 10);
-    s3->setPosition(440, 10);
+    //s3->setPosition(440, 10);
     //s4->setPosition(10, 220);
     //s5->setPosition(440, 220);
     s6->setPosition(440, 220);
@@ -73,11 +73,11 @@ void World::draw()
     app.getRenderer()->getRenderWindow()->draw(*s3);
     //app.getRenderer()->getRenderWindow()->draw(*s4);
     //app.getRenderer()->getRenderWindow()->draw(*s5);
-    app.getRenderer()->getRenderWindow()->draw(*s6);
+    //app.getRenderer()->getRenderWindow()->draw(*s6);
     //app.getRenderer()->getRenderWindow()->draw(*s7);
-    app.getRenderer()->getRenderWindow()->draw(*s8);
-    app.getRenderer()->getRenderWindow()->draw(*s9);
-    app.getRenderer()->getRenderWindow()->draw(*s10);
+    //app.getRenderer()->getRenderWindow()->draw(*s8);
+    //app.getRenderer()->getRenderWindow()->draw(*s9);
+    //app.getRenderer()->getRenderWindow()->draw(*s10);
 }
 
 void World::work()

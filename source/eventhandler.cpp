@@ -71,28 +71,28 @@ void EventHandler::checkEvents()
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
     {
-        auto heightmap = app.getDataStorage()->getSprite("winddirections");
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
         auto pos = heightmap->getPosition();
         pos.x += 5;
         heightmap->setPosition(pos);
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     {
-        auto heightmap = app.getDataStorage()->getSprite("winddirections");
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
         auto pos = heightmap->getPosition();
         pos.x -= 5;
         heightmap->setPosition(pos);
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
     {
-        auto heightmap = app.getDataStorage()->getSprite("winddirections");
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
         auto pos = heightmap->getPosition();
         pos.y += 5;
         heightmap->setPosition(pos);
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
     {
-        auto heightmap = app.getDataStorage()->getSprite("winddirections");
+        auto heightmap = app.getDataStorage()->getSprite("heightmap");
         auto pos = heightmap->getPosition();
         pos.y -= 5;
         heightmap->setPosition(pos);

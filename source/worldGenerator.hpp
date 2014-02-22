@@ -20,9 +20,10 @@ public:
     void formRegions();
     void runRivers();
 
-    std::vector<std::pair<sf::Vector2i, float>> findLowerNeighbors(sf::Vector2i c, int h, ImagePtr img);
+    std::vector<std::pair<sf::Vector2i, float>> findLowerNeighbors(sf::Vector2i c, int h, ImagePtr img, float tolerance);
     void expandLake(sf::Vector2i position, ImagePtr img, int** rivermap, int rivercode);
     sf::Vector2i getRandomDirection(sf::Vector2i coords, ImagePtr img);
+    bool bordersRiver(sf::Vector2i coord, sf::Vector2i source, ImagePtr img, int** rivermap);
 };
 
 #endif
