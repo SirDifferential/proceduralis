@@ -775,11 +775,15 @@ void WorldGenerator::runRivers()
                     else
                         choice = lower.at(0);
 
-                    if (rivermap[choice.first.x][choice.first.y] != -1)
+                    if (rivermap[choice.first.x][choice.first.y] != -1 && rivermap[choice.first.x][choice.first.y] != currentriver)
                         drainageFound = true;
 
-                    //if (bordersRiver(choice.first, current_coords, heightmap, rivermap))
-                    //    drainageFound = true;
+                    if (bordersRiver(choice.first, current_coords, heightmap, rivermap))
+                    {
+                        drainageFound = true;
+                        heightmap->setPixel(choice.first.x, choice.first.y, rivercolor);
+                        rivermap[choice.first.x][choice.first.y] = currentriver;
+                    }
 
                     current_coords = choice.first;
                     if (choice.second < ocean_end_height)
