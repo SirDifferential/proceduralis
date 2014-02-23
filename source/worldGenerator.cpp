@@ -697,7 +697,7 @@ void WorldGenerator::runRivers()
     float preci = 0;
     int mountain_start = 103;
     bool drainageFound = false;
-    int river_limit = 200;
+    float river_preci_limit = 200;
     int water_supply = 0;
     sf::Vector2i flow_direction;
     int random_choice = 0;
@@ -709,7 +709,7 @@ void WorldGenerator::runRivers()
     int rainfall_supply = 100;
     sf::Vector2i dir;
     sf::Vector2i current_coords;
-    sf::Color rivercolor(0, 255, 0, 255);
+    sf::Color rivercolor(150, 150, 255, 255);
     int river_start_height = 70;
     sf::Vector2i previous(-1, -1);
     float height_probability = 1.0;
@@ -738,12 +738,13 @@ void WorldGenerator::runRivers()
             pixel_h = heightmap->getPixel(i, j).r;
             float r = app.getToolbox()->giveRandomFloat();
             float r2 = app.getToolbox()->giveRandomFloat();
+            float r3 = app.getToolbox()->giveRandomFloat();
             float current_height = 0;
             steps_taken = 0;
             drainageFound = false;
             bool done = false;
 
-            if (pixel_h > river_start_height && r < river_probability && r2 > app.getToolbox()->linearInterpolate(0.85, height_probability, pixel_h / 125.0))
+            if (r3 > app.getToolbox()->linearInterpolate(0.0, 1.0, preci / river_preci_limit) && pixel_h > river_start_height && r < river_probability && r2 > app.getToolbox()->linearInterpolate(0.85, height_probability, pixel_h / 125.0))
             {
                 currentriver++;
                 while (drainageFound == false && steps_taken < max_steps)
@@ -785,167 +786,6 @@ void WorldGenerator::runRivers()
             }
         }
     }
-            /*
-
-            previous.x = current_coords.x;
-            previous.y = current_coords.y-1;
-
-            if (preci > river_limit && heightmap->getPixel(i, j).r >= river_start_height && rivermap[i][j] == -1)
-            {
-                currentriver++;
-                steps_taken = 0;
-                drainageFound = false;
-                while (drainageFound == false &&  steps_taken < max_steps)
-                {
-                    steps_taken++;
-
-                    if (bordersRiver(current_coords, previous, heightmap, rivermap) == true)
-                    {
-                        break;
-                    }
-
-                    rivermap[current_coords.x][current_coords.y] = currentriver;
-                    height = heightmap->getPixel(current_coords.x, current_coords.y).r;
-                    heightmap->setPixel(current_coords.x, current_coords.y, rivercolor);
-
-                    auto matches = findLowerNeighbors(sf::Vector2i(i, j), height, heightmap, tolerance);
-                    int random_choice = 0;
-                    if (matches.size() > 1)
-                        dir = matches.at(app.getToolbox()->giveRandomInt(0, matches.size()-1)).first;
-                    else if (matches.size() == 0)
-                        dir = getRandomDirection(sf::Vector2i(i, j), heightmap);
-                    else
-                        dir = matches.at(random_choice).first;
-
-                    if (heightmap->getPixel(dir.x, dir.y).r <= ocean_end_height)
-                    {
-                        drainageFound = true;
-                        continue;
-                    }
-            
-                    // Make sure we are not moving in a pixel that is already bordered by a river
-                    // This prevents blobs of lakes forming everywhere
-                    if (bordersRiver(dir, current_coords, heightmap, rivermap) == true)
-                    {
-                        dir = sf::Vector2i(-1, -1);
-                        bool foundUnconnected = false;
-                        // If bordering a river, try all 9 pixels and find one that is not connected
-                        for (int x1 = -1; x1 < 2; x1++)
-                        {
-                            if (foundUnconnected)
-                                break;
-                            for (int y1 = -1; y1 < 2; y1++)
-                            {
-                                if (foundUnconnected)
-                                    break;
-                                if (bordersRiver(sf::Vector2i(current_coords.x+x1,current_coords.y+y1), current_coords, heightmap, rivermap) == false)
-                                {
-                                    dir = sf::Vector2i(x1, y1);
-                                    foundUnconnected = true;
-                                }
-                            }
-                        }
-                    }
-
-                    if (dir.x == -1 || dir.y == -1)
-                    {
-                        std::cout << "Could not continue river" << std::endl;
-                        break;
-                    }
-
-                    previous = current_coords;
-                    current_coords = dir;
-                }
-            }
-        }
-    }
-        */
-        
-
-        /*
-            // Don't check if this pixel is already part of a river
-            if (rivermap[i][j] != -1)
-                continue;
-            height = heightmap->getPixel(i, j).r;
-            current_position = sf::Vector2i(i, j);
-            // If this pixel is great enough in height for rivers to form
-            if (height > ocean_end_height)//mountain_start)
-            {
-                preci = precipitation->getPixel(i, j).r;
-                
-                // If this area has high enough rainfall to produce rivers
-                if (preci >= river_limit) 
-                {
-                    if (app.getToolbox()->giveRandomFloat() > river_probability)
-                        break;
-
-                    water_supply = 100;
-
-                    steps_taken = 0;
-                    currentriver++;
-                    drainageFound = false;
-
-                    // Begin stepping the river down towards drainage
-                    while (steps_taken < max_steps && drainageFound == false)
-                    {
-                        if (regionmap[current_position.x][current_position.y] <= oceanEndIndex)
-                            drainageFound = true;
-
-                        // If the current position belongs to another river
-                        if (rivermap[current_position.x][current_position.y] != -1)
-                            break;
-
-                        rivermap[current_position.x][current_position.y] = currentriver;
-
-                        // Form the river by decreasing height one unit
-                        height = heightmap->getPixel(current_position.x, current_position.y).r;
-                        heightmap->setPixel(current_position.x, current_position.y, sf::Color(height-1, 255, height-1, 255));
-
-                        // Check neighbors that allow flowing down
-                        auto matches = findLowerNeighbors(sf::Vector2i(i, j), height, heightmap, tolerance);
-
-                        // remove neighbors that are already in the rivermap
-                        matches.erase(std::remove_if(matches.begin(), matches.end(),
-                            [rivermap](const std::pair<sf::Vector2i, float> e)
-                                { return rivermap[e.first.x][e.first.y] != -1; }),
-                            matches.end());
-
-                        if (matches.size() <= 0)
-                        {
-                            // No neighbors are lower, form lake
-                            //expandLake(current_position, heightmap, rivermap, currentriver);
-                            // Pick random direction to continue the river
-                            //current_position = getRandomDirection(current_position, heightmap);
-
-                            // Pick a random direction
-                            int tries = 0;
-                            while (tries < 10)
-                            {
-                                auto next_coords = getRandomDirection(current_position, heightmap);
-                                if (rivermap[next_coords.x][next_coords.y] == -1)
-                                    break;
-                                tries++;
-                            }
-                        }
-                        else
-                        {
-                            // Choose random direction
-                            if (matches.size() > 1)
-                                random_choice = app.getToolbox()->giveRandomInt(0, matches.size()-1);
-                            else
-                                random_choice = 0;
-
-                            auto flow_direction = matches.at(random_choice);
-
-                            current_position = flow_direction.first;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    */
-
     
     std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");
 
