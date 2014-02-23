@@ -666,7 +666,7 @@ bool WorldGenerator::bordersRiver(sf::Vector2i coord, sf::Vector2i source, Image
                 {
                     if (temp.x != source.x || temp.y != source.y)
                     {
-                        if (rivermap[temp.x][temp.y] != -1)
+                        if (rivermap[temp.x][temp.y] != -1 && rivermap[temp.x][temp.y] != rivermap[source.x][source.y])
                             return true;
                     }
                 } 
@@ -704,14 +704,15 @@ void WorldGenerator::runRivers()
     int currentriver = 0;
     int** rivermap = app.getToolbox()->giveIntArray2D(heightmap->getSize().x, heightmap->getSize().y);
     int ocean_end_height = 10;
-    float river_probability = 0.25f;
-    float tolerance = 7;
+    float river_probability = 0.05f;
+    float tolerance = 17;
     int rainfall_supply = 100;
     sf::Vector2i dir;
     sf::Vector2i current_coords;
     sf::Color rivercolor(0, 255, 0, 255);
-    int river_start_height = 115;
+    int river_start_height = 70;
     sf::Vector2i previous(-1, -1);
+    float height_probability = 1.0;
 
     int oceanEndIndex = app.getWorld()->getOceanStartIndex() + app.getWorld()->getOceanRegions()->size();
 
@@ -736,12 +737,13 @@ void WorldGenerator::runRivers()
             preci = precipitation->getPixel(i, j).r;
             pixel_h = heightmap->getPixel(i, j).r;
             float r = app.getToolbox()->giveRandomFloat();
+            float r2 = app.getToolbox()->giveRandomFloat();
             float current_height = 0;
             steps_taken = 0;
             drainageFound = false;
             bool done = false;
 
-            if (pixel_h > river_start_height && r > river_probability)
+            if (pixel_h > river_start_height && r < river_probability && r2 > app.getToolbox()->linearInterpolate(0.85, height_probability, pixel_h / 125.0))
             {
                 currentriver++;
                 while (drainageFound == false && steps_taken < max_steps)
@@ -769,6 +771,12 @@ void WorldGenerator::runRivers()
                     }
                     else
                         choice = lower.at(0);
+
+                    if (rivermap[choice.first.x][choice.first.y] != -1)
+                        drainageFound = true;
+
+                    if (bordersRiver(choice.first, current_coords, heightmap, rivermap))
+                        drainageFound = true;
 
                     current_coords = choice.first;
                     if (choice.second < ocean_end_height)
