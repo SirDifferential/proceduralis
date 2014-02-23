@@ -729,7 +729,6 @@ void WorldGenerator::runRivers()
     // Iterate the region map, looking for areas to form rivers to
     for (int i = 0; i < regionmap_image->getSize().x; i++)
     {
-        std::cout << i << std::endl;
         for (int j = 0; j < regionmap_image->getSize().y; j++)
         {
             current_coords = sf::Vector2i(i, j);
@@ -743,6 +742,9 @@ void WorldGenerator::runRivers()
             steps_taken = 0;
             drainageFound = false;
             bool done = false;
+
+            if (steps_taken > max_steps)
+                std::cout << "maxed out" << std::endl;
 
             if (r3 > app.getToolbox()->linearInterpolate(0.0, 1.0, preci / river_preci_limit) && pixel_h > river_start_height && r < river_probability && r2 > app.getToolbox()->linearInterpolate(0.85, height_probability, pixel_h / 125.0))
             {
@@ -776,8 +778,8 @@ void WorldGenerator::runRivers()
                     if (rivermap[choice.first.x][choice.first.y] != -1)
                         drainageFound = true;
 
-                    if (bordersRiver(choice.first, current_coords, heightmap, rivermap))
-                        drainageFound = true;
+                    //if (bordersRiver(choice.first, current_coords, heightmap, rivermap))
+                    //    drainageFound = true;
 
                     current_coords = choice.first;
                     if (choice.second < ocean_end_height)
