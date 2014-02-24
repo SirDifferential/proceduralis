@@ -157,6 +157,8 @@
     <ClInclude Include="source\cl.hpp" />
     <ClInclude Include="source\cl_blur.hpp" />
     <ClInclude Include="source\cl_perlin.hpp" />
+    <ClInclude Include="source\cl_precipitation.hpp" />
+    <ClInclude Include="source\cl_temperature.hpp" />
     <ClInclude Include="source\cl_voronoi.hpp" />
     <ClInclude Include="source\cl_winddir.hpp" />
     <ClInclude Include="source\datastorage.hpp" />
@@ -182,6 +184,8 @@
     <ClCompile Include="source\applicationFlags.cpp" />
     <ClCompile Include="source\cl_blur.cpp" />
     <ClCompile Include="source\cl_perlin.cpp" />
+    <ClCompile Include="source\cl_precipitation.cpp" />
+    <ClCompile Include="source\cl_temperature.cpp" />
     <ClCompile Include="source\cl_voronoi.cpp" />
     <ClCompile Include="source\cl_winddir.cpp" />
     <ClCompile Include="source\datastorage.cpp" />
@@ -205,6 +209,7 @@
     <None Include="config.json" />
     <None Include="diamondsquare.cl" />
     <None Include="perlin.cl" />
+    <None Include="precipitation.cl" />
     <None Include="simplex.cl" />
     <None Include="simple_world.cl" />
     <None Include="voronoi.cl" />
