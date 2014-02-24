@@ -755,9 +755,10 @@ void WorldGenerator::runRivers()
                     rivermap[current_coords.x][current_coords.y] = currentriver;
                     current_height = heightmap->getPixel(current_coords.x, current_coords.y).r;
                     rivercolor = heightmap->getPixel(current_coords.x, current_coords.y);
-                    rivercolor.r -= 3;
-                    rivercolor.g -= 3;
-                    rivercolor.b -= 3;
+                    // TODO: temp code, change this to erosion
+                    rivercolor.r = 0;
+                    rivercolor.g = 0;
+                    rivercolor.b = 255;
                     heightmap->setPixel(current_coords.x, current_coords.y, rivercolor);
                     
                     auto lower = findLowerNeighbors(current_coords, current_height, heightmap, tolerance);

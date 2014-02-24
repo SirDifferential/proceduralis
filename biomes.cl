@@ -166,6 +166,12 @@ __kernel void biomes(__read_only image2d_t heightmap, __read_only image2d_t prec
             outcol.z = 99;
         }
     }
+    else
+    {
+        outcol.x = 150;
+        outcol.y = 150;
+        outcol.z = 255;
+    }
 
     outcol.w = 255;
 
