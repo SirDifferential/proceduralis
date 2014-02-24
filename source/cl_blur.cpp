@@ -13,6 +13,8 @@ CL_Blur::CL_Blur(std::string s) : CL_Program(s)
     *blur_size = 5;
     kernelSigma = 200;
     rerangeOutput = true;
+	image_buffer_out = NULL;
+	gaussKernel = NULL;
 }
 
 void CL_Blur::init()

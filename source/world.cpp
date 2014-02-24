@@ -22,6 +22,7 @@ World::World()
     world_reso = sf::Vector2i(1024, 1024);
 
     regions = std::shared_ptr<std::map<long, RegionPtr>>(new std::map<long, RegionPtr>());
+	regionmap = NULL;
 }
 
 void World::init()
