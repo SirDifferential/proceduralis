@@ -18,6 +18,7 @@
 #include "cl_winddir.hpp"
 #include "cl_precipitation.hpp"
 #include "cl_temperature.hpp"
+#include "cl_biomes.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -38,6 +39,7 @@ Application::Application()
     cl_winddir = CL_WinddirPtr(new CL_Winddir("winddirection.cl"));
     cl_precipitation = CL_PrecipitationPtr(new CL_Precipitation("precipitation.cl"));
     cl_temperature = CL_TemperaturePtr(new CL_Temperature("temperature.cl"));
+    cl_biomes = CL_BiomesPtr(new CL_Biomes("biomes.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
@@ -123,6 +125,7 @@ int Application::run()
     cl_blur->loadProgram();
     cl_winddir->loadProgram();
     cl_temperature->loadProgram();
+    cl_biomes->loadProgram();
 
     cl_voronoi->setOutputTarget(datastorage->getSprite("voronoi_cells"), "voronoi_cells");
     cl_blur->setOutputTarget(datastorage->getSprite("voronoiblurred"), "voronoiblurred");
@@ -130,6 +133,7 @@ int Application::run()
     cl_perlin->setOutputTarget(datastorage->getSprite("perlinnoise"), "perlinnoise");
     cl_precipitation->setOutputTarget(datastorage->getSprite("precipitation"), "precipitation");
     cl_temperature->setOutputTarget(datastorage->getSprite("temperature"), "temperature");
+    cl_biomes->setOutputTarget(datastorage->getSprite("biomes"), "biomes");
 
     programs["voronoi"] = cl_voronoi;
     programs["perlin"] = cl_perlin;
@@ -137,6 +141,7 @@ int Application::run()
     programs["winddir"] = cl_winddir;
     programs["precipitation"] = cl_precipitation;
     programs["temperature"] = cl_temperature;
+    programs["biomes"] = cl_temperature;
 
     worldgenerator->generate();
 

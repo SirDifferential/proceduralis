@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="source\application.hpp" />
     <ClInclude Include="source\cl.hpp" />
+    <ClInclude Include="source\cl_biomes.hpp" />
     <ClInclude Include="source\cl_blur.hpp" />
     <ClInclude Include="source\cl_perlin.hpp" />
     <ClInclude Include="source\cl_precipitation.hpp" />
@@ -182,6 +183,7 @@
   <ItemGroup>
     <ClCompile Include="source\application.cpp" />
     <ClCompile Include="source\applicationFlags.cpp" />
+    <ClCompile Include="source\cl_biomes.cpp" />
     <ClCompile Include="source\cl_blur.cpp" />
     <ClCompile Include="source\cl_perlin.cpp" />
     <ClCompile Include="source\cl_precipitation.cpp" />
@@ -212,6 +214,7 @@
     <None Include="precipitation.cl" />
     <None Include="simplex.cl" />
     <None Include="simple_world.cl" />
+    <None Include="temperature.cl" />
     <None Include="voronoi.cl" />
     <None Include="winddirection.cl" />
   </ItemGroup>

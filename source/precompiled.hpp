@@ -36,6 +36,7 @@ class CL_Blur;
 class CL_Winddir;
 class CL_Precipitation;
 class CL_Temperature;
+class CL_Biomes;
 
 typedef std::shared_ptr<Region> RegionPtr;
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
@@ -63,3 +64,4 @@ typedef std::shared_ptr<CL_Blur> CL_BlurPtr;
 typedef std::shared_ptr<CL_Winddir> CL_WinddirPtr;
 typedef std::shared_ptr<CL_Precipitation> CL_PrecipitationPtr;
 typedef std::shared_ptr<CL_Temperature> CL_TemperaturePtr;
+typedef std::shared_ptr<CL_Biomes> CL_BiomesPtr;

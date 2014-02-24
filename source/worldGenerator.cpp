@@ -50,6 +50,7 @@ void WorldGenerator::generate()
     runRivers();
 
     app.runProgram("temperature");
+    app.runProgram("biomes");
 }
 
 void WorldGenerator::formSuperRegions()

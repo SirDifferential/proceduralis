@@ -1,4 +1,4 @@
-#include "cl_temperature.hpp"
+#include "cl_biomes.hpp"
 #include "application.hpp"
 #include "applicationFlags.hpp"
 #include "toolbox.hpp"
@@ -8,17 +8,17 @@
 #include "datastorage.hpp"
 #include "cl_blur.hpp"
 
-CL_Temperature::CL_Temperature(std::string s) : CL_Program(s)
+CL_Biomes::CL_Biomes(std::string s) : CL_Program(s)
 {
 }
 
-void CL_Temperature::loadProgram()
+void CL_Biomes::loadProgram()
 {
     CL_Program::loadProgram();
     
     try
     {
-        kernel = cl::Kernel(program, "temperature", &error);
+        kernel = cl::Kernel(program, "biomes", &error);
         print_errors("kernel()", error);
     }
     catch (cl::Error err)
@@ -89,11 +89,11 @@ void CL_Temperature::loadProgram()
     }
 }
 
-void CL_Temperature::runKernel()
+void CL_Biomes::runKernel()
 {
     if (image_buffer_in == NULL)
     {
-        std::cout << "-CL_Temperature: cannot run kernel: image_buffer_in is NULL" << std::endl;
+        std::cout << "-CL_Biomes: cannot run kernel: image_buffer_in is NULL" << std::endl;
         return;
     }
 
@@ -103,7 +103,7 @@ void CL_Temperature::runKernel()
     }
     catch (cl::Error err)
     {
-        std::cout << "-CL_Temperature: Error running kernel: " << err.what() << ", " << err.err() << std::endl;
+        std::cout << "-CL_Biomes: Error running kernel: " << err.what() << ", " << err.err() << std::endl;
         print_errors("commandQueue.enqueueNDRangeKernel", error);
     }
     
@@ -125,41 +125,41 @@ void CL_Temperature::runKernel()
     delete[] map_done;
 }
 
-void CL_Temperature::cleanup()
+void CL_Biomes::cleanup()
 {
     CL_Program::cleanup();
     delete[] image_buffer_in;
     delete[] image_buffer_out;
 }
 
-void CL_Temperature::event1()
+void CL_Biomes::event1()
 {
 }
 
-void CL_Temperature::event2()
+void CL_Biomes::event2()
 {
 }
 
-void CL_Temperature::event3()
+void CL_Biomes::event3()
 {
 }
 
-void CL_Temperature::event4()
+void CL_Biomes::event4()
 {
 }
 
-void CL_Temperature::event5()
+void CL_Biomes::event5()
 {
 }
 
-void CL_Temperature::event6()
+void CL_Biomes::event6()
 {
 }
 
-void CL_Temperature::event7()
+void CL_Biomes::event7()
 {
 }
 
-void CL_Temperature::event8()
+void CL_Biomes::event8()
 {
 }
