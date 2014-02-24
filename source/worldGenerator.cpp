@@ -41,11 +41,15 @@ void WorldGenerator::generate()
 
     app.forceredraw();
 
+    app.runProgram("temperature");
+    app.forceredraw();
     formRegions();
 
     app.getProgram("precipitation")->loadProgram();
     app.runProgram("precipitation");
     runRivers();
+
+    app.runProgram("temperature");
 }
 
 void WorldGenerator::formSuperRegions()

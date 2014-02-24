@@ -49,7 +49,7 @@ void CL_Temperature::loadProgram()
 
     for (int i = 3; i < 1024*1024*4; i += 4)
     {
-        value = app.getToolbox()->giveRandomFloat() + 0.001f;// * 0.6f;
+        value = app.getToolbox()->giveRandomFloat();
         image_buffer_in[i-3] = value;
         image_buffer_in[i-2] = value;
         image_buffer_in[i-1] = value;
@@ -127,11 +127,11 @@ void CL_Temperature::runKernel()
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
     temp->setBlurSize(16);
     temp->setInputBuffer(map_done);
-    temp->setOutputTarget(app.getDataStorage()->getSprite("temperatureblurred"), "temperatureblurred");
+    temp->setOutputTarget(app.getDataStorage()->getSprite("temperature_blurred"), "temperature_blurred");
     temp->setRerange(false);
     temp->runKernel();
     temp->setRerange(true);
-    temp->setInputBuffer(NULL);
+    temp->resetInputBuffer();
 
     delete[] map_done;
 }
