@@ -21,7 +21,7 @@ private:
 
 public:
     CL_Temperature(std::string s);
-    void loadProgram();
+    void init();
     void runKernel();
     void cleanup();
 

@@ -27,7 +27,8 @@ public:
     CL_Program(std::string s);
 
     char* readSource(std::string file_path);
-    virtual void loadProgram() = 0;
+    void loadProgram();
+    virtual void init() = 0;
     virtual void runKernel() = 0;
 
     void setOutputTarget(SpritePtr s, std::string n);

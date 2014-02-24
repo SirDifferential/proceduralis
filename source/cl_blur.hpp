@@ -28,7 +28,7 @@ private:
 
 public:
     CL_Blur(std::string s);
-    void loadProgram();
+    void init();
     void runKernel();
     void cleanup();
 

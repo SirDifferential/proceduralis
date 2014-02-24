@@ -12,10 +12,8 @@ CL_Temperature::CL_Temperature(std::string s) : CL_Program(s)
 {
 }
 
-void CL_Temperature::loadProgram()
+void CL_Temperature::init()
 {
-    CL_Program::loadProgram();
-    
     try
     {
         kernel = cl::Kernel(program, "temperature", &error);

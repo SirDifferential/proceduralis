@@ -47,7 +47,7 @@ private:
 
 public:
     CL_Voronoi(std::string s);
-    void loadProgram();
+    void init();
     void runKernel();
     void cleanup();
 

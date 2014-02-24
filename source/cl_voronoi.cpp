@@ -15,10 +15,8 @@ CL_Voronoi::CL_Voronoi(std::string s) : CL_Program(s)
 {
 }
 
-void CL_Voronoi::loadProgram()
-{
-    CL_Program::loadProgram();
-    
+void CL_Voronoi::init()
+{   
     try
     {
         kernel = cl::Kernel(program, "voronoi", &error);

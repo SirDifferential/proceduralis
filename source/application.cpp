@@ -125,6 +125,7 @@ int Application::run()
     cl_blur->loadProgram();
     cl_winddir->loadProgram();
     cl_temperature->loadProgram();
+    cl_precipitation->loadProgram();
     cl_biomes->loadProgram();
 
     cl_voronoi->setOutputTarget(datastorage->getSprite("voronoi_cells"), "voronoi_cells");
@@ -141,7 +142,7 @@ int Application::run()
     programs["winddir"] = cl_winddir;
     programs["precipitation"] = cl_precipitation;
     programs["temperature"] = cl_temperature;
-    programs["biomes"] = cl_temperature;
+    programs["biomes"] = cl_biomes;
 
     worldgenerator->generate();
 

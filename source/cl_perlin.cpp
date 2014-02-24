@@ -21,10 +21,8 @@ CL_Perlin::CL_Perlin(std::string s) : CL_Program(s)
     *octaves = 11;
 }
 
-void CL_Perlin::loadProgram()
+void CL_Perlin::init()
 {
-    CL_Program::loadProgram();
-    
     try
     {
         kernel = cl::Kernel(program, "perlinnoise", &error);

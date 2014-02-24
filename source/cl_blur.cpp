@@ -15,10 +15,8 @@ CL_Blur::CL_Blur(std::string s) : CL_Program(s)
     rerangeOutput = true;
 }
 
-void CL_Blur::loadProgram()
+void CL_Blur::init()
 {
-    CL_Program::loadProgram();
-    
     try
     {
         kernel = cl::Kernel(program, "blur", &error);

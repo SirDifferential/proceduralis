@@ -7,12 +7,16 @@ class CL_Biomes : public CL_Program
 {
 private:
     // Input and output buffers in CPU memory
-    float* image_buffer_in;
+    float* image_buffer_height;
+    float* image_buffer_precipitation;
+    float* image_buffer_temperature;
     float* image_buffer_out;
 
     // Input and output buffers in OpenCL memory
-    cl::Image2D* image_a;
-    cl::Image2D* image_b;
+    cl::Image2D* image_height;
+    cl::Image2D* image_precipitation;
+    cl::Image2D* image_temperature;
+    cl::Image2D* image_biomes;
 
     // Values used for setting offsets in image read / write operations
     cl::size_t<3> origin;
@@ -21,7 +25,7 @@ private:
 
 public:
     CL_Biomes(std::string s);
-    void loadProgram();
+    void init();
     void runKernel();
     void cleanup();
 

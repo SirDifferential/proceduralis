@@ -12,10 +12,8 @@ CL_Biomes::CL_Biomes(std::string s) : CL_Program(s)
 {
 }
 
-void CL_Biomes::loadProgram()
+void CL_Biomes::init()
 {
-    CL_Program::loadProgram();
-    
     try
     {
         kernel = cl::Kernel(program, "biomes", &error);
@@ -27,16 +25,20 @@ void CL_Biomes::loadProgram()
         print_errors("kernel()", error);
     }
 
-
     cl::ImageFormat format;
     format.image_channel_data_type = CL_FLOAT;
-    format.image_channel_order = CL_RGBA;
+    format.image_channel_order = CL_LUMINANCE;
 
-    int image_size = 1024*1024*4;
+    cl::ImageFormat format2;
+    format2.image_channel_data_type = CL_FLOAT;
+    format2.image_channel_order = CL_RGBA;
+
+    int image_size = 1024*1024;
     
-    image_buffer_in = new float[image_size];
-    image_buffer_out = new float[image_size];
-    row_pitch = 1024 * 4 * sizeof(float);
+    image_buffer_height = new float[image_size];
+    image_buffer_precipitation = new float[image_size];
+    image_buffer_temperature = new float[image_size];
+    row_pitch = 1024 * sizeof(float);
     origin.push_back(0);
     origin.push_back(0);
     origin.push_back(0);
@@ -45,21 +47,28 @@ void CL_Biomes::loadProgram()
     region.push_back(1024);
     region.push_back(1);
 
+    auto height_img = app.getDataStorage()->getImage("heightmap");
+    auto preci_img = app.getDataStorage()->getImage("precipitation_blurred");
+    auto temp_img = app.getDataStorage()->getImage("temperature");
+
     float value;
-
-    for (int i = 3; i < 1024*1024*4; i += 4)
+    int count = 0;
+    for (int y = 0; y < 1024; y++)
     {
-        value = app.getToolbox()->giveRandomFloat();
-        image_buffer_in[i-3] = value;
-        image_buffer_in[i-2] = value;
-        image_buffer_in[i-1] = value;
-        image_buffer_in[i] = 1.0f;
+        for (int x = 0; x < 1024; x++)
+        {
+            image_buffer_height[count] = height_img->getPixel(x, y).r;
+            image_buffer_precipitation[count] = preci_img->getPixel(x, y).r;
+            image_buffer_temperature[count] = temp_img->getPixel(x, y).r;
+            count++;
+        }
     }
-
     try
     {    
-        image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
-        image_b = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format, 1024, 1024, 0);
+        image_height = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
+        image_precipitation = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
+        image_temperature = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
+        image_biomes = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format2, 1024, 1024, 0);
     }
     catch (cl::Error e)
     {
@@ -68,8 +77,9 @@ void CL_Biomes::loadProgram()
 
     try
     {
-        error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
-        error = commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
+        error = commandQueue.enqueueWriteImage(*image_height, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_height);
+        error = commandQueue.enqueueWriteImage(*image_precipitation, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_precipitation);
+        error = commandQueue.enqueueWriteImage(*image_temperature, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_temperature);
     }
     catch (cl::Error e)
     {
@@ -79,8 +89,10 @@ void CL_Biomes::loadProgram()
 
     try
     {
-        error = kernel.setArg(0, *image_a);
-        error = kernel.setArg(1, *image_b);
+        error = kernel.setArg(0, *image_height);
+        error = kernel.setArg(1, *image_precipitation);
+        error = kernel.setArg(2, *image_temperature);
+        error = kernel.setArg(3, *image_biomes);
     }
     catch (cl::Error err)
     {
@@ -91,12 +103,6 @@ void CL_Biomes::loadProgram()
 
 void CL_Biomes::runKernel()
 {
-    if (image_buffer_in == NULL)
-    {
-        std::cout << "-CL_Biomes: cannot run kernel: image_buffer_in is NULL" << std::endl;
-        return;
-    }
-
     try
     {
         error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
@@ -106,12 +112,12 @@ void CL_Biomes::runKernel()
         std::cout << "-CL_Biomes: Error running kernel: " << err.what() << ", " << err.err() << std::endl;
         print_errors("commandQueue.enqueueNDRangeKernel", error);
     }
-    
 
     commandQueue.finish();
 
     float* map_done = new float[1024*1024*4];
-    error = commandQueue.enqueueReadImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, map_done);
+    row_pitch = 1024 * 4 * sizeof(float);
+    error = commandQueue.enqueueReadImage(*image_biomes, CL_TRUE, origin, region, row_pitch, 0, map_done);
     print_errors("commandQueue.enqueueReadImage", error);
 
     if (outputTarget == nullptr)
@@ -128,7 +134,9 @@ void CL_Biomes::runKernel()
 void CL_Biomes::cleanup()
 {
     CL_Program::cleanup();
-    delete[] image_buffer_in;
+    delete[] image_buffer_height;
+    delete[] image_buffer_precipitation;
+    delete[] image_buffer_temperature;
     delete[] image_buffer_out;
 }
 

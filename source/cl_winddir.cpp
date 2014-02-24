@@ -12,10 +12,8 @@ CL_Winddir::CL_Winddir(std::string s) : CL_Program(s)
 {
 }
 
-void CL_Winddir::loadProgram()
+void CL_Winddir::init()
 {
-    CL_Program::loadProgram();
-    
     try
     {
         kernel = cl::Kernel(program, "winddirection", &error);

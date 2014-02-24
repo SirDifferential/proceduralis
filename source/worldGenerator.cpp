@@ -26,6 +26,7 @@ void WorldGenerator::init()
     app.getDataStorage()->generateSpriteTriplet("heightmap", standard_size);
     app.getDataStorage()->generateSpriteTriplet("temperature", standard_size);
     app.getDataStorage()->generateSpriteTriplet("temperature_blurred", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("biomes", standard_size);
 }
 
 /**
@@ -34,6 +35,11 @@ void WorldGenerator::init()
 */
 void WorldGenerator::generate()
 {
+    app.getProgram("voronoi")->init();
+    app.getProgram("perlin")->init();
+    app.getProgram("winddir")->init();
+    app.getProgram("blur")->init();
+
     app.runProgram("voronoi");
     app.runProgram("perlin");
     app.runProgram("winddir");
@@ -41,16 +47,18 @@ void WorldGenerator::generate()
 
     app.forceredraw();
 
+    app.getProgram("temperature")->init();
     app.runProgram("temperature");
     app.forceredraw();
     formRegions();
 
-    app.getProgram("precipitation")->loadProgram();
+    app.getProgram("precipitation")->init();
     app.runProgram("precipitation");
     runRivers();
 
-    app.runProgram("temperature");
+    app.getProgram("biomes")->init();
     app.runProgram("biomes");
+
 }
 
 void WorldGenerator::formSuperRegions()
@@ -746,6 +754,10 @@ void WorldGenerator::runRivers()
 
                     rivermap[current_coords.x][current_coords.y] = currentriver;
                     current_height = heightmap->getPixel(current_coords.x, current_coords.y).r;
+                    rivercolor = heightmap->getPixel(current_coords.x, current_coords.y);
+                    rivercolor.r -= 3;
+                    rivercolor.g -= 3;
+                    rivercolor.b -= 3;
                     heightmap->setPixel(current_coords.x, current_coords.y, rivercolor);
                     
                     auto lower = findLowerNeighbors(current_coords, current_height, heightmap, tolerance);

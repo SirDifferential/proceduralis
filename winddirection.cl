@@ -212,9 +212,11 @@ __kernel void winddirection(__read_only image2d_t random_values,  __write_only i
     outcol.w = 255;
 
 
-    t = t * myabs(sin(random_offset)/0.5) / perlin;
+    t = t / perlin;
     if (t > 1.8*3.14159)
         t = 1.8 * 3.14159 - random_offset;
+    if (t < 0.01)
+        t = 0.01;
     //t = perlin;
 
     // North pole: south, 3.14159 rads

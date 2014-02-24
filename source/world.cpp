@@ -46,31 +46,15 @@ void World::draw()
     auto s9 = app.getDataStorage()->getSprite("windblurred");
     auto s10 = app.getDataStorage()->getSprite("precipitation_blurred");
     auto s11 = app.getDataStorage()->getSprite("temperature");
+    auto s12 = app.getDataStorage()->getSprite("biomes");
 
-    //s1->setScale(0.2, 0.2);
-    //s2->setScale(0.2, 0.2);
     s3->setScale(0.2, 0.2);
-    //s4->setScale(0.2, 0.2);
-    //s5->setScale(0.2, 0.2);
-    s6->setScale(0.2, 0.2);
-    //s7->setScale(0.2, 0.2);
-    s8->setScale(0.2, 0.2);
-    s9->setScale(0.2, 0.2);
-    s10->setScale(0.2, 0.2);
     s11->setScale(0.2, 0.2);
+    s12->setScale(0.2, 0.2);
 
-
-    //s1->setPosition(10, 10);
-    //s2->setPosition(220, 10);
-    //s3->setPosition(440, 10);
-    //s4->setPosition(10, 220);
-    //s5->setPosition(440, 220);
-    s6->setPosition(440, 220);
-    //s7->setPosition(10, 10);
-    s8->setPosition(220, 10);
-    s9->setPosition(10, 220);
-    s10->setPosition(10, 10);
+    s3->setPosition(10, 10);
     s11->setPosition(220, 10);
+    s12->setPosition(10, 220);
 
     //app.getRenderer()->getRenderWindow()->draw(*s1);
     //app.getRenderer()->getRenderWindow()->draw(*s2);
@@ -83,6 +67,7 @@ void World::draw()
     //app.getRenderer()->getRenderWindow()->draw(*s9);
     //app.getRenderer()->getRenderWindow()->draw(*s10);
     app.getRenderer()->getRenderWindow()->draw(*s11);
+    app.getRenderer()->getRenderWindow()->draw(*s12);
 }
 
 void World::work()

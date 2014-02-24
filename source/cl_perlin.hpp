@@ -31,7 +31,7 @@ private:
 
 public:
     CL_Perlin(std::string s);
-    void loadProgram();
+    void init();
     void runKernel();
     void cleanup();
 

@@ -21,7 +21,7 @@ private:
 
 public:
     CL_Winddir(std::string s);
-    void loadProgram();
+    void init();
     void runKernel();
     void cleanup();
 

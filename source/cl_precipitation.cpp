@@ -12,10 +12,8 @@ CL_Precipitation::CL_Precipitation(std::string s) : CL_Program(s)
 {
 }
 
-void CL_Precipitation::loadProgram()
+void CL_Precipitation::init()
 {
-    CL_Program::loadProgram();
-    
     try
     {
         kernel = cl::Kernel(program, "precipitation", &error);

@@ -23,7 +23,7 @@ private:
 
 public:
     CL_Precipitation(std::string s);
-    void loadProgram();
+    void init();
     void runKernel();
     void cleanup();
 
