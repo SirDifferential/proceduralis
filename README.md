@@ -16,9 +16,9 @@ Download SFML 2 at http://www.sfml-dev.org/download/sfml/2.1/ for your compiler,
 
 Download latest available GPU drivers.
 
-Nvidia Cuda Toolkit: https://developer.nvidia.com/cuda-toolkit
-AMD App SDK: http://developer.amd.com/tools-and-sdks/heterogeneous-computing/amd-accelerated-parallel-processing-app-sdk/downloads/
-Intel: You are out of luck as of this moment (year 2014) 
+* Nvidia Cuda Toolkit: https://developer.nvidia.com/cuda-toolkit
+* AMD App SDK: http://developer.amd.com/tools-and-sdks/heterogeneous-computing/amd-accelerated-parallel-processing-app-sdk/downloads/
+* Intel: You are out of luck as of this moment (year 2014) 
 
 Download GLEW: http://glew.sourceforge.net/
 
@@ -43,8 +43,8 @@ ocl-icd-libopencl1 - Generic OpenCL ICD Loader
 
 Which are located at:
 
-libOpenCL.so.1 (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
-libOpenCL.so (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libOpenCL.so
+* libOpenCL.so.1 (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
+* libOpenCL.so (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libOpenCL.so
 
 Download SFML 2 source code from http://www.sfml-dev.org/download/sfml/2.1/
 
