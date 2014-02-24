@@ -23,6 +23,8 @@ public:
     SpritePtr loadAndGiveSprite(std::string name, std::string filepath);
     int loadSound(std::string name, std::string path);
 
+    SpritePtr generateSpriteTriplet(std::string name, sf::Vector2i s);
+
     ImagePtr getImage(std::string name);
     SpritePtr getSprite(std::string name);
     TexturePtr getTexture(std::string name);

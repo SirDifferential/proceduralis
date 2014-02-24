@@ -233,7 +233,7 @@ void CL_Voronoi::runKernel()
     temp->setBlurSize(35);
     temp->setOutputTarget(app.getDataStorage()->getSprite("voronoiblurred"), "voronoiblurred");
     temp->runKernel();
-    temp->setInputBuffer(NULL);
+    temp->resetInputBuffer();
 
     delete[] map_done;
 }

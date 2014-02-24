@@ -208,13 +208,18 @@ void CL_Blur::cleanup()
     delete[] image_buffer_out;
 }
 
+void CL_Blur::resetInputBuffer()
+{
+    image_buffer_in = NULL;
+}
+
 void CL_Blur::setInputBuffer(float* in)
 {
     image_buffer_in = in;
 
     if (image_buffer_in == NULL)
     {
-        std::cout << "-OpenCL: image_buffer_in is null" << std::endl;
+        std::cout << "-CL_Blur: image_buffer_in changed to NULL. See backtrace for culprit. Aborting input buffer init!" << std::endl;
         return;
     }
 

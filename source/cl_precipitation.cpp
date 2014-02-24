@@ -125,7 +125,7 @@ void CL_Precipitation::runKernel()
     temp->setInputBuffer(map_done);
     temp->setOutputTarget(app.getDataStorage()->getSprite("precipitation_blurred"), "precipitation_blurred");
     temp->runKernel();
-    temp->setInputBuffer(NULL);
+    temp->resetInputBuffer();
 
 
     delete[] map_done;

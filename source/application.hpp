@@ -24,6 +24,7 @@ private:
     CL_BlurPtr cl_blur;
     CL_WinddirPtr cl_winddir;
     CL_PrecipitationPtr cl_precipitation;
+    CL_TemperaturePtr cl_temperature;
 
     std::map<std::string, std::shared_ptr<CL_Program>> programs;
 
@@ -43,6 +44,8 @@ public:
 
     void setProgram(std::string name);
     CL_ProgramPtr getProgram(std::string name);
+
+    void runProgram(std::string name);
 
     RendererPtr getRenderer();
     ToolboxPtr getToolbox();

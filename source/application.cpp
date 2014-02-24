@@ -17,6 +17,7 @@
 #include "cl_blur.hpp"
 #include "cl_winddir.hpp"
 #include "cl_precipitation.hpp"
+#include "cl_temperature.hpp"
 #include <fstream>
 #include <chrono>
 #include <iostream>
@@ -36,6 +37,7 @@ Application::Application()
     cl_blur = CL_BlurPtr(new CL_Blur("blur.cl"));
     cl_winddir = CL_WinddirPtr(new CL_Winddir("winddirection.cl"));
     cl_precipitation = CL_PrecipitationPtr(new CL_Precipitation("precipitation.cl"));
+    cl_temperature = CL_TemperaturePtr(new CL_Temperature("temperature.cl"));
     gui = GUIPtr(new GUI());
     textrenderer = TextRendererPtr(new TextRenderer());
     worldgenerator = WorldGeneratorPtr(new WorldGenerator());
@@ -115,41 +117,28 @@ int Application::run()
     worldgenerator->init();
 
     int start_s = clock();
-
+    
     cl_voronoi->loadProgram();
-    cl_voronoi->setOutputTarget(datastorage->getSprite("voronoi_cells"), "voronoi_cells");
-
     cl_perlin->loadProgram();
-    cl_perlin->setOutputTarget(datastorage->getSprite("perlinnoise"), "perlinnoise");
-
     cl_blur->loadProgram();
-    cl_blur->setOutputTarget(datastorage->getSprite("voronoiblurred"), "voronoiblurred");
-
     cl_winddir->loadProgram();
+    cl_temperature->loadProgram();
+
+    cl_voronoi->setOutputTarget(datastorage->getSprite("voronoi_cells"), "voronoi_cells");
+    cl_blur->setOutputTarget(datastorage->getSprite("voronoiblurred"), "voronoiblurred");
     cl_winddir->setOutputTarget(datastorage->getSprite("winddirections"), "winddirections");
+    cl_perlin->setOutputTarget(datastorage->getSprite("perlinnoise"), "perlinnoise");
+    cl_precipitation->setOutputTarget(datastorage->getSprite("precipitation"), "precipitation");
+    cl_temperature->setOutputTarget(datastorage->getSprite("temperature"), "temperature");
 
     programs["voronoi"] = cl_voronoi;
     programs["perlin"] = cl_perlin;
     programs["blur"] = cl_blur;
     programs["winddir"] = cl_winddir;
     programs["precipitation"] = cl_precipitation;
+    programs["temperature"] = cl_temperature;
 
-    activeCLProgram = programs["voronoi"];
-    activeCLProgram->runKernel();
-
-    cl_perlin->runKernel();
-    cl_winddir->runKernel();
-
-    worldgenerator->formSuperRegions();
-    forceredraw();
-    worldgenerator->formRegions();
-
-    cl_precipitation->loadProgram();
-    cl_precipitation->setOutputTarget(datastorage->getSprite("precipitation"), "precipitation");
-    cl_precipitation->runKernel();
-
-    forceredraw();
-    worldgenerator->runRivers();
+    worldgenerator->generate();
 
     int stop_s = clock();
     std::cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;
@@ -195,6 +184,18 @@ void Application::forceredraw()
 {
     world->draw();
     renderer->work();
+}
+
+
+void Application::runProgram(std::string s)
+{
+    if (programs.find(s) == programs.end())
+    {
+        std::cout << "-Application: Unable to run program: " << s << ". Program not found." << std::endl;
+        return;
+    }
+    
+    programs[s]->runKernel();
 }
 
 void Application::setProgram(std::string name)

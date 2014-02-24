@@ -5,6 +5,7 @@
 #include "datastorage.hpp"
 #include "spriteutils.hpp"
 #include "region.hpp"
+#include "cl_precipitation.hpp"
 
 WorldGenerator::WorldGenerator()
 {
@@ -12,52 +13,39 @@ WorldGenerator::WorldGenerator()
 
 void WorldGenerator::init()
 {
-    SpritePtr voronoi_cells = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("voronoi_cells", voronoi_cells);
-    SpritePtr perlinnoise = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("perlinnoise", perlinnoise);
-    SpritePtr blurred = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("voronoiblurred", blurred);
-    SpritePtr perlinblurred = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("perlinblurred", blurred);
-    SpritePtr regionmap = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("regionmap", regionmap);
-    ImagePtr regionmap_image = ImagePtr(new sf::Image());
-    regionmap_image->create(1024, 1024);
-    app.getDataStorage()->storeImage("regionmap", regionmap_image);
-    TexturePtr regionmap_text = TexturePtr(new sf::Texture());
-    regionmap_text->create(1024, 1024);
-    app.getDataStorage()->storeTexture("regionmap", regionmap_text);
-    SpritePtr winddir = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("winddirections", winddir);
-    TexturePtr winddir_text = TexturePtr(new sf::Texture());
-    winddir_text->create(1024, 1024);
-    app.getDataStorage()->storeTexture("winddirections", winddir_text);
-    SpritePtr winddir_blur = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("windblurred", winddir_blur);
-    TexturePtr winddir_text_blur = TexturePtr(new sf::Texture());
-    winddir_text->create(1024, 1024);
-    app.getDataStorage()->storeTexture("windblurred", winddir_text_blur);
-    SpritePtr preci = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("precipitation", preci);
-    TexturePtr preci_text = TexturePtr(new sf::Texture());
-    preci_text->create(1024, 1024);
-    app.getDataStorage()->storeTexture("precipitation", preci_text);
-    ImagePtr preci_img = ImagePtr(new sf::Image());
-    preci_img->create(1024, 1024);
-    app.getDataStorage()->storeImage("precipitation", preci_img);
-    SpritePtr preci_blur = SpritePtr(new sf::Sprite());
-    app.getDataStorage()->storeSprite("precipitation_blurred", preci_blur);
-    TexturePtr preci_text_blur = TexturePtr(new sf::Texture());
-    preci_text->create(1024, 1024);
-    app.getDataStorage()->storeTexture("precipitation_blurred", preci_text_blur);
-    ImagePtr preci_img_blur = ImagePtr(new sf::Image());
-    preci_img->create(1024, 1024);
-    app.getDataStorage()->storeImage("precipitation_blurred", preci_img_blur);
+    sf::Vector2i standard_size(1024,1024);
+    app.getDataStorage()->generateSpriteTriplet("voronoi_cells", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("perlinnoise", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("voronoiblurred", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("perlinblurred", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("regionmap", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("winddirections", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("windblurred", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("precipitation", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("precipitation_blurred", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("heightmap", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("temperature", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("temperature_blurred", standard_size);
 }
 
+/**
+* The big momma.
+* Generates the entire world
+*/
 void WorldGenerator::generate()
 {
+    app.runProgram("voronoi");
+    app.runProgram("perlin");
+    app.runProgram("winddir");
+    formSuperRegions();
+
+    app.forceredraw();
+
+    formRegions();
+
+    app.getProgram("precipitation")->loadProgram();
+    app.runProgram("precipitation");
+    runRivers();
 }
 
 void WorldGenerator::formSuperRegions()
@@ -68,12 +56,6 @@ void WorldGenerator::formSuperRegions()
     auto perlin = app.getDataStorage()->getImage("perlinnoise");
     auto heightmap = app.getDataStorage()->getImage("heightmap");
     auto voronoiblurred = app.getDataStorage()->getImage("voronoiblurred");
-    if (heightmap == nullptr)
-    {
-        heightmap = ImagePtr(new sf::Image());
-        heightmap->create(cells->getSize().x, cells->getSize().y);
-        app.getDataStorage()->storeImage("heightmap", heightmap);
-    }
 
     sf::Color perlin_col;
     sf::Color voronoi_col;
@@ -678,6 +660,10 @@ bool WorldGenerator::bordersRiver(sf::Vector2i coord, sf::Vector2i source, Image
     return false;
 }
 
+/**
+* After height, wind and precipitation have been calculated,
+* this function forms a network of rivers
+*/
 void WorldGenerator::runRivers()
 {
     auto heightmap = app.getDataStorage()->getImage("heightmap");
@@ -799,6 +785,24 @@ void WorldGenerator::runRivers()
     std::shared_ptr<sf::Sprite> heightmap_sprite = app.getDataStorage()->getSprite("heightmap");
     heightmap_sprite->setTexture(*heightmap_text);
 }
+
+/**
+* After height is generated, this function forms temperature zones
+*/
+void WorldGenerator::formTemperature()
+{
+    
+}
+
+/**
+* After height, wind and temperature is formed,
+* this function forms biomes
+*/
+void WorldGenerator::formBiomes()
+{
+
+}
+
 
 /**
 * Simple brute force Voronoi diagram generator

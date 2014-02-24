@@ -35,6 +35,7 @@ class CL_Perlin;
 class CL_Blur;
 class CL_Winddir;
 class CL_Precipitation;
+class CL_Temperature;
 
 typedef std::shared_ptr<Region> RegionPtr;
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
@@ -61,3 +62,4 @@ typedef std::shared_ptr<CL_Perlin> CL_PerlinPtr;
 typedef std::shared_ptr<CL_Blur> CL_BlurPtr;
 typedef std::shared_ptr<CL_Winddir> CL_WinddirPtr;
 typedef std::shared_ptr<CL_Precipitation> CL_PrecipitationPtr;
+typedef std::shared_ptr<CL_Temperature> CL_TemperaturePtr;

@@ -29,6 +29,24 @@ int DataStorage::loadAllData()
 }
 
 /**
+* Generates sf::Sprite, sf::Image and sf::Texture of size s
+* All three are stored in datastorage containers
+* Returns SpritePtr to the newly generated sprite
+*/
+SpritePtr DataStorage::generateSpriteTriplet(std::string name, sf::Vector2i s)
+{
+    SpritePtr sprite = SpritePtr(new sf::Sprite());
+    storeSprite(name, sprite);
+    TexturePtr texture = TexturePtr(new sf::Texture());
+    texture->create(s.x, s.y);
+    storeTexture(name, texture);
+    ImagePtr img = ImagePtr(new sf::Image());
+    img->create(s.x, s.y);
+    storeImage(name, img);
+    return sprite;
+}
+
+/**
 * Loads a new texture from the given path and stores the produced Texture in the textureContainer as a shared_ptr
 * The texture is stored based on the given name
 * Returns -1 if error, 0 if success

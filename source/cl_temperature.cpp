@@ -1,4 +1,4 @@
-#include "cl_winddir.hpp"
+#include "cl_temperature.hpp"
 #include "application.hpp"
 #include "applicationFlags.hpp"
 #include "toolbox.hpp"
@@ -8,17 +8,17 @@
 #include "datastorage.hpp"
 #include "cl_blur.hpp"
 
-CL_Winddir::CL_Winddir(std::string s) : CL_Program(s)
+CL_Temperature::CL_Temperature(std::string s) : CL_Program(s)
 {
 }
 
-void CL_Winddir::loadProgram()
+void CL_Temperature::loadProgram()
 {
     CL_Program::loadProgram();
     
     try
     {
-        kernel = cl::Kernel(program, "winddirection", &error);
+        kernel = cl::Kernel(program, "temperature", &error);
         print_errors("kernel()", error);
     }
     catch (cl::Error err)
@@ -89,15 +89,21 @@ void CL_Winddir::loadProgram()
     }
 }
 
-void CL_Winddir::runKernel()
+void CL_Temperature::runKernel()
 {
+    if (image_buffer_in == NULL)
+    {
+        std::cout << "-CL_Temperature: cannot run kernel: image_buffer_in is NULL" << std::endl;
+        return;
+    }
+
     try
     {
         error = commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024, 1024), cl::NullRange, NULL, &event);
     }
     catch (cl::Error err)
     {
-        std::cout << "-CL_Winddir: Error running kernel: " << err.what() << ", " << err.err() << std::endl;
+        std::cout << "-CL_Temperature: Error running kernel: " << err.what() << ", " << err.err() << std::endl;
         print_errors("commandQueue.enqueueNDRangeKernel", error);
     }
     
@@ -121,50 +127,50 @@ void CL_Winddir::runKernel()
     std::shared_ptr<CL_Blur> temp = std::dynamic_pointer_cast<CL_Blur>(app.getProgram("blur"));
     temp->setBlurSize(16);
     temp->setInputBuffer(map_done);
-    temp->setOutputTarget(app.getDataStorage()->getSprite("windblurred"), "windblurred");
+    temp->setOutputTarget(app.getDataStorage()->getSprite("temperatureblurred"), "temperatureblurred");
     temp->setRerange(false);
     temp->runKernel();
     temp->setRerange(true);
-    temp->resetInputBuffer();
+    temp->setInputBuffer(NULL);
 
     delete[] map_done;
 }
 
-void CL_Winddir::cleanup()
+void CL_Temperature::cleanup()
 {
     CL_Program::cleanup();
     delete[] image_buffer_in;
     delete[] image_buffer_out;
 }
 
-void CL_Winddir::event1()
+void CL_Temperature::event1()
 {
 }
 
-void CL_Winddir::event2()
+void CL_Temperature::event2()
 {
 }
 
-void CL_Winddir::event3()
+void CL_Temperature::event3()
 {
 }
 
-void CL_Winddir::event4()
+void CL_Temperature::event4()
 {
 }
 
-void CL_Winddir::event5()
+void CL_Temperature::event5()
 {
 }
 
-void CL_Winddir::event6()
+void CL_Temperature::event6()
 {
 }
 
-void CL_Winddir::event7()
+void CL_Temperature::event7()
 {
 }
 
-void CL_Winddir::event8()
+void CL_Temperature::event8()
 {
 }

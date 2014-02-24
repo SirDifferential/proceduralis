@@ -186,7 +186,7 @@ void CL_Perlin::runKernel()
     temp->setInputBuffer(map_done);
     temp->setOutputTarget(app.getDataStorage()->getSprite("perlinblurred"), "perlinblurred");
     temp->runKernel();
-    temp->setInputBuffer(NULL);
+    temp->resetInputBuffer();
 
     delete[] map_done;
 }
