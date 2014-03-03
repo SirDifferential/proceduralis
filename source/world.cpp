@@ -24,6 +24,7 @@ World::World()
 
     regions = std::shared_ptr<std::map<long, RegionPtr>>(new std::map<long, RegionPtr>());
     activeSprite = "biomes";
+	regionmap = NULL;
 }
 
 void World::init()

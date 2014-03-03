@@ -3,10 +3,15 @@
 
 This is my personal learning experience on my journey in procedural world generation. It is heavily inspired by Dwarf Fortress.
 
+## Development
+
+I'm actively working on this, on and off. There are some very hacky parts in the code that will eventually be cleaned. I'm not even sure if I will stick with SFML when the actual world generator works well enough.
+
 ## Core ideas
 
-OpenCL is used as much as possible to speed things up. There are a lot of jams that will need to be removed in future - they mostly exist now as a mean of getting easy debug information. SFML is used for the windowing and graphics, at least for now. In future the redundant usage of sf::Sprites/Textures/Images will be removed and optimized.
+Detailed blog entry: http://jessekaukonen.blogspot.fi/2014/02/generation-of-procedural-worlds-using.html
 
+OpenCL is used as much as possible to speed things up. There are a lot of jams that will need to be removed in future - they mostly exist now as a mean of getting easy debug information. SFML is used for the windowing and graphics, at least for now. In future the redundant usage of sf::Sprites/Textures/Images will be removed and optimized.
 
 ## Project setup
 
