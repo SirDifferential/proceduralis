@@ -1,1 +1,2 @@
 RantingHuman: Fixed a bug with blur.cl having off-by-one error
+Eddie Lee: I copied the perlin noise generator from http://vimeo.com/29074357
