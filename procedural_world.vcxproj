@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="source\application.hpp" />
+    <ClInclude Include="source\biomeTools.hpp" />
     <ClInclude Include="source\cl.hpp" />
     <ClInclude Include="source\cl_biomes.hpp" />
     <ClInclude Include="source\cl_blur.hpp" />
@@ -183,6 +184,7 @@
   <ItemGroup>
     <ClCompile Include="source\application.cpp" />
     <ClCompile Include="source\applicationFlags.cpp" />
+    <ClCompile Include="source\biomeTools.cpp" />
     <ClCompile Include="source\cl_biomes.cpp" />
     <ClCompile Include="source\cl_blur.cpp" />
     <ClCompile Include="source\cl_perlin.cpp" />
@@ -207,6 +209,7 @@
     <ClCompile Include="source\worldGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="biomes.cl" />
     <None Include="blur.cl" />
     <None Include="config.json" />
     <None Include="diamondsquare.cl" />
