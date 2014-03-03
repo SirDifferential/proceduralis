@@ -10,13 +10,13 @@ private:
     float* image_buffer_height;
     float* image_buffer_precipitation;
     float* image_buffer_temperature;
-    float* image_buffer_out;
 
     // Input and output buffers in OpenCL memory
     cl::Image2D* image_height;
     cl::Image2D* image_precipitation;
     cl::Image2D* image_temperature;
     cl::Image2D* image_biomes;
+    cl::Image2D* image_biome_codes;
 
     // Values used for setting offsets in image read / write operations
     cl::size_t<3> origin;

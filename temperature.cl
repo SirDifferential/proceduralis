@@ -49,7 +49,7 @@ __kernel void temperature(__read_only image2d_t random_values,  __write_only ima
     float temperature2 = myabs(sin(convert_float(x / (s.x/16.0)))) * linear_interpolate(0.25, 0.85, myabs(sin(convert_float(x / (s.x/12.0))))) * myabs(sin(y / (s.y / 2.0)));
 
     float4 outcol;
-    outcol.x = temperature1 * linear_interpolate(0.5, 1.0, temperature2) * 255;
+    outcol.x = temperature1 * 255;// * linear_interpolate(0.5, 1.0, temperature2) * 255;
     outcol.y = outcol.x;
     outcol.z = outcol.x;
     outcol.w = 255;

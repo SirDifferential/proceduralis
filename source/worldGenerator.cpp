@@ -6,6 +6,7 @@
 #include "spriteutils.hpp"
 #include "region.hpp"
 #include "cl_precipitation.hpp"
+#include "gui.hpp"
 
 WorldGenerator::WorldGenerator()
 {
@@ -35,27 +36,36 @@ void WorldGenerator::init()
 */
 void WorldGenerator::generate()
 {
+    app.getGUI()->drawLoadingText("Initting OpenCL programs...");
     app.getProgram("voronoi")->init();
     app.getProgram("perlin")->init();
     app.getProgram("winddir")->init();
     app.getProgram("blur")->init();
 
+    app.getGUI()->drawLoadingText("Forming tectonic plates...");
     app.runProgram("voronoi");
+    app.getGUI()->drawLoadingText("Forming details...");
     app.runProgram("perlin");
+    app.getGUI()->drawLoadingText("Forming global wind circulation...");
     app.runProgram("winddir");
+    app.getGUI()->drawLoadingText("Forming continents...");
     formSuperRegions();
 
-    app.forceredraw();
-
+    app.getGUI()->drawLoadingText("Calculating temperature...");
     app.getProgram("temperature")->init();
     app.runProgram("temperature");
-    app.forceredraw();
+    app.getWorld()->setTemperatureImage(app.getDataStorage()->getImage("temperature"));
+    app.getGUI()->drawLoadingText("Forming regions...");
     formRegions();
 
+    app.getGUI()->drawLoadingText("Solving rainfall...");
     app.getProgram("precipitation")->init();
     app.runProgram("precipitation");
+    app.getWorld()->setPrecipitationImage(app.getDataStorage()->getImage("precipitation"));
+    app.getGUI()->drawLoadingText("Forming rivers and erosion...");
     runRivers();
 
+    app.getGUI()->drawLoadingText("Forming biomes...");
     app.getProgram("biomes")->init();
     app.runProgram("biomes");
 
@@ -709,7 +719,7 @@ void WorldGenerator::runRivers()
     sf::Vector2i dir;
     sf::Vector2i current_coords;
     sf::Color rivercolor(150, 150, 255, 255);
-    int river_start_height = 70;
+    int river_start_height = 50;
     sf::Vector2i previous(-1, -1);
     float height_probability = 1.0;
 
@@ -756,9 +766,9 @@ void WorldGenerator::runRivers()
                     current_height = heightmap->getPixel(current_coords.x, current_coords.y).r;
                     rivercolor = heightmap->getPixel(current_coords.x, current_coords.y);
                     // TODO: temp code, change this to erosion
-                    rivercolor.r = 0;
-                    rivercolor.g = 0;
-                    rivercolor.b = 255;
+                    rivercolor.r = current_height-3;
+                    rivercolor.g = current_height-3;
+                    rivercolor.b = current_height-3;
                     heightmap->setPixel(current_coords.x, current_coords.y, rivercolor);
                     
                     auto lower = findLowerNeighbors(current_coords, current_height, heightmap, tolerance);
@@ -796,6 +806,8 @@ void WorldGenerator::runRivers()
             }
         }
     }
+
+    app.getWorld()->setRiverMap(rivermap);
     
     std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");
 

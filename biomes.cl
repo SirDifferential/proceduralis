@@ -1,6 +1,4 @@
-
 const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
-
 
 float linear_interpolate(float x0, float x1, float alpha)
 {
@@ -21,7 +19,7 @@ float myabs(float i)
     return i;
 }
 
-__kernel void biomes(__read_only image2d_t heightmap, __read_only image2d_t precipitation, __read_only image2d_t temperature,  __write_only image2d_t biomes)
+__kernel void biomes(__read_only image2d_t heightmap, __read_only image2d_t precipitation, __read_only image2d_t temperature,  __write_only image2d_t biomes, __write_only image2d_t biome_codes)
 {
     // Get the (x,y) coordinates of our desired point
     int x = get_global_id(0);
@@ -35,145 +33,128 @@ __kernel void biomes(__read_only image2d_t heightmap, __read_only image2d_t prec
     outcol.y = 0;
     outcol.z = 0;
 
+    int4 outcol2;
+
     float h = read_imagef(heightmap, sampler, coord).x;
     float p = read_imagef(precipitation, sampler, coord).x;
     float t = read_imagef(temperature, sampler, coord).x;
 
     // Lower temperature by height
-    float lowered_temp = t * linear_interpolate(1.0, 0.0, h / 140.0);
+    float height_temp = linear_interpolate(1.0, 0.0, h / 140.0);
+
+    // Use an analogy of the Whittaker Diagram for generating approximates of realistic biomes
+    // In the usual Whittaker diagram the ranges are about this:
+    float preci = linear_interpolate(0, 300, p);
+    float temp = linear_interpolate(-20, 35, t * height_temp / 255.0);
+
+    if (h < 1)
+    {
+        // ocean
+        outcol.x = 150;
+        outcol.y = 150;
+        outcol.z = 255;
+        outcol2.x = 0;
+    }
+    else if (temp < -5)
+    {
+        // tundra
+        outcol.x = 236;
+        outcol.y = 243;
+        outcol.z = 245;
+        outcol2.x = 1;
+    }
+    else if (temp >= -5 && temp <= 5 && preci > 50)
+    {
+        // taiga
+        outcol.x = 62;
+        outcol.y = 94;
+        outcol.z = 62;
+        outcol2.x = 2;
+    }
+    else if (temp > -5 && temp <= 20 && preci <= 120)
+    {
+        // temperate grassland
+        outcol.x = 70;
+        outcol.y = 113;
+        outcol.z = 60;
+        outcol2.x = 3;
+    }
+    else if (temp > -5 && preci <= 50)
+    {
+        // subtropical desert
+        outcol.x = 138;
+        outcol.y = 131;
+        outcol.z = 76;
+        outcol2.x = 4;
+    }
+    else if (temp > 15 && preci <= 100)
+    {
+        // savanna
+        outcol.x = 214;
+        outcol.y = 206;
+        outcol.z = 104;
+        outcol2.x = 5;
+    }
+    else if (temp > 0 && temp <= 20 && preci <= 200)
+    {
+        // temperate deciduous forest
+        outcol.x = 127;
+        outcol.y = 169;
+        outcol.z = 110;
+        outcol2.x = 6;
+    }
+    else if (temp > 20 && preci <= 230)
+    {
+        // tropical seasonal forest
+        outcol.x = 64;
+        outcol.y = 92;
+        outcol.z = 65;
+        outcol2.x = 7;
+    }
+    else if (temp > 5 && temp <= 20 && preci > 150)
+    {
+       // temperate rain forest
+        outcol.x = 54;
+        outcol.y = 79;
+        outcol.z = 48;
+        outcol2.x = 8;
+    }
+    else if (temp > 20 && preci > 230)
+    {
+        // tropical rain forest
+        outcol.x = 56;
+        outcol.y = 85;
+        outcol.z = 55;
+        outcol2.x = 9;
+    }
 
 
     // 102 or higher: mountains
     // 86-102: hills
-    // 86 - 0: flats
+    // 86 - 1: flats
 
-    // First check if the height is great enough to simply make this area into mountain biome without any further considerations
-
-    if (h > 100)
+    if (h < 1)
     {
-        if (lowered_temp < 20)
-        {
-            outcol.x = 252;
-            outcol.y = 248;
-            outcol.z = 204;
-        }
-        else
-        {
-            outcol.x = 233;
-            outcol.y = 187;
-            outcol.z = 129;
-        }
+        outcol2.y = 0;
     }
-    else if (h > 1)
+    else if (h <= 86)
     {
-        if (lowered_temp > 150 && p < 50)
-        {
-            // Very dry desert
-            outcol.x = 255;
-            outcol.y = 209;
-            outcol.z = 150;
-        }
-        else if (lowered_temp > 150 && p < 100)
-        {
-            // desert
-            outcol.x = 230;
-            outcol.y = 167;
-            outcol.z = 122;
-        }
-        else if (lowered_temp > 150 && p < 150)
-        {
-            // dry savanna
-            outcol.x = 103;
-            outcol.y = 94;
-            outcol.z = 56;
-        }
-        else if (lowered_temp > 150 && p < 200)
-        {
-            // wet savanna
-            outcol.x = 73;
-            outcol.y = 79;
-            outcol.z = 46;
-        }
-        else if (lowered_temp > 150 && p < 255)
-        {
-            // jungle
-            outcol.x = 34;
-            outcol.y = 59;
-            outcol.z = 34;
-        }
-
-        else if (lowered_temp < 20)
-        {
-            // Arctic glacier
-            outcol.x = 188;
-            outcol.y = 219;
-            outcol.z = 239;
-        }
-        else if (lowered_temp < 40)
-        {
-            // arctic
-            outcol.x = 251;
-            outcol.y = 249;
-            outcol.z = 242;
-        }
-        else if (lowered_temp < 60 && p < 50)
-        {
-            // dry arctic-temperate
-            outcol.x = 30;
-            outcol.y = 32;
-            outcol.z = 16;
-        }
-        else if (lowered_temp < 60 && p > 50)
-        {
-            // wet arctic-temperatate
-            outcol.x = 46;
-            outcol.y = 53;
-            outcol.z = 36;
-        }
-        else if (lowered_temp < 100 && p < 50)
-        {
-            // dry temperate
-            outcol.x = 42;
-            outcol.y = 63;
-            outcol.z = 30;
-        }
-        else if (lowered_temp < 100 && p > 50)
-        {
-            // wet temperate
-            outcol.x = 69;
-            outcol.y = 86;
-            outcol.z = 56;
-        }
-        else if (lowered_temp < 130 && p < 80)
-        {
-            // dry mediterranean
-            outcol.x = 141;
-            outcol.y = 116;
-            outcol.z = 73;
-        }
-        else if (lowered_temp < 130 && p > 80)
-        {
-            // wet mediterranean
-            outcol.x = 90;
-            outcol.y = 118;
-            outcol.z = 54;
-        }
-        else if (lowered_temp < 255)
-        {
-            // tropical dry
-            outcol.x = 181;
-            outcol.y = 126;
-            outcol.z = 99;
-        }
+        // flats
+        outcol2.y = 1;
+    }
+    else if (h > 86 && h <= 102)
+    {
+        // mountain-y
+        outcol2.y = 2;
     }
     else
     {
-        outcol.x = 150;
-        outcol.y = 150;
-        outcol.z = 255;
+        // mountains
+        outcol2.y = 3;
     }
 
     outcol.w = 255;
 
 	write_imagef(biomes, coord, outcol);
+    write_imagei(biome_codes, coord, outcol2);
 }

@@ -17,6 +17,7 @@ private:
     DataStoragePtr datastorage;
     SpriteUtilsPtr spriteutils;
     MouseHovererPtr mousehoverer;
+    BiomeToolsPtr biometools;
 
     CL_ProgramPtr activeCLProgram;
     CL_VoronoiPtr cl_voronoi;
@@ -59,6 +60,7 @@ public:
     DataStoragePtr getDataStorage();
     SpriteUtilsPtr getSpriteUtils();
     MouseHovererPtr getMouseHoverer();
+    BiomeToolsPtr getBiomeTools();
 };
 
 extern Application app;

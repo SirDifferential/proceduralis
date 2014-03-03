@@ -33,6 +33,10 @@ void CL_Biomes::init()
     format2.image_channel_data_type = CL_FLOAT;
     format2.image_channel_order = CL_RGBA;
 
+    cl::ImageFormat format3;
+    format3.image_channel_data_type = CL_SIGNED_INT8;
+    format3.image_channel_order = CL_RG;
+
     int image_size = 1024*1024;
     
     image_buffer_height = new float[image_size];
@@ -69,6 +73,7 @@ void CL_Biomes::init()
         image_precipitation = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
         image_temperature = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
         image_biomes = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format2, 1024, 1024, 0);
+        image_biome_codes = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format3, 1024, 1024, 0);
     }
     catch (cl::Error e)
     {
@@ -93,6 +98,7 @@ void CL_Biomes::init()
         error = kernel.setArg(1, *image_precipitation);
         error = kernel.setArg(2, *image_temperature);
         error = kernel.setArg(3, *image_biomes);
+        error = kernel.setArg(4, *image_biome_codes);
     }
     catch (cl::Error err)
     {
@@ -129,6 +135,12 @@ void CL_Biomes::runKernel()
     app.getSpriteUtils()->setPixelsNorerange(outputTarget, outputName, map_done, 1024, 1024);
 
     delete[] map_done;
+
+    int8_t* biome_codes = new int8_t[1024*1024*2];
+    row_pitch = 1024 * 2 * sizeof(int8_t);
+    error = commandQueue.enqueueReadImage(*image_biome_codes, CL_TRUE, origin, region, row_pitch, 0, biome_codes);
+    app.getWorld()->setBiomeCodes(biome_codes);
+    delete[] biome_codes;
 }
 
 void CL_Biomes::cleanup()
@@ -137,7 +149,6 @@ void CL_Biomes::cleanup()
     delete[] image_buffer_height;
     delete[] image_buffer_precipitation;
     delete[] image_buffer_temperature;
-    delete[] image_buffer_out;
 }
 
 void CL_Biomes::event1()
