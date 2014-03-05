@@ -66,3 +66,9 @@ void GUI::drawLoadingText(std::string t)
     app.getTextRenderer()->renderText(20, 40, app.getToolbox()->combineStringAndString("Loading: ", t), FONT_SIZE::MEDIUM_FONT, false, sf::Color::Red);
     app.forceredraw();
 }
+
+void GUI::drawHeight(int h)
+{
+    app.getTextRenderer()->renderText(20, 200, app.getToolbox()->combineStringAndInt("Height: ", h), FONT_SIZE::SMALL_FONT, false, sf::Color::Red);
+}
+

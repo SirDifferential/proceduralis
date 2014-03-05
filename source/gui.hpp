@@ -18,6 +18,7 @@ public:
     void drawPrecipitationText(int preci);
     void drawRiverText(int river);
     void drawLoadingText(std::string t);
+    void drawHeight(int h);
 
     std::string octaveString;
     std::string persistenceString;

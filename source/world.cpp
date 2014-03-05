@@ -97,6 +97,7 @@ void World::work()
         BiomeType t = biomes[std::pair<int,int>(coords.x, coords.y)];
         int precipitation = precipitation_image->getPixel(coords.x, coords.y).r;
         int rivercode = rivermap[coords.x][coords.y];
+        int height = heightmap_image->getPixel(coords.x, coords.y).r;
 
         int code = regionmap[coords.x][coords.y];
         if (code > ocean_index_start && code < ocean_index_start + ocean_regions)
@@ -120,6 +121,7 @@ void World::work()
         app.getGUI()->drawBiomeText(app.getBiomeTools()->biomeCodeToString(t.biome_code), app.getBiomeTools()->mountainCodeToString(t.mountain_type));
         app.getGUI()->drawPrecipitationText(precipitation);
         app.getGUI()->drawRiverText(rivercode);
+        app.getGUI()->drawHeight(height);
     }
 
 }
@@ -216,6 +218,11 @@ void World::setTemperatureImage(ImagePtr img)
 void World::setPrecipitationImage(ImagePtr img)
 {
     precipitation_image = img;
+}
+
+void World::setHeightmapImage(ImagePtr img)
+{
+    heightmap_image = img;
 }
 
 int** World::getRegionMap()

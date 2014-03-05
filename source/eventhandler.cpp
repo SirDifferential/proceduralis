@@ -59,6 +59,9 @@ void EventHandler::checkEvents()
                     case sf::Keyboard::Num4:
                         app.getWorld()->setActiveSprite("precipitation_blurred");
                         break;
+                    case sf::Keyboard::Num5:
+                        app.getWorld()->setActiveSprite("regionmap");
+                        break;
                     case sf::Keyboard::Escape:
                         app.exit();
                         break;

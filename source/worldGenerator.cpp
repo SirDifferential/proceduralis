@@ -61,7 +61,7 @@ void WorldGenerator::generate()
     app.getGUI()->drawLoadingText("Solving rainfall...");
     app.getProgram("precipitation")->init();
     app.runProgram("precipitation");
-    app.getWorld()->setPrecipitationImage(app.getDataStorage()->getImage("precipitation"));
+    app.getWorld()->setPrecipitationImage(app.getDataStorage()->getImage("precipitation_blurred"));
     app.getGUI()->drawLoadingText("Forming rivers and erosion...");
     runRivers();
 
@@ -808,6 +808,7 @@ void WorldGenerator::runRivers()
     }
 
     app.getWorld()->setRiverMap(rivermap);
+    app.getWorld()->setHeightmapImage(heightmap);
     
     std::shared_ptr<sf::Texture> heightmap_text = app.getDataStorage()->getTexture("heightmap");
 

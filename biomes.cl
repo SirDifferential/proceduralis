@@ -39,13 +39,10 @@ __kernel void biomes(__read_only image2d_t heightmap, __read_only image2d_t prec
     float p = read_imagef(precipitation, sampler, coord).x;
     float t = read_imagef(temperature, sampler, coord).x;
 
-    // Lower temperature by height
-    float height_temp = linear_interpolate(1.0, 0.0, h / 140.0);
-
     // Use an analogy of the Whittaker Diagram for generating approximates of realistic biomes
     // In the usual Whittaker diagram the ranges are about this:
-    float preci = linear_interpolate(0, 300, p);
-    float temp = linear_interpolate(-20, 35, t * height_temp / 255.0);
+    float preci = linear_interpolate(0, 300, p / 255.0);
+    float temp = linear_interpolate(-20, 35, t / 255.0);
 
     if (h < 1)
     {
@@ -55,77 +52,196 @@ __kernel void biomes(__read_only image2d_t heightmap, __read_only image2d_t prec
         outcol.z = 255;
         outcol2.x = 0;
     }
-    else if (temp < -5)
+    else
     {
-        // tundra
-        outcol.x = 236;
-        outcol.y = 243;
-        outcol.z = 245;
-        outcol2.x = 1;
-    }
-    else if (temp >= -5 && temp <= 5 && preci > 50)
-    {
-        // taiga
-        outcol.x = 62;
-        outcol.y = 94;
-        outcol.z = 62;
-        outcol2.x = 2;
-    }
-    else if (temp > -5 && temp <= 20 && preci <= 120)
-    {
-        // temperate grassland
-        outcol.x = 70;
-        outcol.y = 113;
-        outcol.z = 60;
-        outcol2.x = 3;
-    }
-    else if (temp > -5 && preci <= 50)
-    {
-        // subtropical desert
-        outcol.x = 138;
-        outcol.y = 131;
-        outcol.z = 76;
-        outcol2.x = 4;
-    }
-    else if (temp > 15 && preci <= 100)
-    {
-        // savanna
-        outcol.x = 214;
-        outcol.y = 206;
-        outcol.z = 104;
-        outcol2.x = 5;
-    }
-    else if (temp > 0 && temp <= 20 && preci <= 200)
-    {
-        // temperate deciduous forest
-        outcol.x = 127;
-        outcol.y = 169;
-        outcol.z = 110;
-        outcol2.x = 6;
-    }
-    else if (temp > 20 && preci <= 230)
-    {
-        // tropical seasonal forest
-        outcol.x = 64;
-        outcol.y = 92;
-        outcol.z = 65;
-        outcol2.x = 7;
-    }
-    else if (temp > 5 && temp <= 20 && preci > 150)
-    {
-       // temperate rain forest
-        outcol.x = 54;
-        outcol.y = 79;
-        outcol.z = 48;
-        outcol2.x = 8;
-    }
-    else if (temp > 20 && preci > 230)
-    {
-        // tropical rain forest
-        outcol.x = 56;
-        outcol.y = 85;
-        outcol.z = 55;
-        outcol2.x = 9;
+        // Use precipitation for primary designation
+        if (preci <= 10)
+        {
+            // Then, based on temperature, figure out what kind of biome this is
+            if (temp <= -10)
+            {
+                // arctic. No plant life
+                // Example: Antractic
+                // Not an actual real biome in real life, but used for creating a perma-frost area with snow
+                outcol2.x = 1;
+                outcol.x = 236;
+                outcol.y = 242;
+                outcol.z = 241;
+            }
+            else
+            {
+                // Temperate desert, temperature varies from 0C to 20C
+                // Example: Colorado Plateau
+                outcol2.x = 4;
+                outcol.x = 137;
+                outcol.y = 114;
+                outcol.z = 64;
+            }
+        }
+        else if (preci <= 50)
+        {
+            if (temp <= -10)
+            {
+                // arctic. No plant life
+                // Example: Antractic
+                // Not an actual real biome in real life, but used for creating a perma-frost area with snow
+                outcol2.x = 1;
+                outcol.x = 236;
+                outcol.y = 242;
+                outcol.z = 241;
+            }
+            else if (temp <= -5)
+            {
+                // Tundra. Some plant life
+                // Examples: northern Canada, Russia and Finland
+                // Mostly frozen. Temperature varies from negative celsius to max of 10C
+                outcol2.x = 2;
+                outcol.x = 198;
+                outcol.y = 149;
+                outcol.z = 91;
+            }
+            else if (temp <= 15)
+            {
+                // Temperate grassland, temperature varies from -40C to 37C
+                // Example: Eurasian steppes
+                outcol2.x = 3;
+                outcol.x = 106;
+                outcol.y = 86;
+                outcol.z = 51;
+            }
+            else if (temp <= 20)
+            {
+                // Temperate desert, temperature varies from 0C to 20C
+                // Example: Colorado Plateau
+                outcol2.x = 4;
+                outcol.x = 137;
+                outcol.y = 114;
+                outcol.z = 64;
+            }
+            else
+            {
+                // Savanna. Temperatures are on average 17C
+                // examples: African central parts, South-eastern India, Northern Australia
+                outcol2.x = 5;
+                outcol.x = 118;
+                outcol.y = 109;
+                outcol.z = 50;
+            }
+        }
+        else if (preci < 100)
+        {
+            if (temp <= 15)
+            {
+                // Taiga, boreal forest. Temperature in range -54C to 30C, mean temperature at 3C
+                // Example: Most of Nordic nations, northern Russia
+                outcol2.x = 6;
+                outcol.x = 63;
+                outcol.y = 70;
+                outcol.z = 37;
+            }
+            else if (temp <= 12)
+            {
+                // Temperate deciduous forest. Mean temperature is 10C
+                // Example: northern mainland Europe, eastern North America
+                outcol2.x = 7;
+                outcol.x = 87;
+                outcol.y = 117;
+                outcol.z = 45;
+            }
+            else if (temp <= 20)
+            {
+                // Temperate desert
+                outcol2.x = 4;
+                outcol.x = 137;
+                outcol.y = 114;
+                outcol.z = 64;
+            }
+            else
+            {
+                // Savanna
+                outcol2.x = 5;
+                outcol.x = 118;
+                outcol.y = 109;
+                outcol.z = 50;
+            }
+        }
+        else if (preci <= 200)
+        {
+            if (temp <= -15)
+            {
+                // arctic
+                outcol2.x = 1;
+                outcol.x = 236;
+                outcol.y = 242;
+                outcol.z = 241;
+            }
+            if (temp <= 13)
+            {
+                // Taiga
+                outcol2.x = 6;
+                outcol.x = 63;
+                outcol.y = 70;
+                outcol.z = 37;
+            }
+            else if (temp <= 20)
+            {
+                // Temperature Deciduous Forest
+                outcol2.x = 7;
+                outcol.x = 87;
+                outcol.y = 117;
+                outcol.z = 45;
+            }
+            else
+            {
+                // Tropical Seasonal Forest, average annual temperatures over 20C
+                // Trees grow more densely than savanna and lose leaves during the dry season
+                // Examples: Large areas of eastern and southern Africa, middle Africa, Southern China, Mexico
+                outcol2.x = 8;
+                outcol.x = 95;
+                outcol.y = 89;
+                outcol.z = 41;
+            }
+        }
+        else if (preci <= 400)
+        {
+            if (temp < -10)
+            {
+                // Whittaker diagram doesn't consider this combo, but we'll use arctic anyway
+                outcol2.x = 1;
+                outcol.x = 236;
+                outcol.y = 242;
+                outcol.z = 241;
+            }
+            else if (temp < 0)
+            {
+                // Even though the Whittaker diagram doesn't have biomes for this high rainfall with
+                // with this low temperature, there are some anomalies in this simulation that create this combo
+                // Use tundra
+                outcol2.x = 2;
+                outcol.x = 198;
+                outcol.y = 149;
+                outcol.z = 91;
+            }
+            else if (temp < 20)
+            {
+                // Temperate Rain Forest. Mean annual temperature between 4C and 12C
+                // north-western United States, Ireland, Japan
+                // A heavily forested area that can be cold during some times of the year
+                outcol2.x = 9;
+                outcol.x = 53;
+                outcol.y = 54;
+                outcol.z = 22;
+            }
+            else
+            {
+                // Tropical rain forest. Temperature in range 20C and 34C
+                // What most people imagine when they hear the word "jungle"
+                outcol2.x = 10;
+                outcol.x = 65;
+                outcol.y = 73;
+                outcol.z = 34;
+            }
+        }
     }
 
 
@@ -151,6 +267,9 @@ __kernel void biomes(__read_only image2d_t heightmap, __read_only image2d_t prec
     {
         // mountains
         outcol2.y = 3;
+        outcol.x = 150;
+        outcol.y = 150;
+        outcol.z = 150;
     }
 
     outcol.w = 255;

@@ -65,6 +65,7 @@ public:
     void setFlatRegions(std::shared_ptr<std::map<int,int>> r);
     void setTemperatureImage(ImagePtr img);
     void setPrecipitationImage(ImagePtr img);
+    void setHeightmapImage(ImagePtr img);
 
     int** getRegionMap();
     std::shared_ptr<std::map<long, RegionPtr>> getRegions();
