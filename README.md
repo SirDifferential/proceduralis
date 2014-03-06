@@ -45,6 +45,13 @@ Download latest GPU drivers. You will have to benchmark a bit to figure out if p
 Now, you can either use the build script "build.sh" located at the root of this git repo, or do the steps manually. The script is run by:
 sudo sh build.sh
 
+The parameters for this script are:
+--nolibs: Does not install any of the libraries that are used by SFML / Proceduralis
+--nosfml: Does not build / install SFML
+--noproceduralis: Does not build / install the project at all
+--installpath /insert/path/here: Installs the project to the specified directory instead of /opt
+--threads numberhere: Uses the number of threads when executing make. Default is 4.
+
 If you prefer to do all this manually (if you, for example, don't want some libraries installed), the steps I used are about these:
 
 Download OpenCL development libraries. This varies per distro. On Debian Wheezy, I have:
