@@ -42,6 +42,11 @@ Copy SFML .dlls from the SFML directory in your project folder, build and run. I
 
 Download latest GPU drivers. You will have to benchmark a bit to figure out if proprietary or open source drivers offer you better OpenCL performance. With NVidia I currently (year 2014) find the proprietary better.
 
+Now, you can either use the build script "build.sh" located at the root of this git repo, or do the steps manually. The script is run by:
+sudo sh build.sh
+
+If you prefer to do all this manually (if you, for example, don't want some libraries installed), the steps I used are about these:
+
 Download OpenCL development libraries. This varies per distro. On Debian Wheezy, I have:
 
 ocl-icd-libopencl1 - Generic OpenCL ICD Loader
