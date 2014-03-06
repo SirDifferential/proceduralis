@@ -30,10 +30,17 @@ void Renderer::showSplash()
     renderWindow->display();
 }
 
+void Renderer::workLoading()
+{
+	renderWindow->setView(*main_view);
+    app.getGUI()->drawLoading();
+	renderWindow->display();
+}
+
 void Renderer::work()
 {
 	renderWindow->setView(*main_view);
-    app.getGUI()->draw();
+    app.getGUI()->drawNormal();
 	renderWindow->display();
 }
 

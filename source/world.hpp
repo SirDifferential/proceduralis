@@ -2,14 +2,26 @@
 #define __WORLD_HPP_
 
 #include "precompiled.hpp"
+#include "cl.hpp"
+
+typedef struct
+{
+    int8_t biome_code;
+    int8_t mountain_type;
+} BiomeType;
 
 class World
 {
 private:
     TexturePtr heightmap_texture;
     ImagePtr heightmap_image;
+    ImagePtr temperature_image;
+    ImagePtr precipitation_image;
+
+    std::string activeSprite;
 
     int** regionmap;
+    int** rivermap;
 
     int ocean_index_start;
     int mountain_index_start;
@@ -28,6 +40,8 @@ private:
 
     std::shared_ptr<std::map<long, RegionPtr>> regions;
 
+    std::map<std::pair<int,int>, BiomeType> biomes;
+
     sf::Vector2i world_reso;
 
 public:
@@ -38,15 +52,20 @@ public:
     void draw();
     void work();
 
-    //std::pair<std::string, int> getRegionInfo(sf::Vector2i c);
-
     void setWorld(ImagePtr image);
+    void setBiomeCodes(int8_t* data);
+
+    void setActiveSprite(std::string s);
 
     void setRegion(int** regions);
+    void setRiverMap(int** rivers);
     void setOceanRegions(std::shared_ptr<std::map<int,int>> r);
     void setMountainRegions(std::shared_ptr<std::map<int,int>> r);
     void setHillRegions(std::shared_ptr<std::map<int,int>> r);
     void setFlatRegions(std::shared_ptr<std::map<int,int>> r);
+    void setTemperatureImage(ImagePtr img);
+    void setPrecipitationImage(ImagePtr img);
+    void setHeightmapImage(ImagePtr img);
 
     int** getRegionMap();
     std::shared_ptr<std::map<long, RegionPtr>> getRegions();

@@ -30,11 +30,17 @@ void CL_Temperature::init()
     format.image_channel_data_type = CL_FLOAT;
     format.image_channel_order = CL_RGBA;
 
+    cl::ImageFormat format2;
+    format2.image_channel_data_type = CL_FLOAT;
+    format2.image_channel_order = CL_LUMINANCE;
+
     int image_size = 1024*1024*4;
+    int image_size2 = 1024*1024;
     
-    image_buffer_in = new float[image_size];
+    image_buffer_height = new float[image_size2];
     image_buffer_out = new float[image_size];
     row_pitch = 1024 * 4 * sizeof(float);
+    size_t row_pitch2 = 1024 * sizeof(float);
     origin.push_back(0);
     origin.push_back(0);
     origin.push_back(0);
@@ -45,18 +51,20 @@ void CL_Temperature::init()
 
     float value;
 
-    for (int i = 3; i < 1024*1024*4; i += 4)
+    int count = 0;
+    auto height_img = app.getDataStorage()->getImage("heightmap");
+    for (int y = 0; y < 1024; y++)
     {
-        value = app.getToolbox()->giveRandomFloat();
-        image_buffer_in[i-3] = value;
-        image_buffer_in[i-2] = value;
-        image_buffer_in[i-1] = value;
-        image_buffer_in[i] = 1.0f;
+        for (int x = 0; x < 1024; x++)
+        {
+            image_buffer_height[count] = height_img->getPixel(x, y).r;
+            count++;
+        }
     }
 
     try
     {    
-        image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format, 1024, 1024, 0);
+        image_a = new cl::Image2D(context, CL_MEM_READ_ONLY, format2, 1024, 1024, 0);
         image_b = new cl::Image2D(context, CL_MEM_WRITE_ONLY, format, 1024, 1024, 0);
     }
     catch (cl::Error e)
@@ -66,7 +74,7 @@ void CL_Temperature::init()
 
     try
     {
-        error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_in);
+        error = commandQueue.enqueueWriteImage(*image_a, CL_TRUE, origin, region, row_pitch2, 0, (void*) image_buffer_height);
         error = commandQueue.enqueueWriteImage(*image_b, CL_TRUE, origin, region, row_pitch, 0, (void*) image_buffer_out);
     }
     catch (cl::Error e)
@@ -89,9 +97,9 @@ void CL_Temperature::init()
 
 void CL_Temperature::runKernel()
 {
-    if (image_buffer_in == NULL)
+    if (image_buffer_height == NULL)
     {
-        std::cout << "-CL_Temperature: cannot run kernel: image_buffer_in is NULL" << std::endl;
+        std::cout << "-CL_Temperature: cannot run kernel: image_buffer_height is NULL" << std::endl;
         return;
     }
 
@@ -126,7 +134,7 @@ void CL_Temperature::runKernel()
 void CL_Temperature::cleanup()
 {
     CL_Program::cleanup();
-    delete[] image_buffer_in;
+    delete[] image_buffer_height;
     delete[] image_buffer_out;
 }
 

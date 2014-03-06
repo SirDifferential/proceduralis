@@ -7,7 +7,7 @@ class CL_Temperature : public CL_Program
 {
 private:
     // Input and output buffers in CPU memory
-    float* image_buffer_in;
+    float* image_buffer_height;
     float* image_buffer_out;
 
     // Input and output buffers in OpenCL memory

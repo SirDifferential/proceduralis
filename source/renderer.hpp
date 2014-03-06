@@ -26,6 +26,7 @@ public:
 
     void draw(SpritePtr s);
 	void work();
+    void workLoading();
 
     RenderWindowPtr getRenderWindow();
 

@@ -1,4 +1,6 @@
-// http://vimeo.com/29074357
+// Copied from http://vimeo.com/29074357
+// Original by Eddie Lee (eddie@illogictree.com)
+// Original file has no license, so ask the original author if this bothers you
 
 const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
 

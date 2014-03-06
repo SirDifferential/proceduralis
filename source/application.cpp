@@ -12,6 +12,7 @@
 #include "datastorage.hpp"
 #include "spriteutils.hpp"
 #include "mouseHoverer.hpp"
+#include "biomeTools.hpp"
 #include "cl_voronoi.hpp"
 #include "cl_perlin.hpp"
 #include "cl_blur.hpp"
@@ -46,6 +47,7 @@ Application::Application()
     datastorage = DataStoragePtr(new DataStorage());
     spriteutils = SpriteUtilsPtr(new SpriteUtils());
     mousehoverer = MouseHovererPtr(new MouseHoverer());
+    biometools = BiomeToolsPtr(new BiomeTools());
 }
 
 int Application::readConfig()
@@ -189,9 +191,8 @@ void Application::windowWasClosed()
 void Application::forceredraw()
 {
     world->draw();
-    renderer->work();
+    renderer->workLoading();
 }
-
 
 void Application::runProgram(std::string s)
 {
@@ -281,4 +282,9 @@ SpriteUtilsPtr Application::getSpriteUtils()
 MouseHovererPtr Application::getMouseHoverer()
 {
     return mousehoverer;
+}
+
+BiomeToolsPtr Application::getBiomeTools()
+{
+    return biometools;
 }

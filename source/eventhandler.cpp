@@ -4,7 +4,7 @@
 #include "toolbox.hpp"
 #include "datastorage.hpp"
 #include "mouseHoverer.hpp"
-
+#include "world.hpp"
 #include "opencl_program.hpp"
 
 EventHandler::EventHandler()
@@ -48,13 +48,19 @@ void EventHandler::checkEvents()
                         app.getCurrentCLProgram()->event6();
                         break;
                     case sf::Keyboard::Num1:
-                        app.setProgram("voronoi");
+                        app.getWorld()->setActiveSprite("heightmap");
                         break;
                     case sf::Keyboard::Num2:
-                        app.setProgram("perlin");
+                        app.getWorld()->setActiveSprite("biomes");
                         break;
                     case sf::Keyboard::Num3:
-                        app.setProgram("blur");
+                        app.getWorld()->setActiveSprite("temperature");
+                        break;
+                    case sf::Keyboard::Num4:
+                        app.getWorld()->setActiveSprite("precipitation_blurred");
+                        break;
+                    case sf::Keyboard::Num5:
+                        app.getWorld()->setActiveSprite("regionmap");
                         break;
                     case sf::Keyboard::Escape:
                         app.exit();
