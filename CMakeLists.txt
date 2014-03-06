@@ -19,7 +19,13 @@ FILE(GLOB hpp_files "source/*.hpp")
 add_executable(proceduralis ${cpp_files} ${hpp_files})
 target_link_libraries(proceduralis ${SFML_LIBRARIES} ${OPENCL_LIBRARIES})
 
+FILE(GLOB OPENCL_FILES "${PROJECT_SOURCE_DIR}/*.cl")
+
 install(TARGETS proceduralis DESTINATION proceduralis)
 install(DIRECTORY data DESTINATION proceduralis)
-install(FILES config.txt DESTINATION proceduralis)
+install(FILES config.json DESTINATION proceduralis)
+install(FILES ${OPENCL_FILES} DESTINATION proceduralis)
+install(FILES README.md DESTINATION proceduralis)
+install(FILES license.txt DESTINATION proceduralis)
+install(FILES collaborators.txt DESTINATION proceduralis)
 
