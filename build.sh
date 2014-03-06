@@ -204,18 +204,6 @@ install_proceduralis()
     file $INSTALL_PATH/$PROJECT_NAME/$PROJECT_NAME
 }
 
-if [ `echo $@ | grep "nolibs"` ]; then
-    export INSTALL_LIBS=false
-fi
-
-if [ `echo $@ | grep "nosfml"` ]; then
-    export BUILD_SFML=false
-fi
-
-if [ `echo $@ | grep "noproceduralis"` ]; then
-    export BUILD_PROCEDURALIS=false
-fi
-
 if [ $INSTALL_LIBS = "true" ]; then
     install_libs
 fi
