@@ -4,6 +4,18 @@ SFML_URL="http://www.sfml-dev.org/download/sfml"
 SFML_VERSION="2.1"
 SFML_FILENAME="SFML-$SFML_VERSION-sources.zip"
 
+echo "This script will install the required libraries for building Proceduralis on Debian and similar systems"
+echo "If you don't want this script doing this stuff, then abort now."
+while true; do
+    read -p "Continue?" yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+
 sudo apt-get install git cmake build-essential g++ libxrandr-dev libfreetype6-dev libjpeg8-dev libsndfile1-dev libglew-dev ocl-icd-opencl-dev
 if [ $? -ne 0 ]; then
     echo "Error installing requires libs. Some package name probably has changed."
