@@ -52,7 +52,7 @@ The parameters for this script are:
 * --installpath /insert/path/here: Installs the project to the specified directory instead of /opt
 * --threads numberhere: Uses the number of threads when executing make. Default is 4.
 
-If you prefer to do all this manually (if you, for example, don't want some libraries installed), the steps I used are about these:
+If you prefer to do all this manually:
 
 Download OpenCL development libraries. This varies per distro. On Debian Wheezy, I have:
 
