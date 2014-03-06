@@ -15,6 +15,12 @@ while true; do
     esac
 done
 
+if [[ $UID != 0 ]]; then
+    echo "Please run this script with sudo:"
+    echo "sudo $0 $*"
+    exit 1
+fi
+
 sudo apt-get install git cmake unzip build-essential g++ libxrandr-dev libfreetype6-dev libjpeg8-dev libsndfile1-dev libglew-dev ocl-icd-opencl-dev libopenal-dev
 if [ $? -ne 0 ]; then
     echo "!! Error installing requires libs. Some package name probably has changed."
