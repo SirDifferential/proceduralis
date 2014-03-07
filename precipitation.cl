@@ -186,7 +186,7 @@ __kernel void precipitation(__read_only image2d_t regionmap, __read_only image2d
         }
 
         
-        float precipitation = (normalized_distance - (flats_met * 0.0016) - (hills_met * 0.0032) - (mountains_met * 0.020)) * latitude_coefficient;
+        float precipitation = (normalized_distance - (flats_met * 0.0016) - (hills_met * 0.0032) - (mountains_met * 0.005)) * latitude_coefficient;
 
         precipitation = precipitation * latitude_coefficient;
 

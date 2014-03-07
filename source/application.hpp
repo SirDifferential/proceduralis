@@ -27,6 +27,7 @@ private:
     CL_PrecipitationPtr cl_precipitation;
     CL_TemperaturePtr cl_temperature;
     CL_BiomesPtr cl_biomes;
+    CL_SatellitePtr cl_satellite;
 
     std::map<std::string, std::shared_ptr<CL_Program>> programs;
 

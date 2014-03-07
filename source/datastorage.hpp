@@ -22,6 +22,7 @@ public:
     SpritePtr createAndGiveSprite(std::string name, std::string textureName, int sizeX, int sizeY, int coordX, int coordY);
     SpritePtr loadAndGiveSprite(std::string name, std::string filepath);
     int loadSound(std::string name, std::string path);
+    void writeImageToDisk(std::string name);
 
     SpritePtr generateSpriteTriplet(std::string name, sf::Vector2i s);
 

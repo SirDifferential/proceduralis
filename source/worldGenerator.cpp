@@ -28,6 +28,7 @@ void WorldGenerator::init()
     app.getDataStorage()->generateSpriteTriplet("temperature", standard_size);
     app.getDataStorage()->generateSpriteTriplet("temperature_blurred", standard_size);
     app.getDataStorage()->generateSpriteTriplet("biomes", standard_size);
+    app.getDataStorage()->generateSpriteTriplet("satellite", standard_size);
 }
 
 /**
@@ -69,6 +70,19 @@ void WorldGenerator::generate()
     app.getProgram("biomes")->init();
     app.runProgram("biomes");
 
+    app.getGUI()->drawLoadingText("Satellite photographing planet...");
+    app.getProgram("satellite")->init();
+    app.runProgram("satellite");
+
+
+    app.getDataStorage()->writeImageToDisk("heightmap");
+    app.getDataStorage()->writeImageToDisk("biomes");
+    app.getDataStorage()->writeImageToDisk("precipitation_blurred");
+    app.getDataStorage()->writeImageToDisk("windblurred");
+    app.getDataStorage()->writeImageToDisk("regionmap");
+    app.getDataStorage()->writeImageToDisk("temperature");
+    app.getDataStorage()->writeImageToDisk("perlinblurred");
+    app.getDataStorage()->writeImageToDisk("voronoi_cells");
 }
 
 void WorldGenerator::formSuperRegions()

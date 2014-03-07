@@ -1,4 +1,6 @@
 #include "datastorage.hpp"
+#include "application.hpp"
+#include "toolbox.hpp"
 
 DataStorage::DataStorage()
 {
@@ -121,6 +123,27 @@ SpritePtr DataStorage::loadAndGiveSprite(std::string name, std::string filepath)
 {
     loadTextureAndStoreSprite(name, filepath);
     return getSprite(name);
+}
+
+/**
+* Writes an image to the disk if the image exists
+*/
+void DataStorage::writeImageToDisk(std::string name)
+{
+    auto img = getImage(name);
+    if (img == nullptr)
+    {
+        std::cout << "!DataStorage: Unable to write file to disk: not found: " << name << std::endl;
+        return;
+    }
+    if (img->saveToFile(app.getToolbox()->combineStringAndString(name, ".png")))
+    {
+        std::cout << "+DataStorage: Wrote " << name << " to disk" << std::endl;
+    }
+    else
+    {
+        std::cout << "!DataStorage: Error writing file to disk: " << name << std::endl;
+    }
 }
 
 /**

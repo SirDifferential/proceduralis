@@ -62,6 +62,9 @@ void EventHandler::checkEvents()
                     case sf::Keyboard::Num5:
                         app.getWorld()->setActiveSprite("regionmap");
                         break;
+                    case sf::Keyboard::Num6:
+                        app.getWorld()->setActiveSprite("satellite");
+                        break;
                     case sf::Keyboard::Escape:
                         app.exit();
                         break;

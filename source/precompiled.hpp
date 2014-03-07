@@ -38,6 +38,7 @@ class CL_Winddir;
 class CL_Precipitation;
 class CL_Temperature;
 class CL_Biomes;
+class CL_Satellite;
 
 typedef std::shared_ptr<Region> RegionPtr;
 typedef std::shared_ptr<sf::Sprite> SpritePtr;
@@ -67,3 +68,4 @@ typedef std::shared_ptr<CL_Winddir> CL_WinddirPtr;
 typedef std::shared_ptr<CL_Precipitation> CL_PrecipitationPtr;
 typedef std::shared_ptr<CL_Temperature> CL_TemperaturePtr;
 typedef std::shared_ptr<CL_Biomes> CL_BiomesPtr;
+typedef std::shared_ptr<CL_Satellite> CL_SatellitePtr;
