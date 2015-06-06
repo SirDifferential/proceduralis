@@ -91,7 +91,7 @@ fi
 
 install_libs()
 {
-    sudo apt-get install git cmake unzip build-essential g++ libxrandr-dev libfreetype6-dev libjpeg8-dev libsndfile1-dev libglew-dev ocl-icd-opencl-dev libopenal-dev
+    sudo apt-get install git cmake unzip build-essential g++ libxrandr-dev libfreetype6-dev libjpeg62-turbo-dev libsndfile1-dev libglew-dev libopenal-dev
     
     if [ $? -ne 0 ]; then
         echo "!! Error installing requires libs. Some package name probably has changed."
