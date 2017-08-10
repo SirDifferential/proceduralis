@@ -50,14 +50,21 @@ The parameters for this script are:
 
 If you prefer to do all this manually:
 
-Download OpenCL development libraries. This varies per distro. On Debian Wheezy, I have:
+Download OpenCL development libraries. This varies per distro. On Debian Jessie:
 
-ocl-icd-libopencl1 - Generic OpenCL ICD Loader
+NVidia:
 
-Which are located at:
+* nvidia-libopencl1 NVIDIA OpenCL ICD Loader library
+* nvidia-opencl-icd NVIDIA OpenCL installable client driver
 
-* libOpenCL.so.1 (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libOpenCL.so.1
-* libOpenCL.so (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libOpenCL.so
+The library is located at:
+
+* /usr/lib/x86_64-linux-gnu/libnvidia-opencl.so.1: symbolic link to /etc/alternatives/nvidia--libnvidia-opencl.so.1-x86_64-linux-gnu
+
+AMD:
+
+* amd-opencl-icd
+* amd-libopencl1
 
 Download SFML 2 source code from http://www.sfml-dev.org/download/sfml/2.1/
 
